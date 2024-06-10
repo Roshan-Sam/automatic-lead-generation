@@ -22,6 +22,7 @@ const Register = () => {
     sector: "",
   });
   const [companyUsers, setCompanyUsers] = useState([]);
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
   const fetchCompanyUsers = async () => {
@@ -189,7 +190,13 @@ const Register = () => {
           `${import.meta.env.VITE_API_URL}register/company/`,
           formData
         );
-        navigate("/login");
+        if (res.status === 200) {
+          setSuccess(true);
+          setTimeout(() => {
+            setSuccess(false);
+            navigate("/login");
+          }, 3000);
+        }
       } catch (error) {
         console.log(error);
       }
@@ -219,12 +226,12 @@ const Register = () => {
                 </Link>
               </p>
             </div>
-            <div className="md:px-0 sm:px-20 px-8">
-              <div className="bg-white rounded-xl px-6 py-8 space-y-6 xl:max-w-lg md:max-w-2xl xl:ml-auto max-xl:mx-auto">
+            <div className="">
+              <div className="bg-white rounded-xl px-6 py-8 space-y-6 xl:max-w-lg md:max-w-2xl max-w-lg xl:ml-auto max-xl:mx-auto">
                 <h3 className="text-3xl font-extrabold mb-12 max-xl:text-center">
                   Create Your Account
                 </h3>
-                <div className="xl:max-w-lg md:max-w-2xl flex flex-col gap-4">
+                <div className="xl:max-w-lg md:max-w-2xl max-w-lg flex flex-col gap-4">
                   <div className="flex md:gap-10 md:flex-row flex-col gap-2">
                     <div className="md:w-80">
                       <Label value="Company name" />
@@ -392,6 +399,42 @@ const Register = () => {
                   >
                     Sign up
                   </button>
+                  {success && (
+                    <div
+                      className="mt-2 bg-purple-100 border-t-2 border-purple-600 rounded-lg p-4 dark:bg-purple-800/30"
+                      role="alert"
+                    >
+                      <div className="flex">
+                        <div className="flex-shrink-0">
+                          <span className="inline-flex justify-center items-center size-8 rounded-full border-4 border-purple-100 bg-purple-200 text-purple-800 dark:border-purple-900 dark:bg-purple-800 dark:text-purple-400">
+                            <svg
+                              className="flex-shrink-0 size-4"
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+                              <path d="m9 12 2 2 4-4"></path>
+                            </svg>
+                          </span>
+                        </div>
+                        <div className="ms-3">
+                          <h3 className="text-gray-800 font-semibold dark:text-white">
+                            Successfully registered.
+                          </h3>
+                          <p className="text-sm text-gray-700 dark:text-neutral-400">
+                            You have successfully registered your account.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <p className="my-10 text-sm text-gray-400 text-center">
                   or continue with
