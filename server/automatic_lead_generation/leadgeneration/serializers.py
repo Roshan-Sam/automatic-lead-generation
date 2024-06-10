@@ -3,8 +3,8 @@ from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model  = User
-        fields = '__all__'
+        model = User
+        exclude = ['password']
         
 class CompanyRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -44,3 +44,4 @@ class CompanyRegisterSerializer(serializers.ModelSerializer):
             user_type='company', 
         )
         return user
+    
