@@ -82,9 +82,9 @@ const Login = () => {
           const { token, user } = res.data;
           localStorage.setItem("user", JSON.stringify(user));
           Cookies.set("token", token, { expires: 7 });
-          if (user.user_type === "admin") {
-            navigate("/admin-dash");
-          } else if (user.user_type === "company") {
+          if (user.position === "admin") {
+            navigate("/admin-dash?tab=dash");
+          } else if (user.position === "company") {
             navigate("/company-dash");
           }
         }

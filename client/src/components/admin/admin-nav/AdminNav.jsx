@@ -11,15 +11,15 @@ const AdminNav = () => {
     navigate("/login");
   };
   return (
-    <div>
-      <header class="flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-gray-900 border-b border-gray-700 text-sm py-2.5 sm:py-4 dark:bg-neutral-950 dark:border-neutral-700">
+    <div className="z-50">
+      <header className="fixed top-0 left-0 right-0 h-20 flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-gray-900 border-b border-gray-900 text-sm py-2.5 sm:py-4 dark:bg-neutral-950 dark:border-neutral-700">
         <nav
-          class="max-w-7xl flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8"
+          className="flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8"
           aria-label="Global"
         >
-          <div class="me-5 md:me-8">
+          <div className="me-5 md:me-8 flex">
             <a
-              class="flex-none text-xl font-semibold text-white"
+              className="flex-none text-2xl font-semibold text-white"
               href="#"
               aria-label="Brand"
             >
@@ -27,83 +27,23 @@ const AdminNav = () => {
             </a>
           </div>
 
-          <div class="w-full flex items-center justify-end ms-auto sm:justify-between sm:gap-x-3 sm:order-3">
-            <div class="sm:hidden">
+          <div className="w-full flex items-center justify-end ms-auto sm:justify-between sm:gap-x-3 sm:order-3">
+            <div className="flex flex-row items-center justify-end gap-2 ml-auto">
               <button
                 type="button"
-                class="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
+                className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
               >
                 <svg
-                  class="flex-shrink-0 size-4"
+                  className="flex-shrink-0 size-4"
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.3-4.3" />
-                </svg>
-              </button>
-            </div>
-
-            <div class="hidden mx-auto sm:block">
-              <label for="icon" class="sr-only">
-                Search
-              </label>
-              <div class="relative">
-                <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-4">
-                  <svg
-                    class="flex-shrink-0 size-4 text-gray-500 dark:text-neutral-500"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.3-4.3" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  id="icon"
-                  name="icon"
-                  class="py-2 px-4 ps-11 pe-20 block w-92 md:w-96 bg-transparent border-gray-700 shadow-sm rounded-lg text-sm text-gray-300 focus:z-10 focus:border-gray-900 focus:ring-gray-600 placeholder:text-gray-500 dark:border-neutral-700 dark:text-neutral-500 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
-                  placeholder="Search"
-                />
-                <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none z-20 pe-4">
-                  <span class="text-gray-500 dark:text-neutral-500">
-                    Ctrl + /
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex flex-row items-center justify-end gap-2">
-              <button
-                type="button"
-                class="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
-              >
-                <svg
-                  class="flex-shrink-0 size-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
                   <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                   <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
@@ -111,54 +51,54 @@ const AdminNav = () => {
               </button>
               <button
                 type="button"
-                class="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
+                className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
                 data-hs-offcanvas="#hs-offcanvas-right"
               >
                 <svg
-                  class="flex-shrink-0 size-4"
+                  className="flex-shrink-0 size-4"
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
                   height="24"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
                   <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
                 </svg>
               </button>
 
               <div
-                class="hs-dropdown relative inline-flex"
+                className="hs-dropdown relative inline-flex"
                 data-hs-dropdown-placement="bottom-right"
               >
                 <button
                   id="hs-dropdown-with-header"
                   type="button"
-                  class="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
+                  className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
                 >
                   <img
-                    class="inline-block size-[38px] rounded-full"
+                    className="inline-block size-[38px] rounded-full"
                     src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80"
                     alt="Image Description"
                   />
                 </button>
 
                 <div
-                  class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-60 z-10 bg-white shadow-md rounded-lg p-2 dark:bg-neutral-800 dark:border dark:border-neutral-700"
+                  className="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-60 z-10 bg-white shadow-md rounded-lg p-2 dark:bg-neutral-800 dark:border dark:border-neutral-700"
                   aria-labelledby="hs-dropdown-with-header"
                 >
-                  <div class="py-3 px-5 -m-2 bg-gray-100 rounded-t-lg dark:bg-neutral-700">
-                    <p class="text-sm text-gray-500 dark:text-neutral-400">
+                  <div className="py-3 px-5 -m-2 bg-gray-100 rounded-t-lg dark:bg-neutral-700">
+                    <p className="text-sm text-gray-500 dark:text-neutral-400">
                       Signed in as
                     </p>
-                    <p class="text-sm font-medium text-gray-800 dark:text-neutral-300">
+                    <p className="text-sm font-medium text-gray-800 dark:text-neutral-300">
                       admin@gmail.com
                     </p>
                   </div>
-                  <div class="mt-2 py-2 first:pt-0 last:pb-0">
+                  <div className="mt-2 py-2 first:pt-0 last:pb-0">
                     <a
                       className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
                       href="#"
@@ -193,9 +133,9 @@ const AdminNav = () => {
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
                       <path d="M10 16L14 12L10 8" />
                       <path d="M14 12H3" />
@@ -209,65 +149,6 @@ const AdminNav = () => {
           </div>
         </nav>
       </header>
-      <main id="content">
-        <nav
-          class="sticky -top-px bg-white text-sm font-medium text-black ring-1 ring-gray-900 ring-opacity-5 border-t shadow-sm shadow-gray-100 pt-6 md:pb-6 -mt-px dark:bg-neutral-900 dark:border-neutral-800 dark:shadow-neutral-700/70"
-          aria-label="Jump links"
-        >
-          <div class="max-w-7xl snap-x w-full flex items-center overflow-x-auto px-4 sm:px-6 lg:px-8 pb-4 md:pb-0 mx-auto [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 dark:bg-neutral-900">
-            <div class="snap-center shrink-0 pe-5 sm:pe-8 sm:last-pe-0">
-              <a
-                class="inline-flex items-center gap-x-2 hover:text-gray-500 dark:text-neutral-400 dark:hover:text-neutral-500"
-                href="#"
-              >
-                Dashboard
-              </a>
-            </div>
-            <div class="snap-center shrink-0 pe-5 sm:pe-8 sm:last:pe-0">
-              <a
-                class="inline-flex items-center gap-x-2 hover:text-gray-500 dark:text-neutral-400 dark:hover:text-neutral-500"
-                href="#"
-              >
-                Users
-              </a>
-            </div>
-            <div class="snap-center shrink-0 pe-5 sm:pe-8 sm:last:pe-0">
-              <a
-                class="inline-flex items-center gap-x-2 hover:text-gray-500 dark:text-neutral-400 dark:hover:text-neutral-500"
-                href="#"
-              >
-                Account
-              </a>
-            </div>
-            <div class="snap-center shrink-0 pe-5 sm:pe-8 sm:last:pe-0">
-              <a
-                class="inline-flex items-center gap-x-2 hover:text-gray-500 dark:text-neutral-400 dark:hover:text-neutral-500"
-                href="#"
-              >
-                Marketing
-              </a>
-            </div>
-            <div class="snap-center shrink-0 pe-5 sm:pe-8 sm:last:pe-0">
-              <a
-                class="inline-flex items-center gap-x-2 hover:text-gray-500 dark:text-neutral-400 dark:hover:text-neutral-500"
-                href="#"
-              >
-                Leads
-              </a>
-            </div>
-            <div class="snap-center shrink-0 pe-5 sm:pe-8 sm:last:pe-0">
-              <a
-                class="inline-flex items-center gap-x-2 hover:text-gray-500 dark:text-neutral-400 dark:hover:text-neutral-500"
-                href="#"
-              >
-                Activities
-              </a>
-            </div>
-          </div>
-        </nav>
-
-        <div class="max-w-7xl min-h-[75rem] mx-auto py-10 px-4 sm:px-6 lg:px-8"></div>
-      </main>
     </div>
   );
 };

@@ -28,7 +28,7 @@ const Register = () => {
   const fetchCompanyUsers = async () => {
     try {
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}company/users/`
+        `${import.meta.env.VITE_API_URL}companies/`
       );
       setCompanyUsers(res.data);
     } catch (error) {

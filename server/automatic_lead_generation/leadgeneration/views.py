@@ -7,8 +7,8 @@ from django.contrib.auth import authenticate
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from rest_framework.views import APIView
-from .models import User
-from .serializers import CompanyRegisterSerializer,UserSerializer
+from .models import User,CompanyLog
+from .serializers import CompanyLogSerializer
 from django.contrib.auth import authenticate
 
 # Create your views here.
@@ -17,35 +17,76 @@ from django.contrib.auth import authenticate
 def index(request):
     return Response({"message":"hello"})
 
-class CompanyRegisterView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = CompanyRegisterSerializer(data=request.data)
+class CompanyRegistrationView(APIView):
+    def post(self, request):
+        data = request.data
+        serializer = CompanyLogSerializer(data=data)
+
         if serializer.is_valid():
+            email = data.get('email')
+            if CompanyLog.objects.filter(email=email).exists():
+                return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+            phone = data.get('phone')
+            if len(phone) != 10:
+                return Response({"error": "Phone number must be 10 digits"}, status=status.HTTP_400_BAD_REQUEST)
+
+            password = data.get('password')
+            if len(password) < 6:
+                return Response({"error": "Password must be at least 6 characters long"}, status=status.HTTP_400_BAD_REQUEST)
+
+            username = data.get('username')
+            if CompanyLog.objects.filter(username=username).exists():
+                return Response({"error": "Username already taken"}, status=status.HTTP_400_BAD_REQUEST)
+
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class CompanyUsersView(APIView):
+class RegisteredCompaniesView(APIView):
     def get(self, request):
-        company_users = User.objects.filter(user_type='company')
-        serializer = UserSerializer(company_users, many=True)
-        return Response(serializer.data)
+        company_name = request.query_params.get('company_name', None)
+        sector = request.query_params.get('sector', None)
+        sort_by_date = request.query_params.get('sort_by_date', None)
+
+        companies = CompanyLog.objects.filter(position__iexact='company').order_by('register_date')
+
+        if company_name:
+            companies = companies.filter(company_name__icontains=company_name)
+        if sector:
+            companies = companies.filter(sector__icontains=sector)
+
+        if sort_by_date:
+            if sort_by_date == 'asc':
+                companies = companies.order_by('register_date')
+            elif sort_by_date == 'desc':
+                companies = companies.order_by('-register_date')
+
+        serializer = CompanyLogSerializer(companies, many=True)
+        data = serializer.data
+        for company in data:
+            company.pop('password', None)  
+
+        return Response(data)
     
-class LoginView(APIView):
+class CompanyLoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
-        password = request.data.get('password') 
+        password = request.data.get('password')
+        
+        if not username or not password:
+            return Response({'error': 'Username and password are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
         try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            user = None
-        user = authenticate(username=username, password=password)
-
-        if user:
-            refresh = RefreshToken.for_user(user)
-            user_serializer = UserSerializer(user)
-            user_details = user_serializer.data
-
-            return Response({'token': str(refresh.access_token), 'user': user_details}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'Invalid username or password'}, status=status.HTTP_401_UNAUTHORIZED)
+            user = CompanyLog.objects.get(username=username)
+        except CompanyLog.DoesNotExist:
+            return Response({'error': 'Username or password is invalid'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if user.password != password:
+            return Response({'error': 'Username or password is invalid'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        refresh = RefreshToken.for_user(user)
+        user_details = CompanyLogSerializer(user).data
+        user_details.pop('password', None)
+        
+        return Response({'token': str(refresh.access_token), 'user': user_details}, status=status.HTTP_200_OK)
