@@ -5,6 +5,8 @@ import AdminSidebar from "../../../components/admin/admin-sidebar/AdminSidebar";
 import AdminDash from "../../../components/admin/admin-dash/AdminDash";
 import Profile from "../../../components/admin/admin-profile/Profile";
 import Company from "../../../components/admin/admin-company/Company";
+import PlanAndPricing from "../../../components/admin/admin-plan-pricing/PlanAndPricing";
+import Preline from "../../../components/preline/Preline";
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -23,7 +25,8 @@ const AdminDashboard = () => {
 
   return (
     <>
-      <div className="bg-gray-800">
+      <Preline />
+      <div className="bg-gray-900">
         <AdminNav />
         <div className="flex min-h-screen pt-20">
           <div className="w-fit md:fixed top-20 left-0 min-h-screen bottom-0 md:block hidden">
@@ -40,6 +43,8 @@ const AdminDashboard = () => {
             {tab === "profile" && <Profile />}
 
             {tab === "company" && <Company />}
+
+            {tab === "plan-pricing" && <PlanAndPricing />}
           </div>
         </div>
       </div>

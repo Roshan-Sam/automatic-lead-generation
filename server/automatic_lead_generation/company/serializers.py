@@ -1,10 +1,6 @@
 from rest_framework import serializers
-from .models import User,CompanyLog
+from .models import CompanyLog
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        exclude = ['password']
     
 class CompanyLogSerializer(serializers.ModelSerializer):
     class Meta:

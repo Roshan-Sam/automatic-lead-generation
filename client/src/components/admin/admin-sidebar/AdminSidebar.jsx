@@ -104,7 +104,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
   return (
     <>
       <Preline />
-      <section className="flex gap-6 fixed top-20 left-0 bottom-0 z-50">
+      <section className="flex gap-6 fixed top-20 left-0 bottom-0 z-50 border-r border-gray-700">
         <div
           className={`bg-gray-900 z-50 min-h-screen ${
             isSidebarOpen ? "w-64" : "w-20"
@@ -144,7 +144,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                       <h2
                         className={`${
                           isSidebarOpen && "hidden"
-                        } absolute z-50 left-48 bg-transparent font-semibold whitespace- text-white rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
+                        } absolute z-50 left-20 bg-transparent font-semibold whitespace- text-white rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
                       >
                         {menuItem.name}
                       </h2>
@@ -196,7 +196,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                     <h2
                       className={`${
                         isSidebarOpen && "hidden"
-                      } absolute left-48 z-50 bg-transparent font-semibold whitespace- text-white rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
+                      } absolute left-20 z-40 bg-transparent font-semibold whitespace-pre-line text-white rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
                     >
                       {menuItem.name}
                     </h2>

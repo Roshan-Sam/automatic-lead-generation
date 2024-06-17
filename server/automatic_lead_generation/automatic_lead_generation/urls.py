@@ -21,7 +21,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/',include('leadgeneration.urls'))
+    path('api/',include('company.urls')),
+    path('api/',include('custom_admin.urls'))
 ]
 
 if settings.DEBUG:

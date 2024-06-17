@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class LeadgenerationConfig(AppConfig):
+class CustomAdminConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'leadgeneration'
+    name = 'custom_admin'

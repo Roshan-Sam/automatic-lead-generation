@@ -1,21 +1,15 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view,permission_classes
+from rest_framework.decorators import permission_classes
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken,AccessToken
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import authenticate
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from rest_framework.views import APIView
-from .models import User,CompanyLog
+from .models import CompanyLog
 from .serializers import CompanyLogSerializer
-from django.contrib.auth import authenticate
 
 # Create your views here.
-
-@api_view(['GET'])
-def index(request):
-    return Response({"message":"hello"})
 
 class CompanyRegistrationView(APIView):
     def post(self, request):
@@ -48,8 +42,17 @@ class RegisteredCompaniesView(APIView):
         company_name = request.query_params.get('company_name', None)
         sector = request.query_params.get('sector', None)
         sort_by_date = request.query_params.get('sort_by_date', None)
+        limit = request.query_params.get('limit', None)
+        offset = request.query_params.get('offset', 0)   
 
-        companies = CompanyLog.objects.filter(position__iexact='company').order_by('register_date')
+        try:
+            if limit:
+                limit = int(limit)
+            offset = int(offset)
+        except ValueError:
+            return Response({"error": "Invalid limit or offset parameter"}, status=status.HTTP_400_BAD_REQUEST)
+
+        companies = CompanyLog.objects.filter(position__iexact='company').order_by('-register_date')
 
         if company_name:
             companies = companies.filter(company_name__icontains=company_name)
@@ -61,13 +64,18 @@ class RegisteredCompaniesView(APIView):
                 companies = companies.order_by('register_date')
             elif sort_by_date == 'desc':
                 companies = companies.order_by('-register_date')
+                
+        if limit is not None:
+            companies = companies[offset:offset + limit]
+        else:
+            companies = companies[offset:]
 
         serializer = CompanyLogSerializer(companies, many=True)
         data = serializer.data
         for company in data:
             company.pop('password', None)  
 
-        return Response(data)
+        return Response(data,status=status.HTTP_200_OK)
     
 class CompanyLoginView(APIView):
     def post(self, request):

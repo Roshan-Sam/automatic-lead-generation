@@ -12,7 +12,7 @@ const AdminNav = () => {
   };
   return (
     <div className="z-50">
-      <header className="fixed top-0 left-0 right-0 h-20 flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-gray-900 border-b border-gray-900 text-sm py-2.5 sm:py-4 dark:bg-neutral-950 dark:border-neutral-700">
+      <header className="fixed top-0 left-0 right-0 h-20 flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-gray-900 border-b border-gray-700 text-sm py-2.5 sm:py-4 dark:bg-neutral-950 dark:border-neutral-700">
         <nav
           className="flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8"
           aria-label="Global"

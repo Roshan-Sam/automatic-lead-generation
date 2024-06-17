@@ -43,13 +43,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'leadgeneration',
+    'authentication',
+    'custom_admin',
+    'company',
     'rest_framework',
     "corsheaders",
     'rest_framework_simplejwt',
 ]
 
-AUTH_USER_MODEL = "leadgeneration.User" 
+AUTH_USER_MODEL = "authentication.User" 
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
