@@ -3,11 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Label } from "flowbite-react";
 import Cookies from "js-cookie";
+import { useAdminProfileContext } from "../../../hooks/useAdminProfileContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [errors, setErrors] = useState({ username: "", password: "" });
   const [resErr, setResErr] = useState("");
+  const { dispatch } = useAdminProfileContext();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -80,9 +82,9 @@ const Login = () => {
         );
         if (res.status === 200) {
           const { token, user } = res.data;
-          localStorage.setItem("user", JSON.stringify(user));
           Cookies.set("token", token, { expires: 7 });
           if (user.position === "admin") {
+            dispatch({ type: "UPDATE_PROFILE", payload: user });
             navigate("/admin-dash?tab=dash");
           } else if (user.position === "company") {
             navigate("/company-dash");

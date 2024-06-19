@@ -1,18 +1,33 @@
 import Cookies from "js-cookie";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { FiBell, FiZap, FiUser, FiArrowRight } from "react-icons/fi";
+import { useEffect, useState } from "react";
+import { useAdminProfileContext } from "../../../hooks/useAdminProfileContext";
 
 const AdminNav = () => {
-  const currentUser = JSON.parse(localStorage.getItem("user"));
+  const { profile } = useAdminProfileContext();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const location = useLocation();
+  const [tab, setTab] = useState();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabFromUrl = urlParams.get("tab");
+    if (tabFromUrl) setTab(tabFromUrl);
+  }, [location.search]);
 
   const handleSignOut = () => {
     Cookies.remove("token");
-    localStorage.removeItem("user");
     navigate("/login");
   };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  };
   return (
-    <div className="z-50">
-      <header className="fixed top-0 left-0 right-0 h-20 flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-gray-900 border-b border-gray-700 text-sm py-2.5 sm:py-4 dark:bg-neutral-950 dark:border-neutral-700">
+    <div className="z-50" onMouseLeave={() => setDropdownOpen(false)}>
+      <header className="fixed top-0 left-0 right-0 h-20 flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-[rgb(16,23,42)] border-b border-gray-700 text-sm py-2.5 sm:py-4 dark:bg-neutral-950 dark:border-neutral-700">
         <nav
           className="flex basis-full items-center w-full mx-auto px-4 sm:px-6 lg:px-8"
           aria-label="Global"
@@ -33,117 +48,63 @@ const AdminNav = () => {
                 type="button"
                 className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
               >
-                <svg
-                  className="flex-shrink-0 size-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-                  <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-                </svg>
+                <FiBell className="flex-shrink-0 size-4" />
               </button>
               <button
                 type="button"
                 className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
                 data-hs-offcanvas="#hs-offcanvas-right"
               >
-                <svg
-                  className="flex-shrink-0 size-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                </svg>
+                <FiZap className="flex-shrink-0 size-4" />
               </button>
 
-              <div
-                className="hs-dropdown relative inline-flex"
-                data-hs-dropdown-placement="bottom-right"
-              >
+              <div className="relative inline-flex">
                 <button
-                  id="hs-dropdown-with-header"
+                  onClick={() => toggleDropdown()}
                   type="button"
                   className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
                 >
                   <img
-                    className="inline-block size-[38px] rounded-full"
-                    src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80"
-                    alt="Image Description"
+                    className="inline-block size-[38px] rounded-full object-cover"
+                    src={`${import.meta.env.VITE_API_IMAGE_URL}${
+                      profile.profile
+                    }`}
+                    alt={profile.username}
                   />
                 </button>
 
-                <div
-                  className="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-60 z-10 bg-white shadow-md rounded-lg p-2 dark:bg-neutral-800 dark:border dark:border-neutral-700"
-                  aria-labelledby="hs-dropdown-with-header"
-                >
-                  <div className="py-3 px-5 -m-2 bg-gray-100 rounded-t-lg dark:bg-neutral-700">
-                    <p className="text-sm text-gray-500 dark:text-neutral-400">
-                      Signed in as
-                    </p>
-                    <p className="text-sm font-medium text-gray-800 dark:text-neutral-300">
-                      admin@gmail.com
-                    </p>
-                  </div>
-                  <div className="mt-2 py-2 first:pt-0 last:pb-0">
-                    <a
-                      className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300"
-                      href="#"
-                    >
-                      <svg
-                        className="flex-shrink-0 size-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="8" cy="7" r="4" />
-                      </svg>
-                      Account
-                    </a>
-                  </div>
-                  <button
-                    onClick={handleSignOut}
-                    className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:hover:text-neutral-300 w-full text-left"
+                {dropdownOpen && (
+                  <div
+                    onMouseLeave={() => setDropdownOpen(false)}
+                    className="absolute right-0 mt-12 w-48 bg-gray-900 border border-gray-700 shadow-lg rounded-lg p-2 z-10"
                   >
-                    <svg
-                      className="flex-shrink-0 size-4"
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <div className="py-3 px-5 -m-2 bg-gray-900 rounded-t-lg border-b border-b-gray-700">
+                      <p className="text-sm text-white">Signed in as</p>
+                      <p className="text-sm font-medium text-white">
+                        {profile.username}
+                      </p>
+                    </div>
+                    <div className="mt-2 py-2 first:pt-0 last:pb-0">
+                      <Link
+                        to="/admin-dash?tab=account"
+                        className={`flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-white hover:bg-purple-600 ${
+                          tab === "account" ? "bg-purple-600" : ""
+                        }`}
+                        onClick={() => setDropdownOpen(false)}
+                      >
+                        <FiUser className="flex-shrink-0 size-4" />
+                        Account
+                      </Link>
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-white hover:bg-purple-600 w-full"
                     >
-                      <path d="M10 16L14 12L10 8" />
-                      <path d="M14 12H3" />
-                      <path d="M14 12L10 16L14 12L10 8" />
-                    </svg>
-                    Sign out
-                  </button>{" "}
-                </div>
+                      <FiArrowRight className="flex-shrink-0 size-4" />
+                      Sign out
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

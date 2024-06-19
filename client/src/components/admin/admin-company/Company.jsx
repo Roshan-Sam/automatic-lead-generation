@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
-import Preline from "../../preline/Preline";
 import { CiFilter } from "react-icons/ci";
 import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
@@ -13,12 +12,14 @@ import {
 } from "react-icons/md";
 import { CiMenuKebab } from "react-icons/ci";
 import { FaSync, FaTimes, FaTrashAlt, FaCheckCircle } from "react-icons/fa";
+import { FiChevronDown, FiUser } from "react-icons/fi";
 import "./company.css";
 
 const Company = () => {
   const [open, setOpen] = useState(false);
   const onOpenModal = () => setOpen(true);
   const onCloseModal = () => setOpen(false);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const [editOpenModal, setEditOpenModal] = useState(false);
   const onOpenEditModal = () => setEditOpenModal(true);
@@ -786,9 +787,12 @@ const Company = () => {
     }
   };
 
+  const toggleDropdown = (id) => {
+    setOpenDropdown(openDropdown === id ? null : id);
+  };
+
   return (
     <>
-      <Preline />
       <div className="text-white pt-10">
         <h1 className="text-3xl font-bold text-center mb-12">Companies</h1>
       </div>
@@ -798,36 +802,31 @@ const Company = () => {
           <div className="flex flex-col">
             <div className="-m-1.5 overflow-x-auto">
               <div className="p-1.5 min-w-full inline-block align-middle">
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-800 dark:border-neutral-700">
-                  <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-200 dark:border-neutral-700">
+                <div className="bg-slate-900 shadow-gray-500 border border-gray-700 rounded-xl shadow-sm overflow-hidden dark:bg-neutral-800 dark:border-neutral-700">
+                  <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-b border-gray-400 dark:border-neutral-700">
                     <div>
-                      <h2 className="text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                      <h2 className="text-xl font-semibold text-white dark:text-neutral-200">
                         Companies
                       </h2>
-                      <p className="text-sm text-gray-600 dark:text-neutral-400">
+                      <p className="text-sm text-white dark:text-neutral-400">
                         Here are the registered companies and can be added,
                         deleted and updated.
                       </p>
                       <div className="sm:col-span-1 mt-2">
-                        <label
-                          htmlFor="hs-as-table-product-review-search"
-                          className="sr-only"
-                        >
-                          Search
-                        </label>
+                        <label className="sr-only">Search</label>
                         <div className="relative">
                           <input
                             type="text"
-                            id="hs-as-table-product-review-search"
-                            name="hs-as-table-product-review-search"
-                            className="py-2 px-3 ps-11 block w-full border-gray-200 rounded-lg text-sm focus:border-purple-500 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
+                            id="search"
+                            name="search"
+                            className="py-2 px-3 ps-11 text-white block w-full bg-slate-900 border-gray-700 rounded-lg text-sm focus:border-purple-600 focus:ring-purple-600 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
                             placeholder="Search"
                             value={searchTerm}
                             onChange={handleSearchChange}
                           />
                           <div className="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4">
                             <svg
-                              className="flex-shrink-0 size-4 text-gray-400 dark:text-neutral-500"
+                              className="flex-shrink-0 size-4 text-slate-400 dark:text-neutral-500"
                               xmlns="http://www.w3.org/2000/svg"
                               width="24"
                               height="24"
@@ -851,7 +850,7 @@ const Company = () => {
                         <div className="inline-flex gap-x-2">
                           <button
                             onClick={onOpenModal}
-                            className="py-3 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
+                            className="py-3 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-purple-700 text-slate-950 hover:bg-purple-700 bg-purple-600 disabled:opacity-50 disabled:pointer-events-none"
                           >
                             <svg
                               className="flex-shrink-0 size-4"
@@ -873,33 +872,22 @@ const Company = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <div className="relative w-48 h-fit border border-gray-300 rounded-lg outline-none dropdown-one">
+                        <div className="relative w-48 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                           <button
                             onClick={showDropDownMenuOne_form_layout_wizard3}
                             className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
                           >
                             <span
-                              className="pr-4 text-sm text-gray-900"
+                              className="pr-4 text-sm text-white"
                               id="drop-down-content-setter-one_form_layout_wizard3"
                             >
                               {selectedLayout}
                             </span>
-                            <svg
+                            <FiChevronDown
                               id="rotate1"
-                              className="absolute z-10 cursor-pointer right-5"
-                              width={10}
-                              height={6}
-                              viewBox="0 0 10 6"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M0.5 0.75L5 5.25L9.5 0.75"
-                                stroke="#4B5563"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                              className="absolute z-10 cursor-pointer right-5 text-white"
+                              size={14}
+                            />
                           </button>
                           <div
                             className={`absolute right-0 z-20 ${
@@ -919,33 +907,22 @@ const Company = () => {
                             ))}
                           </div>
                         </div>
-                        <div className="relative w-40 h-fit border border-gray-300 rounded-lg outline-none dropdown-one">
+                        <div className="relative w-40 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                           <button
                             onClick={showDropDownMenuOne_form_layout_wizard4}
                             className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
                           >
                             <span
-                              className="pr-4 text-sm text-gray-900"
+                              className="pr-4 text-sm text-white"
                               id="drop-down-content-setter-one_form_layout_wizard4"
                             >
                               {selectedLayout1}
                             </span>
-                            <svg
+                            <FiChevronDown
                               id="rotate1"
-                              className="absolute z-10 cursor-pointer right-5"
-                              width={10}
-                              height={6}
-                              viewBox="0 0 10 6"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M0.5 0.75L5 5.25L9.5 0.75"
-                                stroke="#4B5563"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                              className="absolute z-10 cursor-pointer right-5 text-white"
+                              size={14}
+                            />
                           </button>
                           <div
                             className={`absolute right-0 z-20 ${
@@ -969,9 +946,9 @@ const Company = () => {
                           <button
                             onClick={handleClear}
                             type="button"
-                            className="py-2 px-4 inline-flex items-center gap-x-1 focus:ring-1 focus:ring-purple-600 focus:border-purple-600 text-sm rounded-lg border border-gray-300 bg-white text-gray-900 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
+                            className="py-2 px-4 text-white inline-flex items-center gap-x-1 focus:ring-1 focus:ring-purple-600 focus:border-purple-600 text-sm rounded-lg border border-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
                           >
-                            <CiFilter className="size-4 text-gray-800" />
+                            <CiFilter className="size-4 text-white" />
                             Clear
                           </button>
                         </div>
@@ -979,8 +956,8 @@ const Company = () => {
                     </div>
                   </div>
 
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-neutral-700">
-                    <thead className="bg-gray-50 dark:bg-neutral-800">
+                  <table className="min-w-full divide-y divide-gray-700 dark:divide-neutral-700">
+                    <thead className="bg-gray-800 dark:bg-neutral-800">
                       <tr>
                         <th scope="col" className="ps-6 py-3 text-start">
                           <label
@@ -989,8 +966,7 @@ const Company = () => {
                           >
                             <input
                               type="checkbox"
-                              className="shrink-0 border-gray-300 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-600 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800"
-                              id="hs-at-with-checkboxes-main"
+                              className="shrink-0 border-gray-700 bg-slate-900 rounded text-purple-600 focus:ring-purple-600 focus:ring-1"
                             />
                             <span className="sr-only">Checkbox</span>
                           </label>
@@ -1000,68 +976,71 @@ const Company = () => {
                           className="ps-6 lg:ps-3 xl:ps-0 pe-6 py-3 text-start"
                         >
                           <div className="flex items-center gap-x-2 pl-1">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-white">
                               Name
                             </span>
                           </div>
                         </th>
                         <th scope="col" className="px-6 py-3 text-start">
                           <div className="flex items-center gap-x-2">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-white">
                               Email
                             </span>
                           </div>
                         </th>
                         <th scope="col" className="px-6 py-3 text-start">
                           <div className="flex items-center gap-x-2">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-white">
                               Phone
                             </span>
                           </div>
                         </th>
                         <th scope="col" className="px-6 py-3 text-start">
                           <div className="flex items-center gap-x-2">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-white">
                               Sector
                             </span>
                           </div>
                         </th>
                         <th scope="col" className="px-6 py-3 text-start">
                           <div className="flex items-center gap-x-2">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-white">
                               Registered Date
                             </span>
                           </div>
                         </th>
                         <th scope="col" className="px-6 py-3 text-start">
                           <div className="flex items-center gap-x-2">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-white">
                               Status
                             </span>
                           </div>
                         </th>
                         <th scope="col" className="px-6 py-3 text-start">
                           <div className="flex items-center gap-x-2 w-max">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-white">
                               Log In
                             </span>
                           </div>
                         </th>
                         <th scope="col" className="px-6 py-3 text-start">
                           <div className="flex items-center gap-x-2 w-max">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-white">
                               Log Out
                             </span>
                           </div>
                         </th>
                         <th scope="col" className="px-6 py-3 text-end">
-                          <span className="text-xs font-semibold uppercase tracking-wide text-gray-800 dark:text-neutral-200">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-white">
                             Action
                           </span>
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200 dark:divide-neutral-700">
+                    <tbody
+                      className="divide-y divide-gray-700 dark:divide-neutral-700"
+                      onMouseLeave={() => setOpenDropdown(null)}
+                    >
                       {companies.map((company) => (
                         <tr key={company.id}>
                           <td className="size-px whitespace-nowrap">
@@ -1072,7 +1051,7 @@ const Company = () => {
                               >
                                 <input
                                   type="checkbox"
-                                  className="shrink-0 border-gray-300 rounded text-purple-600 focus:ring-purple-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-600 dark:checked:bg-purple-500 dark:checked:border-purple-500 dark:focus:ring-offset-gray-800"
+                                  className="shrink-0 border-gray-700 bg-transparent rounded text-purple-600 focus:ring-purple-500 focus:ring-1"
                                   id={`checkbox-${company.id}`}
                                 />
                                 <span className="sr-only">Checkbox</span>
@@ -1090,7 +1069,7 @@ const Company = () => {
                                   alt={company.company_name}
                                 />
                                 <div className="grow">
-                                  <span className="block text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                                  <span className="block text-sm font-semibold text-white">
                                     {company.company_name}
                                   </span>
                                 </div>
@@ -1099,28 +1078,28 @@ const Company = () => {
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="px-6 py-3">
-                              <span className="block text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                              <span className="block text-sm font-semibold text-white">
                                 {company.email}
                               </span>
                             </div>
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="px-6 py-3">
-                              <span className="block text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                              <span className="block text-sm font-semibold text-white">
                                 {company.phone}
                               </span>
                             </div>
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="px-6 py-3">
-                              <span className="block text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                              <span className="block text-sm font-semibold text-white">
                                 {company.sector}
                               </span>
                             </div>
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="px-6 py-3">
-                              <span className="block text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                              <span className="block text-sm font-semibold text-white">
                                 {new Date(
                                   company.register_date
                                 ).toLocaleString()}
@@ -1129,14 +1108,14 @@ const Company = () => {
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="px-6 py-3">
-                              <span className="py-1 px-1.5 inline-flex items-center gap-x-1 text-xs font-medium bg-teal-100 text-teal-800 rounded-full dark:bg-teal-500/10 dark:text-teal-500">
+                              <span class=" text-green-400 text-sm font-medium me-2 px-2.5 py-0.5 rounded border border-green-400">
                                 {company.status}
                               </span>
                             </div>
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="px-6 py-3">
-                              <span className="block text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                              <span className="block text-sm font-semibold text-white">
                                 {company.log_in
                                   ? new Date(company.log_in).toLocaleString()
                                   : "N/A"}
@@ -1145,7 +1124,7 @@ const Company = () => {
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="px-6 py-3">
-                              <span className="block text-sm font-semibold text-gray-800 dark:text-neutral-200">
+                              <span className="block text-sm font-semibold text-white">
                                 {company.log_out
                                   ? new Date(company.log_out).toLocaleString()
                                   : "N/A"}
@@ -1154,30 +1133,35 @@ const Company = () => {
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="relative flex justify-center text-left w-full ">
-                              <div className="group rounded-xl w-fit">
+                              <div className="group rounded-xl w-fit border border-gray-700">
                                 <button
+                                  onClick={() => toggleDropdown(company.id)}
                                   type="button"
                                   className="bg-primary flex items-center rounded-lg px-3 py-2 text-base font-medium"
                                 >
-                                  <CiMenuKebab className="rotate-90" />
+                                  <CiMenuKebab className="rotate-90 text-white" />
                                 </button>
-
-                                <div className="absolute right-3 w-fit z-40 mt-0 border border-gray-100 bg-white divide-y divide-gray-100 rounded-sm shadow-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition duration-300">
-                                  <button
-                                    onClick={() => handleEdit(company.id)}
-                                    className="flex items-center justify-start w-full px-4 py-2 text-sm text-blue-700 dark:text-dark-6 hover:bg-[#F5F7FD] dark:hover:bg-primary/5 hover:text-primary"
+                                {openDropdown === company.id && (
+                                  <div
+                                    onMouseLeave={() => setOpenDropdown(null)}
+                                    className="absolute top-10 right-5 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-10"
                                   >
-                                    <MdEdit className="mr-2" />
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(company.id)}
-                                    className="flex items-center justify-start w-full px-4 py-2 text-sm text-red-700 dark:text-dark-6 hover:bg-[#F5F7FD] dark:hover:bg-primary/5 hover:text-primary"
-                                  >
-                                    <MdDelete className="mr-2" />
-                                    Delete
-                                  </button>
-                                </div>
+                                    <button
+                                      onClick={() => handleEdit(company.id)}
+                                      className="px-4 py-2 text-sm text-blue-600 hover:bg-gray-700 w-full text-left flex items-center"
+                                    >
+                                      <MdEdit className="mr-2" />
+                                      Edit
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(company.id)}
+                                      className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-700 w-full text-left"
+                                    >
+                                      <MdDelete className="mr-2" />
+                                      Delete
+                                    </button>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </td>
@@ -1186,11 +1170,11 @@ const Company = () => {
                     </tbody>
                   </table>
 
-                  <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-200 dark:border-neutral-700">
+                  <div className="px-6 py-4 grid gap-3 md:flex md:justify-between md:items-center border-t border-gray-400 dark:border-neutral-700">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-neutral-400">
-                        <span className="font-semibold text-gray-800 dark:text-neutral-200">
-                          {companies.length}
+                      <p className="text-sm text-white dark:text-neutral-400">
+                        <span className="font-semibold text-white dark:text-neutral-200">
+                          {companies.length}{" "}
                         </span>
                         results
                       </p>
@@ -1202,7 +1186,7 @@ const Company = () => {
                           onClick={loadMoreCompanies}
                           disabled={!hasMore}
                           type="button"
-                          className="py-1.5 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
+                          className="py-1.5 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-700 text-white shadow-sm hover:bg-slate-800 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
                         >
                           Load Next
                           <svg
@@ -1242,7 +1226,7 @@ const Company = () => {
           }}
           closeIcon
         >
-          <div className="relative flex flex-col bg-white shadow-lg rounded-xl dark:bg-neutral-800 border-none">
+          <div className="relative flex flex-col bg-gray-900 shadow-lg rounded-xl dark:bg-neutral-800 border-none">
             <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center">
               <div className="absolute top-2 end-2">
                 <button
@@ -1280,27 +1264,27 @@ const Company = () => {
 
             <div className="p-4 sm:p-7 overflow-y-auto">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-neutral-200">
+                <h3 className="text-lg font-semibold text-white dark:text-neutral-200">
                   Create Company
                 </h3>
               </div>
               <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-10 mx-auto w-full">
                 <div className="mt-0 w-full mx-auto">
-                  <div className="flex flex-col border rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
-                    <h2 className="mb-8 text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                  <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
+                    <h2 className="mb-8 text-xl font-semibold text-white dark:text-neutral-200">
                       Fill the company details
                     </h2>
                     <div>
                       <div className="grid gap-4 lg:gap-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                           <div>
-                            <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                            <label className="block mb-2 text-sm text-white font-medium dark:text-white">
                               Company Name
                             </label>
                             <input
                               type="text"
                               id="company_name"
-                              className=" bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                               placeholder="company name"
                               required
                               value={createCompanyForm.company_name}
@@ -1314,13 +1298,13 @@ const Company = () => {
                           </div>
 
                           <div>
-                            <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                            <label className="block mb-2 text-sm text-white font-medium dark:text-white">
                               Contact Number
                             </label>
                             <div className="flex items-center">
                               <button
                                 id="phone-button"
-                                className="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600"
+                                className="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-white bg-transparent border border-gray-700 rounded-s-lg hover:bg-gray-800 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600"
                                 type="button"
                               >
                                 <svg
@@ -1368,7 +1352,7 @@ const Company = () => {
                                 <input
                                   type="text"
                                   id="phone"
-                                  className="block p-2.5 w-full z-20 text-sm text-gray-900 bg-white rounded-e-lg border-s-0 border border-gray-300 focus:ring-purple-600 focus:border-purple-600 dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-purple-600"
+                                  className="block p-2.5 w-full z-20 text-sm text-white bg-transparent rounded-e-lg border-s-0 border border-gray-700 focus:ring-purple-600 focus:border-purple-600 dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-purple-600"
                                   pattern="[0-9]{10}"
                                   placeholder="mobile"
                                   required
@@ -1387,13 +1371,13 @@ const Company = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                           <div>
-                            <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                            <label className="block mb-2 text-sm text-white font-medium dark:text-white">
                               Email
                             </label>
                             <input
                               type="email"
                               id="email"
-                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                               placeholder="company.name@gmail.com"
                               required
                               value={createCompanyForm.email}
@@ -1407,13 +1391,13 @@ const Company = () => {
                           </div>
 
                           <div>
-                            <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                            <label className="block mb-2 text-sm text-white font-medium dark:text-white">
                               Username
                             </label>
                             <input
                               type="text"
                               id="username"
-                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                               placeholder="username"
                               required
                               value={createCompanyForm.username}
@@ -1428,36 +1412,26 @@ const Company = () => {
                         </div>
 
                         <div>
-                          <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                          <label className="block mb-2 text-sm text-white font-medium dark:text-white">
                             Sector
                           </label>
-                          <div className="relative h-fit border border-gray-300 rounded-lg outline-none dropdown-one">
+                          <div className="relative h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                             <button
                               onClick={showDropDownMenuOne_form_layout_wizard5}
                               className="relative flex items-center justify-between w-full p-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
                             >
                               <span
-                                className="pr-4 text-sm text-gray-900"
+                                className="pr-4 text-sm text-white"
                                 id="drop-down-content-setter-one_form_layout_wizard5"
                               >
                                 {selectedLayout2}
                               </span>
-                              <svg
+                              <FiChevronDown
                                 id="rotate1"
                                 className="absolute z-10 cursor-pointer right-5"
-                                width={10}
-                                height={6}
-                                viewBox="0 0 10 6"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M0.5 0.75L5 5.25L9.5 0.75"
-                                  stroke="#4B5563"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
+                                size={14}
+                                color="white"
+                              />
                             </button>
                             <div
                               className={`absolute right-0 z-20 ${
@@ -1528,9 +1502,9 @@ const Company = () => {
               <div className="flex justify-end gap-x-2">
                 <a
                   onClick={handleSubmit}
-                  className="p-2.5 inline-flex items-center gap-x-2 text-sm font-medium cursor-pointer rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
+                  className="py-2 inline-flex items-center gap-x-2 px-2 text-sm font-medium cursor-pointer rounded-lg border border-gray-700 bg-transparent text-white hover:bg-gray-800 disabled:opacity-50 disabled:pointer-events-none"
                 >
-                  <MdOutlineAccountCircle className="size-5" />
+                  <FiUser className="size-5" />
                   Create
                 </a>
               </div>

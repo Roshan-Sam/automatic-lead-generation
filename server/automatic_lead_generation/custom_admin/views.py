@@ -122,3 +122,48 @@ class UpdateSubscriptionPlanView(APIView):
             return Response({'message': 'Subscription plan deleted successfully.'}, status=status.HTTP_200_OK)
         except SubscriptionPlan.DoesNotExist:
             return Response({'error': 'Subscription plan not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
+class UpdateProfileView(APIView):
+    def put(self, request, profile_id):
+        try:
+            company = CompanyLog.objects.get(id=profile_id)
+        except CompanyLog.DoesNotExist:
+            return Response({"error": "Company not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = CompanyLogSerializer(company, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            serialized_data = serializer.data
+            serialized_data.pop('password', None)
+            return Response(serialized_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class UpdatePasswordView(APIView):
+    def put(self, request, profile_id):
+        try:
+            company = CompanyLog.objects.get(id=profile_id)
+        except CompanyLog.DoesNotExist:
+            return Response({"error": "Company not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+        
+        if not current_password and not new_password:
+            return Response({"error": "Both current and new passwords are required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not current_password:
+            return Response({"error": "Current password is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not new_password:
+            return Response({"error": "New password is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if current_password != company.password:
+            return Response({"error": "Current password is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if len(new_password) < 6:
+            return Response({"error": "New password must be at least 6 characters long"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        company.password = new_password
+        company.save()
+        
+        return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)

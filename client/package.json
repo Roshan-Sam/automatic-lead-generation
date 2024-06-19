@@ -10,12 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@preline/select": "^2.3.0",
     "axios": "^1.7.2",
     "flowbite": "^2.3.0",
     "flowbite-react": "^0.9.0",
     "js-cookie": "^3.0.5",
-    "preline": "^2.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-responsive-modal": "^6.4.2",

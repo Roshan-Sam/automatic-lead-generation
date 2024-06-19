@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Preline from "../../preline/Preline";
 import {
   MdAdd,
   MdClose,
@@ -17,10 +16,12 @@ import { AiOutlineDelete } from "react-icons/ai";
 import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
 import axios from "axios";
+import { CiMenuKebab } from "react-icons/ci";
 import "./planprice.css";
 
 const PlanAndPricing = () => {
   const [plans, setPlans] = useState([]);
+  const [openDropdown, setOpenDropdown] = useState(null);
 
   const [planAndPricingForm, setPlanAndPricingForm] = useState({
     plan_name: "",
@@ -381,10 +382,13 @@ const PlanAndPricing = () => {
     }
   };
 
+  const toggleDropdown = (id) => {
+    setOpenDropdown(openDropdown === id ? null : id);
+  };
+
   return (
     <>
-      <Preline />
-      <div className=" text-white py-10 px-4">
+      <div className="text-white py-10 px-4">
         <div className="px-4">
           <h1 className="text-3xl font-bold text-center mb-12">
             Pricing and Plans
@@ -393,32 +397,65 @@ const PlanAndPricing = () => {
           <div className="flex mb-8 justify-end">
             <button
               onClick={onOpenModal}
-              className="py-2 w-36 flex justify-center items-center gap-x-2 text-sm font-semibold rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
+              className="py-2 w-36 flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-purple-600 text-slate-950 hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
             >
               <MdAdd className="flex-shrink-0 size-5" />
               Add New Plan
             </button>
           </div>
 
-          <div className="space-y-8 z-10 max-w-screen-xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {plans.map((plan) => (
               <div
+                onMouseLeave={() => setOpenDropdown(null)}
                 key={plan.id}
-                className="bg p-8 rounded-md border border-gray-800"
+                className="bg-slate-900 p-6 rounded-lg border border-gray-700 shadow-sm shadow-gray-500 transition-shadow duration-300 hover:-translate-y-1"
               >
-                <h2 className="text-xl font-semibold mb-10">
-                  {plan.plan_name.charAt(0).toUpperCase() +
-                    plan.plan_name.slice(1)}{" "}
-                  Pricing
-                </h2>
-                <div className="flex justify-between gap-4">
-                  <div className="flex md:gap-x-20 gap-x-10 flex-wrap">
+                <div className="flex items-center mb-6 justify-between">
+                  <h2 className="text-2xl">
+                    {plan.plan_name.charAt(0).toUpperCase() +
+                      plan.plan_name.slice(1)}{" "}
+                    Plan
+                  </h2>
+                  <div
+                    className="border p-1 rounded-md border-gray-700 cursor-pointer"
+                    onClick={() => toggleDropdown(plan.id)}
+                  >
+                    <CiMenuKebab className="rotate-90  p-0 size-6" />
+                  </div>
+                </div>
+                {openDropdown === plan.id && (
+                  <div
+                    className="absolute top-16 right-5 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-2 z-10"
+                    onMouseLeave={() => setOpenDropdown(null)}
+                  >
+                    <button
+                      onClick={() => handleEdit(plan)}
+                      className="px-4 py-2 text-sm text-blue-600 hover:bg-gray-700 w-full text-left flex items-center"
+                    >
+                      <FaEdit className="mr-2" /> Edit Plan
+                    </button>
+                    <button
+                      onClick={() => handleDelete(plan.id)}
+                      className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-700 w-full text-left"
+                    >
+                      <AiOutlineDelete className="mr-2" /> Delete Plan
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-wrap gap-x-10 gap-y-6">
                     <div>
-                      <h3 className="font-bold">Description</h3>
+                      <h3 className="underline underline-offset-2 mb-1 text-lg">
+                        Description
+                      </h3>
                       <p className="max-w-40">{plan.description}</p>
                     </div>
                     <div>
-                      <h3 className="font-bold">Features</h3>
+                      <h3 className="underline underline-offset-2 mb-1 text-lg">
+                        Features
+                      </h3>
                       <ul className="list-disc">
                         {plan.features.split(",").map((feature, index) => (
                           <li key={index}>{feature}</li>
@@ -426,47 +463,36 @@ const PlanAndPricing = () => {
                       </ul>
                     </div>
                     <div>
-                      <h3 className="font-bold">Duration in Months</h3>
+                      <h3 className="underline underline-offset-2 mb-1 text-lg">
+                        Duration in Months
+                      </h3>
                       <p>{plan.duration_in_months}</p>
                     </div>
                     <div>
-                      <h3 className="font-bold">Active</h3>
+                      <h3 className="underline underline-offset-2 mb-1">
+                        Active
+                      </h3>
                       <p>{plan.is_active ? "Yes" : "No"}</p>
                     </div>
                   </div>
 
                   <div className="text-right flex flex-col justify-end max-w-full">
-                    <p className="text-4xl font-bold mb-2">
+                    <p className="text-2xl font-medium mb-2">
                       ₹{plan.monthly_price}
                     </p>
-                    <p className="text-gray-400">per month</p>
-                    <p className="text-4xl font-bold mb-2 mt-4">
+                    <p className="text-gray-400 text-sm">per month</p>
+                    <p className="text-4xl font-medium mb-2 mt-4">
                       ₹{plan.annual_price}
                     </p>
-                    <p className="text-gray-400">per year</p>
-                    <p className="text-4xl font-bold mb-2 mt-4">
+                    <p className="text-gray-400 text-sm">per year</p>
+                    <p className="text-3xl font-medium mb-2 mt-4">
                       ₹{plan.custom_price}
                     </p>
-
-                    <p className="text-gray-400">custom price</p>
+                    <p className="text-gray-400 text-sm">custom price</p>
                     <p className="text-gray-400 mt-2">
                       Only valid for {plan.duration_in_months} months
                     </p>
                   </div>
-                </div>
-                <div className="flex md:flex-row flex-col gap-2 justify-end items-end mt-6 ">
-                  <button
-                    onClick={() => handleEdit(plan)}
-                    className="w-32 justify-center flex items-center px-2 py-1 bg-blue-700 text-white font-medium rounded-md shadow-md hover:bg-blue-600"
-                  >
-                    <FaEdit className="mr-2" /> Edit Plan
-                  </button>
-                  <button
-                    onClick={() => handleDelete(plan.id)}
-                    className="w-32 justify-center flex items-center px-2 py-1 bg-red-700 text-white font-medium rounded-md shadow-md hover:bg-red-600"
-                  >
-                    <AiOutlineDelete className="mr-2" /> Delete Plan
-                  </button>
                 </div>
               </div>
             ))}

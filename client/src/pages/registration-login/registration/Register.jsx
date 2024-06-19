@@ -21,9 +21,57 @@ const Register = () => {
     password: "",
     sector: "",
   });
+  const [selectedLayout, setSelectedLayout] = useState("Sector");
+  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [companyUsers, setCompanyUsers] = useState([]);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+
+  const [sectorOptions, setSectorOptions] = useState([
+    "tech",
+    "finance",
+    "healthcare",
+    "education",
+    "real-estate",
+    "energy",
+    "consumer-goods",
+    "utilities",
+    "industrials",
+    "telecom",
+  ]);
+
+  const showDropDownMenuOne_form_layout_wizard3 = () => {
+    setDropdownVisible(!dropdownVisible);
+  };
+
+  const swaptextone_form_layout_wizard3 = (e) => {
+    const targetText = e.target.innerText;
+    setSelectedLayout(targetText);
+    setDropdownVisible(false);
+    if (e.target.innerText !== "Sector") {
+      setFormData({ ...formData, sector: targetText });
+    }
+  };
+
+  const handleOutsideClick = (e) => {
+    const dropdown = document.getElementById(
+      "drop-down-div-one_form_layout_wizard3"
+    );
+    if (
+      dropdown &&
+      !dropdown.contains(e.target) &&
+      e.target.id !== "drop-down-content-setter-one_form_layout_wizard3"
+    ) {
+      setDropdownVisible(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   const fetchCompanyUsers = async () => {
     try {
@@ -90,12 +138,6 @@ const Register = () => {
           errorMessage = "Password is required";
         } else if (value.length < 6) {
           errorMessage = "Password must be at least 6 characters";
-        }
-        break;
-
-      case "sector":
-        if (!value) {
-          errorMessage = "Sector is required";
         }
         break;
 
@@ -353,34 +395,52 @@ const Register = () => {
                     </div>
                     <div className="md:w-80">
                       <Label value="Select sector" />
-                      <select
-                        id="sector"
-                        data-hs-select='{
-                  "placeholder": "Select option...",
-                  "toggleTag": "<button type=\"button\"></button>",
-                  "toggleClasses": "hs-select-disabled:pointer-events-none hs-select-disabled:opacity-50 relative py-3 px-4 pe-9 flex text-nowrap w-full cursor-pointer bg-white border border-gray-200 rounded-lg text-start text-sm focus:border-purple-600 focus:ring-purple-600 focus:ring-1 before:absolute before:inset-0 before:z-[1] dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400",
-                  "dropdownClasses": "mt-2 z-50 w-full max-h-72 p-1 space-y-0.5 bg-white border border-gray-200 rounded-lg overflow-hidden overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 dark:[&::-webkit-scrollbar-track]:bg-neutral-700 dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 dark:bg-neutral-900 dark:border-neutral-700",
-                  "optionClasses": "py-2 px-4 w-full text-sm text-gray-800 cursor-pointer hover:bg-gray-100 rounded-lg focus:outline-none focus:bg-gray-100 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-neutral-200 dark:focus:bg-neutral-800",
-                  "optionTemplate": "<div class=\"flex justify-between items-center w-full\"><span data-title></span><span class=\"hidden hs-selected:block\"><svg class=\"flex-shrink-0 size-3.5 text-purple-600 dark:text-purple-600\" xmlns=\"http:.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"20 6 9 17 4 12\"/></svg></span></div>",
-                  "extraMarkup": "<div class=\"absolute top-1/2 end-3 -translate-y-1/2\"><svg class=\"flex-shrink-0 size-3.5 text-gray-500 dark:text-neutral-500\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m7 15 5 5 5-5\"/><path d=\"m7 9 5-5 5 5\"/></svg></div>"
-                }'
-                        className="hidden"
-                        value={formData.sector}
-                        onChange={handleChange}
-                        required
-                      >
-                        <option value="">Choose a sector</option>
-                        <option value="tech">Technology</option>
-                        <option value="finance">Finance</option>
-                        <option value="healthcare">Healthcare</option>
-                        <option value="education">Education</option>
-                        <option value="real-estate">Real Estate</option>
-                        <option value="energy">Energy</option>
-                        <option value="consumer-goods">Consumer Goods</option>
-                        <option value="utilities">Utilities</option>
-                        <option value="industrials">Industrials</option>
-                        <option value="telecom">Telecommunication</option>
-                      </select>
+                      <div className="relative w-full border border-gray-300 rounded-lg outline-none dropdown-one">
+                        <button
+                          onClick={showDropDownMenuOne_form_layout_wizard3}
+                          className="relative flex items-center justify-between w-full px-5 h-10 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
+                        >
+                          <span
+                            className="pr-4 text-sm text-gray-900"
+                            id="drop-down-content-setter-one_form_layout_wizard3"
+                          >
+                            {selectedLayout}
+                          </span>
+                          <svg
+                            id="rotate1"
+                            className="absolute z-10 cursor-pointer right-5"
+                            width={10}
+                            height={6}
+                            viewBox="0 0 10 6"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="M0.5 0.75L5 5.25L9.5 0.75"
+                              stroke="#4B5563"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                        <div
+                          className={`absolute right-0 z-20 ${
+                            dropdownVisible ? "" : "hidden"
+                          } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-10 max-h-28 overflow-y-scroll select`}
+                          id="drop-down-div-one_form_layout_wizard3"
+                        >
+                          {sectorOptions.map((sector, index) => (
+                            <a key={index}>
+                              <p
+                                className="p-3 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                onClick={swaptextone_form_layout_wizard3}
+                              >
+                                {sector}
+                              </p>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
                       {errors.sector && (
                         <p className="text-red-600 text-sm font-medium">
                           {errors.sector}
