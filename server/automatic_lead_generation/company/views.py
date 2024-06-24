@@ -8,6 +8,9 @@ from django.conf import settings
 from rest_framework.views import APIView
 from .models import CompanyLog
 from .serializers import CompanyLogSerializer
+from custom_admin.models import AdminNotification
+from custom_admin.serializers import AdminNotificationSerializer
+from django.db.models import Q
 
 # Create your views here.
 
@@ -33,7 +36,17 @@ class CompanyRegistrationView(APIView):
             if CompanyLog.objects.filter(username=username).exists():
                 return Response({"error": "Username already taken"}, status=status.HTTP_400_BAD_REQUEST)
 
-            serializer.save()
+            company_instance = serializer.save()
+            
+            admin_notification_message = f"New company registered: {company_instance.company_name}. Email: {email}"
+            admin_notification_data = {
+                "message": admin_notification_message,
+                "type": "company_register",
+            }
+            admin_notification_serializer = AdminNotificationSerializer(data=admin_notification_data)
+            if admin_notification_serializer.is_valid():
+                admin_notification_serializer.save()
+                
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -55,7 +68,7 @@ class RegisteredCompaniesView(APIView):
         companies = CompanyLog.objects.filter(position__iexact='company').order_by('-register_date')
 
         if company_name:
-            companies = companies.filter(company_name__icontains=company_name)
+            companies = companies.filter(Q(company_name__icontains=company_name))
         if sector:
             companies = companies.filter(sector__icontains=sector)
 

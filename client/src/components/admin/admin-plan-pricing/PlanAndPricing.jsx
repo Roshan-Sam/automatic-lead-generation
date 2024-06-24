@@ -17,6 +17,7 @@ import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
 import axios from "axios";
 import { CiMenuKebab } from "react-icons/ci";
+import { Link } from "react-router-dom";
 import "./planprice.css";
 
 const PlanAndPricing = () => {
@@ -388,12 +389,18 @@ const PlanAndPricing = () => {
 
   return (
     <>
+      <div className="flex pt-10 px-4">
+        <ul className="bg-slate-900 border border-gray-700 rounded-full py-2 px-4 -space-x-4 w-max flex items-center mt-4">
+          <li className="bg-gray-800 text-purple-500 hover:underline rounded-full z-40 px-8 py-3 text-base cursor-pointer">
+            <Link to="/admin-dash?tab=dash">Dashboard</Link>
+          </li>
+          <li className="bg-purple-600 text-white underline rounded-r-full z-10 px-8 py-3 text-base cursor-pointer">
+            <Link to="/admin-dash?tab=plan-pricing">Plan & Pricing</Link>
+          </li>
+        </ul>
+      </div>
       <div className="text-white py-10 px-4">
         <div className="px-4">
-          <h1 className="text-3xl font-bold text-center mb-12">
-            Pricing and Plans
-          </h1>
-
           <div className="flex mb-8 justify-end">
             <button
               onClick={onOpenModal}
@@ -409,7 +416,7 @@ const PlanAndPricing = () => {
               <div
                 onMouseLeave={() => setOpenDropdown(null)}
                 key={plan.id}
-                className="bg-slate-900 p-6 rounded-lg border border-gray-700 shadow-sm shadow-gray-500 transition-shadow duration-300 hover:-translate-y-1"
+                className="bg-slate-900 p-6 rounded-lg border border-b-2 border-gray-700 shadow-sm shadow-gray-500 transition-shadow duration-300 hover:-translate-y-1"
               >
                 <div className="flex items-center mb-6 justify-between">
                   <h2 className="text-2xl">
@@ -511,7 +518,7 @@ const PlanAndPricing = () => {
         }}
         closeIcon
       >
-        <div className="relative flex flex-col bg-white shadow-lg rounded-xl dark:bg-neutral-800 border-none">
+        <div className="relative flex flex-col bg-gray-900 shadow-lg rounded-xl dark:bg-neutral-800 border-none">
           <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center">
             <div className="absolute top-2 end-2">
               <button
@@ -549,24 +556,24 @@ const PlanAndPricing = () => {
 
           <div className="p-4 overflow-y-auto">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-neutral-200">
+              <h3 className="text-lg font-semibold text-white">
                 Add Plan and Pricing
               </h3>
             </div>
             <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-4 mx-auto w-full">
               <div className="mt-0 w-full mx-auto">
-                <div className="flex flex-col border rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
-                  <h2 className="mb-8 text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
+                  <h2 className="mb-8 text-xl font-semibold text-white">
                     Fill the plan details
                   </h2>
                   <div className="mb-2">
-                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                    <label className="block mb-2 text-sm text-white font-medium">
                       Plan Name
                     </label>
                     <input
                       type="text"
                       id="plan_name"
-                      className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                      className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                       placeholder="plan"
                       required
                       value={planAndPricingForm.plan_name}
@@ -579,13 +586,13 @@ const PlanAndPricing = () => {
                     )}
                   </div>
                   <div className="mb-2">
-                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                    <label className="block mb-2 text-sm text-white font-medium">
                       Description
                     </label>
                     <textarea
                       id="description"
                       rows="4"
-                      className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                      className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                       placeholder="description"
                       value={planAndPricingForm.description}
                       onChange={handleChange}
@@ -597,17 +604,20 @@ const PlanAndPricing = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                    <label className="block mb-2 text-sm text-white font-medium dark:text-white">
                       Features
                     </label>
                     <textarea
                       id="features"
                       rows="4"
-                      className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                      className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                       placeholder="features"
                       value={planAndPricingForm.features}
                       onChange={handleChange}
                     />
+                    <p className="text-xs text-gray-400 mt-1">
+                      ( Add commas to separate features )
+                    </p>
                     {errors.features && (
                       <p className="text-red-600 text-sm font-medium">
                         {errors.features}
@@ -616,13 +626,13 @@ const PlanAndPricing = () => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mt-2">
                     <div>
-                      <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                      <label className="block mb-2 text-sm text-white font-medium">
                         Monthly price
                       </label>
                       <input
                         type="number"
                         id="monthly_price"
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                        className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                         placeholder="monthly price"
                         required
                         value={planAndPricingForm.monthly_price}
@@ -635,13 +645,13 @@ const PlanAndPricing = () => {
                       )}
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                      <label className="block mb-2 text-sm text-white font-medium">
                         Annual Price
                       </label>
                       <input
                         type="number"
                         id="annual_price"
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                        className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                         placeholder="annual price"
                         required
                         value={planAndPricingForm.annual_price}
@@ -656,13 +666,13 @@ const PlanAndPricing = () => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mt-2">
                     <div>
-                      <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                      <label className="block mb-2 text-sm text-white font-medium">
                         Custom Price
                       </label>
                       <input
                         type="number"
                         id="custom_price"
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                        className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                         placeholder="custom price"
                         required
                         value={planAndPricingForm.custom_price}
@@ -670,13 +680,13 @@ const PlanAndPricing = () => {
                       />
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                      <label className="block mb-2 text-sm text-white font-medium">
                         Duration in Months
                       </label>
                       <input
                         type="number"
                         id="duration_in_months"
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                        className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                         placeholder="duration in months"
                         required
                         value={planAndPricingForm.duration_in_months}
@@ -726,7 +736,7 @@ const PlanAndPricing = () => {
             <div className="flex justify-end gap-x-2">
               <a
                 onClick={handleSubmit}
-                className="p-2.5 inline-flex items-center gap-x-2 text-sm font-medium cursor-pointer rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
+                className="p-2.5 inline-flex items-center gap-x-2 text-sm font-medium cursor-pointer rounded-md border border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:pointer-events-none"
               >
                 <MdOutlineAddCircle className="size-5" />
                 Add Plan
@@ -745,7 +755,7 @@ const PlanAndPricing = () => {
         }}
         closeIcon
       >
-        <div className="relative flex flex-col bg-white shadow-lg rounded-xl dark:bg-neutral-800 border-none">
+        <div className="relative flex flex-col bg-gray-900 shadow-lg rounded-xl dark:bg-neutral-800 border-none">
           <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center">
             <div className="absolute top-2 end-2">
               <button
@@ -783,24 +793,24 @@ const PlanAndPricing = () => {
 
           <div className="p-4 overflow-y-auto">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-neutral-200">
+              <h3 className="text-lg font-semibold text-white">
                 Update Plan and Pricing
               </h3>
             </div>
             <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-4 mx-auto w-full">
               <div className="mt-0 w-full mx-auto">
-                <div className="flex flex-col border rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
-                  <h2 className="mb-8 text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
+                  <h2 className="mb-8 text-xl font-semibold text-white">
                     Fill the plan details
                   </h2>
                   <div className="mb-2">
-                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                    <label className="block mb-2 text-sm text-white font-medium">
                       Plan Name
                     </label>
                     <input
                       type="text"
                       id="plan_name"
-                      className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                      className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                       placeholder="plan"
                       required
                       value={editPlanPricingForm.plan_name}
@@ -813,13 +823,13 @@ const PlanAndPricing = () => {
                     )}
                   </div>
                   <div className="mb-2">
-                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                    <label className="block mb-2 text-sm text-white font-medium">
                       Description
                     </label>
                     <textarea
                       id="description"
                       rows="4"
-                      className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                      className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                       placeholder="description"
                       value={editPlanPricingForm.description}
                       onChange={handleEditChange}
@@ -831,17 +841,21 @@ const PlanAndPricing = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                    <label className="block mb-2 text-sm text-white font-medium">
                       Features
                     </label>
                     <textarea
                       id="features"
                       rows="4"
-                      className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                      className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                       placeholder="features"
                       value={editPlanPricingForm.features}
                       onChange={handleEditChange}
                     />
+                    <p className="text-xs text-gray-400 mt-1">
+                      ( Add commas to separate features )
+                    </p>
+
                     {editErrors.features && (
                       <p className="text-red-600 text-sm font-medium">
                         {editErrors.features}
@@ -850,13 +864,13 @@ const PlanAndPricing = () => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mt-2">
                     <div>
-                      <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                      <label className="block mb-2 text-sm text-white font-medium">
                         Monthly price
                       </label>
                       <input
                         type="number"
                         id="monthly_price"
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                        className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                         placeholder="monthly price"
                         required
                         value={editPlanPricingForm.monthly_price}
@@ -869,13 +883,13 @@ const PlanAndPricing = () => {
                       )}
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                      <label className="block mb-2 text-sm text-white font-medium">
                         Annual Price
                       </label>
                       <input
                         type="number"
                         id="annual_price"
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                        className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                         placeholder="annual price"
                         required
                         value={editPlanPricingForm.annual_price}
@@ -890,13 +904,13 @@ const PlanAndPricing = () => {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mt-2">
                     <div>
-                      <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                      <label className="block mb-2 text-sm text-white font-medium">
                         Custom Price
                       </label>
                       <input
                         type="number"
                         id="custom_price"
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                        className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                         placeholder="custom price"
                         required
                         value={editPlanPricingForm.custom_price}
@@ -904,13 +918,13 @@ const PlanAndPricing = () => {
                       />
                     </div>
                     <div>
-                      <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                      <label className="block mb-2 text-sm text-white font-medium">
                         Duration in Months
                       </label>
                       <input
                         type="number"
                         id="duration_in_months"
-                        className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                        className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                         placeholder="duration in months"
                         required
                         value={editPlanPricingForm.duration_in_months}
@@ -960,9 +974,9 @@ const PlanAndPricing = () => {
             <div className="flex justify-end gap-x-2">
               <a
                 onClick={handleEditSubmit}
-                className="p-2.5 inline-flex items-center gap-x-2 text-sm font-medium cursor-pointer rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
+                className="p-2.5 inline-flex items-center gap-x-2 text-sm font-medium cursor-pointer rounded-md border border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:pointer-events-none"
               >
-                <FaSync className="size-4" />
+                <FaSync className="size-3" />
                 Update Plan
               </a>
             </div>
@@ -981,7 +995,7 @@ const PlanAndPricing = () => {
         }}
         closeIcon
       >
-        <div className="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
+        <div className="w-full max-w-lg bg-gray-900 shadow-lg rounded-lg p-6 relative">
           <FaTimes
             className="w-3.5 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500 float-right"
             onClick={onCloseDeleteModal}
@@ -989,7 +1003,7 @@ const PlanAndPricing = () => {
 
           <div className="my-4 text-center">
             <FaTrashAlt className="size-16 text-red-600 inline" />
-            <h4 className="text-gray-800 text-base font-semibold mt-4">
+            <h4 className="text-gray-200 text-base font-semibold mt-4">
               Are you sure you want to delete this plan?
             </h4>
 

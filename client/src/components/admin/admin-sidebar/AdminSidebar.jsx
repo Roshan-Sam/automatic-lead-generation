@@ -20,13 +20,20 @@ const AdminSidebar = ({ sidebarToggle }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAccountSettingsOpen, setIsAccountSettingsOpen] = useState(false);
   const [tab, setTab] = useState();
+  const [pass, setPass] = useState();
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const tabFromUrl = urlParams.get("tab");
+    const passFromUrl = urlParams.get("password");
     if (tabFromUrl) setTab(tabFromUrl);
+    if (passFromUrl) {
+      setPass(passFromUrl);
+    } else {
+      setPass("");
+    }
   }, [location.search]);
 
   const handleSignOut = () => {
@@ -94,6 +101,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
             navigate("/admin-dash?tab=account&password=reset");
           },
           icon: MdLock,
+          pass: "reset",
         },
         { name: "Signout", action: handleSignOut, icon: MdExitToApp },
       ],
@@ -128,7 +136,13 @@ const AdminSidebar = ({ sidebarToggle }) => {
                       className={`group z-50 flex items-center cursor-pointer text-sm gap-3.5 font-medium p-2 hover:bg-purple-800 rounded-md`}
                       onClick={toggleAccountSettings}
                     >
-                      <div>
+                      <div
+                        className={`${
+                          !isSidebarOpen
+                            ? "ml-1 transition-transform duration-300"
+                            : "transition-transform duration-300"
+                        }`}
+                      >
                         {React.createElement(menuItem.icon, { size: "24" })}
                       </div>
                       <h2
@@ -142,21 +156,25 @@ const AdminSidebar = ({ sidebarToggle }) => {
                       <h2
                         className={`${
                           isSidebarOpen && "hidden"
-                        } absolute z-50 left-20 bg-purple-700 font-semibold whitespace-pre text-white rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
+                        } absolute z-50 left-20 bg-purple-800 font-semibold whitespace-pre text-white rounded-sm drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
                       >
                         {menuItem.name}
                       </h2>
                     </div>
                     {isAccountSettingsOpen && (
                       <div
-                        className={`absolute flex flex-col gap-4 top-full left-3 bg-gray-900 shadow-lg rounded-md p-2 mt-1 ${
+                        className={`absolute flex flex-col gap-4 top-full left-3 bg-gray-800 shadow-lg rounded-md p-2 mt-1 ${
                           isSidebarOpen ? "w-full" : "w-max"
                         }`}
                       >
                         {menuItem.submenu.map((subMenuItem, j) => (
                           <div
                             key={j}
-                            className="flex items-center gap-3.5 text-sm font-medium p-2 bg-gray-900 hover:bg-purple-800 rounded-md cursor-pointer hover:text-gray-200"
+                            className={`flex items-center gap-3.5 text-sm font-medium p-2 bg-gray-800 hover:bg-purple-800 rounded-md cursor-pointer hover:text-gray-200 ${
+                              subMenuItem.pass === pass
+                                ? "bg-purple-800"
+                                : "hover:bg-purple-800"
+                            }`}
                             onClick={() => {
                               subMenuItem.action && subMenuItem.action();
                               setIsAccountSettingsOpen(false);
@@ -180,7 +198,13 @@ const AdminSidebar = ({ sidebarToggle }) => {
                         : "hover:bg-purple-800"
                     }`}
                   >
-                    <div>
+                    <div
+                      className={`${
+                        !isSidebarOpen
+                          ? "ml-1 transition-transform duration-300"
+                          : "transition-transform duration-300"
+                      }`}
+                    >
                       {React.createElement(menuItem.icon, { size: "24" })}
                     </div>
                     <h2
@@ -194,7 +218,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                     <h2
                       className={`${
                         isSidebarOpen && "hidden"
-                      } absolute left-20 z-50 bg-purple-700 font-semibold whitespace-pre text-white rounded-md drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
+                      } absolute left-20 z-50 bg-purple-800 font-semibold whitespace-pre text-white rounded-sm drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
                     >
                       {menuItem.name}
                     </h2>

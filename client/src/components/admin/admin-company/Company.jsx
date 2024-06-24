@@ -13,6 +13,7 @@ import {
 import { CiMenuKebab } from "react-icons/ci";
 import { FaSync, FaTimes, FaTrashAlt, FaCheckCircle } from "react-icons/fa";
 import { FiChevronDown, FiUser } from "react-icons/fi";
+import { Link } from "react-router-dom";
 import "./company.css";
 
 const Company = () => {
@@ -694,19 +695,25 @@ const Company = () => {
           editCompanyForm
         );
         if (res.status === 200) {
-          const updatedCompanies = companies.map((company) =>
-            company.id === editedCompanyId
-              ? {
-                  ...company,
-                  company_name: res.data.company_name,
-                  phone: res.data.phone,
-                  email: res.data.email,
-                  username: res.data.username,
-                  sector: res.data.sector,
-                }
-              : company
-          );
-          setCompanies(updatedCompanies);
+          if (searchTerm === "" && sector === "" && sortByDate === "") {
+            const updatedCompanies = companies.map((company) =>
+              company.id === editedCompanyId
+                ? {
+                    ...company,
+                    company_name: res.data.company_name,
+                    phone: res.data.phone,
+                    email: res.data.email,
+                    username: res.data.username,
+                    sector: res.data.sector,
+                  }
+                : company
+            );
+            setCompanies(updatedCompanies);
+          } else {
+            handleClear();
+            fetchCompanyUsers();
+            fetchCompaniesAfterCreation();
+          }
           setSuccess("Company account updated successfully");
           setSelectedLayout3("Sector");
           setEditCompanyForm({
@@ -793,8 +800,15 @@ const Company = () => {
 
   return (
     <>
-      <div className="text-white pt-10">
-        <h1 className="text-3xl font-bold text-center mb-12">Companies</h1>
+      <div className="flex pt-10 mb-12 px-4">
+        <ul className="bg-slate-900 border border-gray-700 rounded-full py-2 px-4 -space-x-4 w-max flex items-center mt-4">
+          <li className="bg-gray-800 text-purple-500 hover:underline rounded-full z-40 px-8 py-3 text-base cursor-pointer">
+            <Link to="/admin-dash?tab=dash">Dashboard</Link>
+          </li>
+          <li className="bg-purple-600 text-white underline rounded-r-full z-10 px-8 py-3 text-base cursor-pointer">
+            <Link to="/admin-dash?tab=company">Company</Link>
+          </li>
+        </ul>
       </div>
 
       <div className="">
@@ -820,7 +834,7 @@ const Company = () => {
                             id="search"
                             name="search"
                             className="py-2 px-3 ps-11 text-white block w-full bg-slate-900 border-gray-700 rounded-lg text-sm focus:border-purple-600 focus:ring-purple-600 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400 dark:placeholder-neutral-500 dark:focus:ring-neutral-600"
-                            placeholder="Search"
+                            placeholder="Search by company name"
                             value={searchTerm}
                             onChange={handleSearchChange}
                           />
@@ -875,7 +889,7 @@ const Company = () => {
                         <div className="relative w-48 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                           <button
                             onClick={showDropDownMenuOne_form_layout_wizard3}
-                            className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
+                            className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                           >
                             <span
                               className="pr-4 text-sm text-white"
@@ -910,7 +924,7 @@ const Company = () => {
                         <div className="relative w-40 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                           <button
                             onClick={showDropDownMenuOne_form_layout_wizard4}
-                            className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
+                            className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                           >
                             <span
                               className="pr-4 text-sm text-white"
@@ -946,7 +960,7 @@ const Company = () => {
                           <button
                             onClick={handleClear}
                             type="button"
-                            className="py-2 px-4 text-white inline-flex items-center gap-x-1 focus:ring-1 focus:ring-purple-600 focus:border-purple-600 text-sm rounded-lg border border-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
+                            className="py-2 px-4 text-white inline-flex items-center gap-x-1 hover:bg-gray-800 focus:bg-transparent focus:ring-1 focus:ring-purple-600 focus:border-purple-600 text-sm rounded-lg border border-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
                           >
                             <CiFilter className="size-4 text-white" />
                             Clear
@@ -1108,7 +1122,7 @@ const Company = () => {
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="px-6 py-3">
-                              <span class=" text-green-400 text-sm font-medium me-2 px-2.5 py-0.5 rounded border border-green-400">
+                              <span className=" text-green-400 text-sm font-medium me-2 px-2.5 py-0.5 rounded border border-green-400">
                                 {company.status}
                               </span>
                             </div>
@@ -1133,7 +1147,7 @@ const Company = () => {
                           </td>
                           <td className="size-px whitespace-nowrap">
                             <div className="relative flex justify-center text-left w-full ">
-                              <div className="group rounded-xl w-fit border border-gray-700">
+                              <div className="reative group rounded-xl w-fit border border-gray-700">
                                 <button
                                   onClick={() => toggleDropdown(company.id)}
                                   type="button"
@@ -1144,7 +1158,7 @@ const Company = () => {
                                 {openDropdown === company.id && (
                                   <div
                                     onMouseLeave={() => setOpenDropdown(null)}
-                                    className="absolute top-10 right-5 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-10"
+                                    className="absolute mt-1 right-5 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-10"
                                   >
                                     <button
                                       onClick={() => handleEdit(company.id)}
@@ -1525,7 +1539,7 @@ const Company = () => {
           }}
           closeIcon
         >
-          <div className="relative flex flex-col bg-white shadow-lg rounded-xl dark:bg-neutral-800 border-none">
+          <div className="relative flex flex-col bg-gray-900 shadow-lg rounded-xl dark:bg-neutral-800 border-none">
             <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center">
               <div className="absolute top-2 end-2">
                 <button
@@ -1563,27 +1577,27 @@ const Company = () => {
 
             <div className="p-4 sm:p-7 overflow-y-auto">
               <div className="text-center">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-neutral-200">
+                <h3 className="text-lg font-semibold text-white">
                   Update Company
                 </h3>
               </div>
               <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-10 mx-auto w-full">
                 <div className="mt-0 w-full mx-auto">
-                  <div className="flex flex-col border rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
-                    <h2 className="mb-8 text-xl font-semibold text-gray-800 dark:text-neutral-200">
+                  <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
+                    <h2 className="mb-8 text-xl font-semibold text-white">
                       Fill the company details
                     </h2>
                     <div>
                       <div className="grid gap-4 lg:gap-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                           <div>
-                            <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                            <label className="block mb-2 text-sm text-white font-medium">
                               Company Name
                             </label>
                             <input
                               type="text"
                               id="company_name"
-                              className=" bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              className=" bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                               placeholder="company name"
                               required
                               value={editCompanyForm.company_name}
@@ -1597,13 +1611,13 @@ const Company = () => {
                           </div>
 
                           <div>
-                            <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                            <label className="block mb-2 text-sm text-white font-medium">
                               Contact Number
                             </label>
                             <div className="flex items-center">
                               <button
                                 id="phone-button"
-                                className="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-white border border-gray-300 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600"
+                                className="flex-shrink-0 z-10 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-white bg-transparent border border-gray-700 rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 dark:focus:ring-gray-700 dark:text-white dark:border-gray-600"
                                 type="button"
                               >
                                 <svg
@@ -1651,7 +1665,7 @@ const Company = () => {
                                 <input
                                   type="text"
                                   id="phone"
-                                  className="block p-2.5 w-full z-20 text-sm text-gray-900 bg-white rounded-e-lg border-s-0 border border-gray-300 focus:ring-purple-600 focus:border-purple-600 dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-purple-600"
+                                  className="block p-2.5 w-full z-20 text-sm text-white bg-transparent rounded-e-lg border-s-0 border border-gray-700 focus:ring-purple-600 focus:border-purple-600 dark:bg-gray-700 dark:border-s-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-purple-600"
                                   pattern="[0-9]{10}"
                                   placeholder="mobile"
                                   required
@@ -1670,13 +1684,13 @@ const Company = () => {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6">
                           <div>
-                            <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                            <label className="block mb-2 text-sm text-white font-medium">
                               Email
                             </label>
                             <input
                               type="email"
                               id="email"
-                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                               placeholder="company.name@gmail.com"
                               required
                               value={editCompanyForm.email}
@@ -1690,13 +1704,13 @@ const Company = () => {
                           </div>
 
                           <div>
-                            <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                            <label className="block mb-2 text-sm text-white font-medium">
                               Username
                             </label>
                             <input
                               type="text"
                               id="username"
-                              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
                               placeholder="username"
                               required
                               value={editCompanyForm.username}
@@ -1711,36 +1725,26 @@ const Company = () => {
                         </div>
 
                         <div>
-                          <label className="block mb-2 text-sm text-gray-700 font-medium dark:text-white">
+                          <label className="block mb-2 text-sm text-white font-medium">
                             Sector
                           </label>
-                          <div className="relative h-fit border border-gray-300 rounded-lg outline-none dropdown-one">
+                          <div className="relative h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                             <button
                               onClick={showDropDownMenuOne_form_layout_wizard6}
                               className="relative flex items-center justify-between w-full p-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
                             >
                               <span
-                                className="pr-4 text-sm text-gray-900"
+                                className="pr-4 text-sm text-white"
                                 id="drop-down-content-setter-one_form_layout_wizard6"
                               >
                                 {selectedLayout3}
                               </span>
-                              <svg
+                              <FiChevronDown
                                 id="rotate1"
                                 className="absolute z-10 cursor-pointer right-5"
-                                width={10}
-                                height={6}
-                                viewBox="0 0 10 6"
-                                fill="none"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M0.5 0.75L5 5.25L9.5 0.75"
-                                  stroke="#4B5563"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
+                                size={14}
+                                color="white"
+                              />
                             </button>
                             <div
                               className={`absolute right-0 z-20 ${
@@ -1811,7 +1815,7 @@ const Company = () => {
               <div className="flex justify-end gap-x-2">
                 <a
                   onClick={handleEditSubmit}
-                  className="p-2.5 inline-flex items-center gap-x-2 text-sm font-medium cursor-pointer rounded-lg border border-transparent bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
+                  className="p-2.5 inline-flex items-center gap-x-2 text-sm font-medium cursor-pointer rounded-md border border-gray-700 text-white hover:bg-gray-800 disabled:opacity-50 disabled:pointer-events-none"
                 >
                   <FaSync className="size-3" />
                   Update
@@ -1834,7 +1838,7 @@ const Company = () => {
           }}
           closeIcon
         >
-          <div className="w-full max-w-lg bg-white shadow-lg rounded-lg p-6 relative">
+          <div className="w-full max-w-lg bg-gray-900 shadow-lg rounded-lg p-6 relative">
             <FaTimes
               className="w-3.5 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500 float-right"
               onClick={onCloseDeleteModal}
@@ -1842,7 +1846,7 @@ const Company = () => {
 
             <div className="my-4 text-center">
               <FaTrashAlt className="size-16 text-red-600 inline" />
-              <h4 className="text-gray-800 text-base font-semibold mt-4">
+              <h4 className="text-gray-200 text-base font-semibold mt-4">
                 Are you sure you want to delete this company?
               </h4>
 
@@ -1866,21 +1870,21 @@ const Company = () => {
             {success && (
               <div
                 id="dismiss-alert"
-                class="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 bg-purple-50 border border-purple-200 text-sm text-purple-800 rounded-lg p-4 dark:bg-purple-800/10 dark:border-purple-900 dark:text-purple-500"
+                className="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 bg-purple-50 border border-purple-200 text-sm text-purple-800 rounded-lg p-4 dark:bg-purple-800/10 dark:border-purple-900 dark:text-purple-500"
                 role="alert"
               >
-                <div class="flex">
-                  <div class="flex-shrink-0">
+                <div className="flex">
+                  <div className="flex-shrink-0">
                     <FaCheckCircle className="flex-shrink-0 size-4 mt-0.5 text-purple-500" />
                   </div>
-                  <div class="ms-2">
-                    <div class="text-sm font-medium">{success}</div>
+                  <div className="ms-2">
+                    <div className="text-sm font-medium">{success}</div>
                   </div>
-                  <div class="ps-3 ms-auto">
-                    <div class="-mx-1.5 -my-1.5">
+                  <div className="ps-3 ms-auto">
+                    <div className="-mx-1.5 -my-1.5">
                       <button
                         type="button"
-                        class="inline-flex bg-purple-50 rounded-lg p-1.5 text-purple-500 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-50 focus:ring-purple-600 dark:bg-transparent dark:hover:bg-purple-800/50 dark:text-purple-600"
+                        className="inline-flex bg-purple-50 rounded-lg p-1.5 text-purple-500 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-50 focus:ring-purple-600 dark:bg-transparent dark:hover:bg-purple-800/50 dark:text-purple-600"
                         data-hs-remove-element="#dismiss-alert"
                       >
                         <span className="sr-only">Dismiss</span>

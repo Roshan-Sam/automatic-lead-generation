@@ -9,10 +9,11 @@ from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 from company.models import CompanyLog
 from company.serializers import CompanyLogSerializer
-from .models import SubscriptionPlan
-from .serializers import SubscriptionPlanSerializer
+from .models import SubscriptionPlan,AdminNotification,CompanySubscription
+from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer
 import random
 import string   
+from django.db.models import Q
 
 class CreateCompany(APIView):
     def post(self, request):
@@ -167,3 +168,124 @@ class UpdatePasswordView(APIView):
         company.save()
         
         return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
+    
+class AdminNotificationListView(APIView):
+    def get(self, request):
+        notifications = AdminNotification.objects.all().order_by('-created_at')
+        serializer = AdminNotificationSerializer(notifications, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class MarkNotificationAsReadView(APIView):
+    def put(self, request, notification_id):
+        try:
+            notification = AdminNotification.objects.get(id=notification_id)
+        except AdminNotification.DoesNotExist:
+            return Response({"error": "Notification not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        notification.is_read = True
+        notification.save()
+        
+        serializer = AdminNotificationSerializer(notification)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CompanySubscriptionListView(APIView):
+    def get(self, request):
+        search_term = request.query_params.get('search', '')
+        status_filter = request.query_params.get('status', '')
+        limit = request.query_params.get('limit', None)
+        offset = request.query_params.get('offset', 0)   
+        
+        try:
+            if limit:
+                limit = int(limit)
+            offset = int(offset)
+        except ValueError:
+            return Response({"error": "Invalid limit or offset parameter"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        subscriptions = CompanySubscription.objects.select_related('subscription_plan', 'company_name').order_by('-created_at')
+        
+        if search_term:
+            subscriptions = subscriptions.filter(
+                Q(company_name__company_name__icontains=search_term) |
+                Q(subscription_plan__plan_name__icontains=search_term)
+            )
+            
+        if status_filter:
+            subscriptions = subscriptions.filter(status=status_filter)
+            
+        if limit is not None:
+            subscriptions = subscriptions[offset:offset + limit]
+        else:
+            subscriptions = subscriptions[offset:]
+            
+        serializer = CompanySubscriptionSerializer(subscriptions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        data = request.data
+        
+        company_name_id = data.get('company_name')
+        subscription_plan_id = data.get('subscription_plan')
+
+        try:
+            company_log = CompanyLog.objects.get(id=company_name_id)
+        except CompanyLog.DoesNotExist:
+            return Response({'error': 'Company name does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            subscription_plan_obj = SubscriptionPlan.objects.get(id=subscription_plan_id)
+        except SubscriptionPlan.DoesNotExist:
+            return Response({'error': 'Subscription plan does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+        company_subscription = CompanySubscription.objects.create(
+            company_name=company_log,
+            subscription_plan=subscription_plan_obj,
+            start_date=data.get('start_date'),
+            end_date=data.get('end_date'),
+        )
+
+        serializer = CompanySubscriptionSerializer(company_subscription)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CompanySubscriptionUpdateStatusView(APIView):
+    def patch(self, request, pk):
+        try:
+            subscription = CompanySubscription.objects.get(pk=pk)
+        except CompanySubscription.DoesNotExist:
+            return Response({'error': 'CompanySubscription does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        subscription.status = request.data.get('status', subscription.status)
+        subscription.save()
+
+        serializer = CompanySubscriptionSerializer(subscription)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request, pk):
+        try:
+            subscription = CompanySubscription.objects.get(pk=pk)
+        except CompanySubscription.DoesNotExist:
+            return Response({'error': 'CompanySubscription does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        data = request.data
+        subscription_plan_id = data.get('subscription_plan')
+        try:
+            subscription_plan = SubscriptionPlan.objects.get(id=subscription_plan_id)
+        except SubscriptionPlan.DoesNotExist:
+            return Response({'error': 'Subscription plan does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+        subscription.subscription_plan = subscription_plan
+        subscription.start_date = data.get('start_date')
+        subscription.end_date = data.get('end_date')
+        subscription.save()
+
+        serializer = CompanySubscriptionSerializer(subscription)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CompanySubscriptionDeleteView(APIView):
+    def delete(self, request, pk):
+        try:
+            subscription = CompanySubscription.objects.get(pk=pk)
+            subscription.delete()
+            return Response(status=status.HTTP_200_OK)
+        except CompanySubscription.DoesNotExist:
+            return Response({'error': 'CompanySubscription does not exist'}, status=status.HTTP_404_NOT_FOUND)

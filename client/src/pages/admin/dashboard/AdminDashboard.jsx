@@ -6,6 +6,9 @@ import AdminDash from "../../../components/admin/admin-dash/AdminDash";
 import Profile from "../../../components/admin/admin-profile/Profile";
 import Company from "../../../components/admin/admin-company/Company";
 import PlanAndPricing from "../../../components/admin/admin-plan-pricing/PlanAndPricing";
+import Notification from "../../../components/admin/admin-notification/Notification";
+import Subscriptions from "../../../components/admin/admin-subscriptions/Subscriptions";
+import ProductFeatures from "../../../components/admin/admin-product-features/ProductFeatures";
 
 const AdminDashboard = () => {
   const location = useLocation();
@@ -43,6 +46,12 @@ const AdminDashboard = () => {
             {tab === "company" && <Company />}
 
             {tab === "plan-pricing" && <PlanAndPricing />}
+
+            {tab === "notifications" && <Notification />}
+
+            {tab === "subscriptions" && <Subscriptions />}
+
+            {tab === "product-features" && <ProductFeatures />}
           </div>
         </div>
       </div>

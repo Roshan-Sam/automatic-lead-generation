@@ -1,20 +1,48 @@
 import Cookies from "js-cookie";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { FiBell, FiZap, FiUser, FiArrowRight } from "react-icons/fi";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import {
+  MdOutlineDashboard,
+  MdOutlineCategory,
+  MdOutlineAttachMoney,
+  MdBusiness,
+  MdSubscriptions,
+  MdNotifications,
+  MdSettings,
+  MdLock,
+  MdExitToApp,
+  MdKeyboardArrowDown,
+} from "react-icons/md";
 import { useAdminProfileContext } from "../../../hooks/useAdminProfileContext";
+import { useAdminNotificationContext } from "../../../hooks/useAdminNotificationContext";
+import { formatDistanceToNow } from "date-fns";
 
 const AdminNav = () => {
   const { profile } = useAdminProfileContext();
+  const { notificationCount, unreadNotifications } =
+    useAdminNotificationContext();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [dropdownOpen1, setDropdownOpen1] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [accountSettingsOpen, setAccountSettingsOpen] = useState(false);
   const location = useLocation();
   const [tab, setTab] = useState();
+  const [pass, setPass] = useState();
   const navigate = useNavigate();
+  const sidebarRef = useRef(null);
+  const zapButtonRef = useRef(null);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const tabFromUrl = urlParams.get("tab");
+    const passFromUrl = urlParams.get("password");
     if (tabFromUrl) setTab(tabFromUrl);
+    if (passFromUrl) {
+      setPass(passFromUrl);
+    } else {
+      setPass("");
+    }
   }, [location.search]);
 
   const handleSignOut = () => {
@@ -24,7 +52,34 @@ const AdminNav = () => {
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
+    setDropdownOpen1(false);
   };
+  const toggleDropdown1 = () => {
+    setDropdownOpen1(!dropdownOpen1);
+    setDropdownOpen(false);
+  };
+
+  const toggleSidebar = () => {
+    setSidebarOpen((prev) => !prev);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target) &&
+        zapButtonRef.current &&
+        !zapButtonRef.current.contains(event.target)
+      ) {
+        setSidebarOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sidebarRef, zapButtonRef]);
+
   return (
     <div className="z-50" onMouseLeave={() => setDropdownOpen(false)}>
       <header className="fixed top-0 left-0 right-0 h-20 flex flex-wrap sm:justify-start sm:flex-nowrap z-50 w-full bg-[rgb(16,23,42)] border-b border-gray-700 text-sm py-2.5 sm:py-4 dark:bg-neutral-950 dark:border-neutral-700">
@@ -44,16 +99,56 @@ const AdminNav = () => {
 
           <div className="w-full flex items-center justify-end ms-auto sm:justify-between sm:gap-x-3 sm:order-3">
             <div className="flex flex-row items-center justify-end gap-2 ml-auto">
+              <div className="relative">
+                <button
+                  onClick={toggleDropdown1}
+                  type="button"
+                  className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none"
+                >
+                  <FiBell className="flex-shrink-0 size-4" />
+                  {notificationCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center  px-2 py-1 text-xs font-bold leading-none text-red-100 bg-purple-700 rounded-full transform translate-x-1/2 -translate-y-1/2">
+                      {notificationCount}
+                    </span>
+                  )}
+                </button>
+                {dropdownOpen1 && (
+                  <div
+                    onMouseLeave={() => setDropdownOpen1(false)}
+                    className="absolute right-0 mt-2 w-72 bg-slate-900 border border-gray-700 shadow-md rounded-lg z-10"
+                  >
+                    <div className="py-4 px-4 bg-gray-800 text-white font-semibold rounded-t-lg">
+                      Notifications
+                    </div>
+                    <div className="max-h-60 overflow-y-auto divide-y divide-gray-700">
+                      {unreadNotifications.length > 0 ? (
+                        unreadNotifications.map((notification) => (
+                          <div key={notification.id} className="p-4 text-white">
+                            <p>{notification.message}</p>
+                            <p className="text-xs text-gray-400">
+                              {formatDistanceToNow(
+                                new Date(notification.created_at),
+                                {
+                                  addSuffix: true,
+                                }
+                              )}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-4 text-gray-400">
+                          No new notifications
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
-              >
-                <FiBell className="flex-shrink-0 size-4" />
-              </button>
-              <button
-                type="button"
-                className="w-[2.375rem] h-[2.375rem] inline-flex justify-center items-center gap-x-2 text-sm font-semibold rounded-full text-white hover:bg-white/20 disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:ring-1 focus:ring-gray-600"
-                data-hs-offcanvas="#hs-offcanvas-right"
+                onClick={toggleSidebar}
+                ref={zapButtonRef}
               >
                 <FiZap className="flex-shrink-0 size-4" />
               </button>
@@ -110,6 +205,109 @@ const AdminNav = () => {
           </div>
         </nav>
       </header>
+
+      <aside
+        ref={sidebarRef}
+        className={`fixed top-20 left-0 h-full w-64 bg-[rgb(16,23,42)] md:hidden border-r border-r-gray-700 shadow-lg z-50 transform ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 ease-in-out`}
+      >
+        <div className="p-4">
+          <nav
+            className="space-y-4 mt-10
+          "
+          >
+            <Link
+              to="/admin-dash?tab=dash"
+              className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
+                tab === "dash" ? "bg-purple-800" : ""
+              }`}
+            >
+              <MdOutlineDashboard className="text-2xl" />
+              Dashboard
+            </Link>
+            <Link
+              to="/admin-dash?tab=product-features"
+              className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
+                tab === "products" ? "bg-purple-800" : ""
+              }`}
+            >
+              <MdOutlineCategory className="text-2xl" />
+              Products & Features
+            </Link>
+            <Link
+              to="/admin-dash?tab=plan-pricing"
+              className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
+                tab === "plan-pricing" ? "bg-purple-800" : ""
+              }`}
+            >
+              <MdOutlineAttachMoney className="text-2xl" />
+              Plan & Pricing
+            </Link>
+            <Link
+              to="/admin-dash?tab=company"
+              className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
+                tab === "company" ? "bg-purple-800" : ""
+              }`}
+            >
+              <MdBusiness className="text-2xl" />
+              Company
+            </Link>
+            <Link
+              to="/admin-dash?tab=subscriptions"
+              className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
+                tab === "subscriptions" ? "bg-purple-800" : ""
+              }`}
+            >
+              <MdSubscriptions className="text-2xl" />
+              Subscriptions
+            </Link>
+            <Link
+              to="/admin-dash?tab=notifications"
+              className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
+                tab === "notifications" ? "bg-purple-800" : ""
+              }`}
+            >
+              <MdNotifications className="text-2xl" />
+              Notifications
+            </Link>
+          </nav>
+          <div className="mt-10">
+            <button
+              onClick={() => setAccountSettingsOpen(!accountSettingsOpen)}
+              className="flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg w-full"
+            >
+              <MdSettings className="text-2xl" />
+              Account Settings
+              <MdKeyboardArrowDown
+                className={`ml-auto transform transition-transform ${
+                  accountSettingsOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {accountSettingsOpen && (
+              <div className="space-y-2 ml-8 mt-2 bg-gray-800 rounded-md">
+                <Link
+                  to="/admin-dash?tab=account&password=reset"
+                  className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
+                    pass === "reset" ? "bg-purple-800" : ""
+                  }`}
+                >
+                  <MdLock className="text-2xl" />
+                  Password change
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg w-full"
+                >
+                  <MdExitToApp className="text-2xl" />
+                  Sign Out
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </aside>
     </div>
   );
 };
