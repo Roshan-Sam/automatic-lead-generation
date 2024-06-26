@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Label } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import config from "../../../Functions/config";
 import "./registration.css";
 
 const Register = () => {
@@ -75,7 +76,7 @@ const Register = () => {
 
   const fetchCompanyUsers = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}companies/`);
+      const res = await axios.get(`${config.baseApiUrl}companies/`);
       setCompanyUsers(res.data);
     } catch (error) {
       console.log(error);
@@ -227,7 +228,7 @@ const Register = () => {
     if (isFormValid) {
       try {
         const res = await axios.post(
-          `${import.meta.env.VITE_API_URL}register/company/`,
+          `${config.baseApiUrl}register/company/`,
           formData
         );
         if (res.status === 200) {

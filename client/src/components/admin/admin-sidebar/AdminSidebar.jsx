@@ -14,21 +14,19 @@ import {
   MdExitToApp,
 } from "react-icons/md";
 import React from "react";
+import { useSidebarContext } from "../../../hooks/useSidebarContext";
 import "./adminsidebar.css";
 
 const AdminSidebar = ({ sidebarToggle }) => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAccountSettingsOpen, setIsAccountSettingsOpen] = useState(false);
-  const [tab, setTab] = useState();
-  const [pass, setPass] = useState();
   const location = useLocation();
   const navigate = useNavigate();
+  const [pass, setPass] = useState("");
+  const { isSidebarCollapsed, dispatch: sidebarDispatch } = useSidebarContext();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const tabFromUrl = urlParams.get("tab");
     const passFromUrl = urlParams.get("password");
-    if (tabFromUrl) setTab(tabFromUrl);
     if (passFromUrl) {
       setPass(passFromUrl);
     } else {
@@ -43,7 +41,6 @@ const AdminSidebar = ({ sidebarToggle }) => {
   };
 
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
     sidebarToggle();
     if (isAccountSettingsOpen) {
       setIsAccountSettingsOpen(!isAccountSettingsOpen);
@@ -57,39 +54,33 @@ const AdminSidebar = ({ sidebarToggle }) => {
   const menu = [
     {
       name: "Dashboard",
-      link: "/admin-dash?tab=dash",
+      link: "/admin/dashboard",
       icon: MdOutlineDashboard,
-      tab: "dash",
     },
     {
       name: "Product & Features",
-      link: "/admin-dash?tab=product-features",
+      link: "/admin/product-features",
       icon: MdOutlineCategory,
-      tab: "product-features",
     },
     {
       name: "Plan & Pricing",
-      link: "/admin-dash?tab=plan-pricing",
+      link: "/admin/plan-pricing",
       icon: MdOutlineAttachMoney,
-      tab: "plan-pricing",
     },
     {
       name: "Company",
-      link: "/admin-dash?tab=company",
+      link: "/admin/company",
       icon: MdBusiness,
-      tab: "company",
     },
     {
       name: "Subscriptions",
-      link: "/admin-dash?tab=subscriptions",
+      link: "/admin/subscriptions",
       icon: MdSubscriptions,
-      tab: "subscriptions",
     },
     {
       name: "Notifications",
-      link: "/admin-dash?tab=notifications",
+      link: "/admin/notifications",
       icon: MdNotifications,
-      tab: "notifications",
     },
     {
       name: "Account Settings",
@@ -98,7 +89,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
         {
           name: "Password Change",
           action: () => {
-            navigate("/admin-dash?tab=account&password=reset");
+            navigate("/admin/account?password=reset");
           },
           icon: MdLock,
           pass: "reset",
@@ -113,7 +104,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
       <section className="flex gap-6 fixed top-20 left-0 bottom-0 z-50 border-r border-gray-700">
         <div
           className={`bg-[rgb(16,23,42)] z-50 min-h-screen ${
-            isSidebarOpen ? "w-64" : "w-20"
+            isSidebarCollapsed ? "w-64" : "w-20"
           } duration-300 text-gray-100 px-4`}
         >
           <div className="py-3 flex justify-end">
@@ -121,7 +112,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
               <MdKeyboardArrowLeft
                 size={26}
                 className={`cursor-pointer transition-transform duration-300 ${
-                  isSidebarOpen ? "" : "rotate-180"
+                  isSidebarCollapsed ? "" : "rotate-180"
                 }`}
                 onClick={toggleSidebar}
               />
@@ -138,7 +129,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                     >
                       <div
                         className={`${
-                          !isSidebarOpen
+                          !isSidebarCollapsed
                             ? "ml-1 transition-transform duration-300"
                             : "transition-transform duration-300"
                         }`}
@@ -147,7 +138,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                       </div>
                       <h2
                         className={`whitespace-pre duration-500 ${
-                          !isSidebarOpen &&
+                          !isSidebarCollapsed &&
                           "opacity-0 translate-x-20 overflow-hidden"
                         }`}
                       >
@@ -155,7 +146,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                       </h2>
                       <h2
                         className={`${
-                          isSidebarOpen && "hidden"
+                          isSidebarCollapsed && "hidden"
                         } absolute z-50 left-20 bg-purple-800 font-semibold whitespace-pre text-white rounded-sm drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit  `}
                       >
                         {menuItem.name}
@@ -164,7 +155,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                     {isAccountSettingsOpen && (
                       <div
                         className={`absolute flex flex-col gap-4 top-full left-3 bg-gray-800 shadow-lg rounded-md p-2 mt-1 ${
-                          isSidebarOpen ? "w-full" : "w-max"
+                          isSidebarCollapsed ? "w-full" : "w-max"
                         }`}
                       >
                         {menuItem.submenu.map((subMenuItem, j) => (
@@ -193,14 +184,14 @@ const AdminSidebar = ({ sidebarToggle }) => {
                   <Link
                     to={menuItem.link}
                     className={`group z-50 flex items-center text-sm gap-3.5 font-medium p-2 rounded-md ${
-                      menuItem.tab === tab
+                      location.pathname === menuItem.link
                         ? "bg-purple-800"
                         : "hover:bg-purple-800"
                     }`}
                   >
                     <div
                       className={`${
-                        !isSidebarOpen
+                        !isSidebarCollapsed
                           ? "ml-1 transition-transform duration-300"
                           : "transition-transform duration-300"
                       }`}
@@ -209,7 +200,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                     </div>
                     <h2
                       className={`whitespace-pre duration-500 ${
-                        !isSidebarOpen &&
+                        !isSidebarCollapsed &&
                         "opacity-0 translate-x-20 overflow-hidden"
                       }`}
                     >
@@ -217,7 +208,7 @@ const AdminSidebar = ({ sidebarToggle }) => {
                     </h2>
                     <h2
                       className={`${
-                        isSidebarOpen && "hidden"
+                        isSidebarCollapsed && "hidden"
                       } absolute left-20 z-50 bg-purple-800 font-semibold whitespace-pre text-white rounded-sm drop-shadow-lg px-0 py-0 w-0 overflow-hidden group-hover:px-2 group-hover:py-1 group-hover:left-14 group-hover:duration-300 group-hover:w-fit`}
                     >
                       {menuItem.name}

@@ -9,8 +9,8 @@ from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 from company.models import CompanyLog
 from company.serializers import CompanyLogSerializer
-from .models import SubscriptionPlan,AdminNotification,CompanySubscription
-from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer
+from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage
+from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer
 import random
 import string   
 from django.db.models import Q
@@ -289,3 +289,24 @@ class CompanySubscriptionDeleteView(APIView):
             return Response(status=status.HTTP_200_OK)
         except CompanySubscription.DoesNotExist:
             return Response({'error': 'CompanySubscription does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        
+class ProductFeaturesView(APIView):
+    def get(self, request):
+        products = ProductService.objects.all().order_by('-created_at')
+        serializer = ProductServiceSerializer(products, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        serializer = ProductServiceSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            product_instance = serializer.save()
+
+            images_data = request.FILES.getlist("images")
+            for image_data in images_data:
+                ProductImage.objects.create(
+                    product=product_instance,
+                    image=image_data
+                )
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -17,6 +17,7 @@ import {
 import { useAdminProfileContext } from "../../../hooks/useAdminProfileContext";
 import { useAdminNotificationContext } from "../../../hooks/useAdminNotificationContext";
 import { formatDistanceToNow } from "date-fns";
+import config from "../../../Functions/config";
 
 const AdminNav = () => {
   const { profile } = useAdminProfileContext();
@@ -27,7 +28,6 @@ const AdminNav = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [accountSettingsOpen, setAccountSettingsOpen] = useState(false);
   const location = useLocation();
-  const [tab, setTab] = useState();
   const [pass, setPass] = useState();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
@@ -35,9 +35,7 @@ const AdminNav = () => {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
-    const tabFromUrl = urlParams.get("tab");
     const passFromUrl = urlParams.get("password");
-    if (tabFromUrl) setTab(tabFromUrl);
     if (passFromUrl) {
       setPass(passFromUrl);
     } else {
@@ -161,9 +159,7 @@ const AdminNav = () => {
                 >
                   <img
                     className="inline-block size-[38px] rounded-full object-cover"
-                    src={`${import.meta.env.VITE_API_IMAGE_URL}${
-                      profile.profile
-                    }`}
+                    src={`${config.baseApiImageUrl}${profile.profile}`}
                     alt={profile.username}
                   />
                 </button>
@@ -181,9 +177,11 @@ const AdminNav = () => {
                     </div>
                     <div className="mt-2 py-2 first:pt-0 last:pb-0">
                       <Link
-                        to="/admin-dash?tab=account"
+                        to="/admin/account"
                         className={`flex items-center gap-x-3.5 py-2 px-3 rounded-lg text-sm text-white hover:bg-purple-600 ${
-                          tab === "account" ? "bg-purple-600" : ""
+                          location.pathname === "/admin/account"
+                            ? "bg-purple-600"
+                            : ""
                         }`}
                         onClick={() => setDropdownOpen(false)}
                       >
@@ -218,54 +216,62 @@ const AdminNav = () => {
           "
           >
             <Link
-              to="/admin-dash?tab=dash"
+              to="/admin/dashboard"
               className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
-                tab === "dash" ? "bg-purple-800" : ""
+                location.pathname === "/admin/dashboard" ? "bg-purple-800" : ""
               }`}
             >
               <MdOutlineDashboard className="text-2xl" />
               Dashboard
             </Link>
             <Link
-              to="/admin-dash?tab=product-features"
+              to="/admin/product-features"
               className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
-                tab === "products" ? "bg-purple-800" : ""
+                location.pathname === "/admin/product-features"
+                  ? "bg-purple-800"
+                  : ""
               }`}
             >
               <MdOutlineCategory className="text-2xl" />
               Products & Features
             </Link>
             <Link
-              to="/admin-dash?tab=plan-pricing"
+              to="/admin/plan-pricing"
               className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
-                tab === "plan-pricing" ? "bg-purple-800" : ""
+                location.pathname === "/admin/plan-pricing"
+                  ? "bg-purple-800"
+                  : ""
               }`}
             >
               <MdOutlineAttachMoney className="text-2xl" />
               Plan & Pricing
             </Link>
             <Link
-              to="/admin-dash?tab=company"
+              to="/admin/company"
               className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
-                tab === "company" ? "bg-purple-800" : ""
+                location.pathname === "/admin/company" ? "bg-purple-800" : ""
               }`}
             >
               <MdBusiness className="text-2xl" />
               Company
             </Link>
             <Link
-              to="/admin-dash?tab=subscriptions"
+              to="/admin/subscriptions"
               className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
-                tab === "subscriptions" ? "bg-purple-800" : ""
+                location.pathname === "/admin/subscriptions"
+                  ? "bg-purple-800"
+                  : ""
               }`}
             >
               <MdSubscriptions className="text-2xl" />
               Subscriptions
             </Link>
             <Link
-              to="/admin-dash?tab=notifications"
+              to="/admin/notifications"
               className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
-                tab === "notifications" ? "bg-purple-800" : ""
+                location.pathname === "/admin/notifications"
+                  ? "bg-purple-800"
+                  : ""
               }`}
             >
               <MdNotifications className="text-2xl" />
@@ -288,7 +294,7 @@ const AdminNav = () => {
             {accountSettingsOpen && (
               <div className="space-y-2 ml-8 mt-2 bg-gray-800 rounded-md">
                 <Link
-                  to="/admin-dash?tab=account&password=reset"
+                  to="/admin/account?password=reset"
                   className={`flex items-center gap-x-3 py-2 px-4 text-white hover:bg-purple-800 rounded-lg ${
                     pass === "reset" ? "bg-purple-800" : ""
                   }`}

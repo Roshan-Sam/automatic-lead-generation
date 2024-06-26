@@ -26,3 +26,13 @@ class CompanySubscription(models.Model):
     end_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, default='Pending', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+class ProductService(models.Model):
+    name = models.CharField(max_length=255, null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    features = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(ProductService, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
+    image = models.ImageField(upload_to='product_images/', null=True, blank=True)

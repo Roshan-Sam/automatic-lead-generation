@@ -4,6 +4,7 @@ import axios from "axios";
 import { Label } from "flowbite-react";
 import Cookies from "js-cookie";
 import { useAdminProfileContext } from "../../../hooks/useAdminProfileContext";
+import config from "../../../Functions/config";
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: "", password: "" });
@@ -76,16 +77,13 @@ const Login = () => {
 
     if (isFormValid) {
       try {
-        const res = await axios.post(
-          `${import.meta.env.VITE_API_URL}login/`,
-          formData
-        );
+        const res = await axios.post(`${config.baseApiUrl}login/`, formData);
         if (res.status === 200) {
           const { token, user } = res.data;
           Cookies.set("token", token, { expires: 7 });
           if (user.position === "admin") {
             dispatch({ type: "UPDATE_PROFILE", payload: user });
-            navigate("/admin-dash?tab=dash");
+            navigate("/admin/dashboard");
           } else if (user.position === "company") {
             navigate("/company-dash");
           }
