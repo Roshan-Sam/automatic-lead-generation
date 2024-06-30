@@ -409,10 +409,10 @@ const PlanAndPricing = () => {
             <div className="flex pt-10 px-4">
               <ul className="bg-slate-900 border border-gray-700 rounded-full py-2 px-4 -space-x-4 w-max flex items-center mt-4">
                 <li className="bg-gray-800 text-purple-500 hover:underline rounded-full z-40 px-8 py-3 text-base cursor-pointer">
-                  <Link to="/admin-dash?tab=dash">Dashboard</Link>
+                  <Link to="/admin/dashboard">Dashboard</Link>
                 </li>
                 <li className="bg-purple-600 text-white underline rounded-r-full z-10 px-8 py-3 text-base cursor-pointer">
-                  <Link to="/admin-dash?tab=plan-pricing">Plan & Pricing</Link>
+                  <Link to="/admin/plan-pricing">Plan & Pricing</Link>
                 </li>
               </ul>
             </div>
@@ -579,7 +579,7 @@ const PlanAndPricing = () => {
                       Add Plan and Pricing
                     </h3>
                   </div>
-                  <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-4 mx-auto w-full">
+                  <div className="px-4 py-10 sm:px-6 lg:px-8 mx-auto w-full">
                     <div className="mt-0 w-full mx-auto">
                       <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
                         <h2 className="mb-8 text-xl font-semibold text-white">
@@ -604,44 +604,46 @@ const PlanAndPricing = () => {
                             </p>
                           )}
                         </div>
-                        <div className="mb-2">
-                          <label className="block mb-2 text-sm text-white font-medium">
-                            Description
-                          </label>
-                          <textarea
-                            id="description"
-                            rows="4"
-                            className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
-                            placeholder="description"
-                            value={planAndPricingForm.description}
-                            onChange={handleChange}
-                          />
-                          {errors.description && (
-                            <p className="text-red-600 text-sm font-medium">
-                              {errors.description}
+                        <div className="flex md:flex-row flex-col gap-4">
+                          <div className="mb-2 w-full">
+                            <label className="block mb-2 text-sm text-white font-medium">
+                              Description
+                            </label>
+                            <textarea
+                              id="description"
+                              rows="4"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              placeholder="description"
+                              value={planAndPricingForm.description}
+                              onChange={handleChange}
+                            />
+                            {errors.description && (
+                              <p className="text-red-600 text-sm font-medium">
+                                {errors.description}
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-full">
+                            <label className="block mb-2 text-sm text-white font-medium dark:text-white">
+                              Features
+                            </label>
+                            <textarea
+                              id="features"
+                              rows="4"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              placeholder="features"
+                              value={planAndPricingForm.features}
+                              onChange={handleChange}
+                            />
+                            <p className="text-xs text-gray-400 mt-1">
+                              ( Add commas to separate features )
                             </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block mb-2 text-sm text-white font-medium dark:text-white">
-                            Features
-                          </label>
-                          <textarea
-                            id="features"
-                            rows="4"
-                            className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
-                            placeholder="features"
-                            value={planAndPricingForm.features}
-                            onChange={handleChange}
-                          />
-                          <p className="text-xs text-gray-400 mt-1">
-                            ( Add commas to separate features )
-                          </p>
-                          {errors.features && (
-                            <p className="text-red-600 text-sm font-medium">
-                              {errors.features}
-                            </p>
-                          )}
+                            {errors.features && (
+                              <p className="text-red-600 text-sm font-medium">
+                                {errors.features}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mt-2">
                           <div>
@@ -816,7 +818,7 @@ const PlanAndPricing = () => {
                       Update Plan and Pricing
                     </h3>
                   </div>
-                  <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-4 mx-auto w-full">
+                  <div className="px-4 py-10 sm:px-6 lg:px-8 mx-auto w-full">
                     <div className="mt-0 w-full mx-auto">
                       <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
                         <h2 className="mb-8 text-xl font-semibold text-white">
@@ -841,45 +843,47 @@ const PlanAndPricing = () => {
                             </p>
                           )}
                         </div>
-                        <div className="mb-2">
-                          <label className="block mb-2 text-sm text-white font-medium">
-                            Description
-                          </label>
-                          <textarea
-                            id="description"
-                            rows="4"
-                            className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
-                            placeholder="description"
-                            value={editPlanPricingForm.description}
-                            onChange={handleEditChange}
-                          />
-                          {editErrors.description && (
-                            <p className="text-red-600 text-sm font-medium">
-                              {editErrors.description}
+                        <div className="flex md:flex-row flex-col gap-4">
+                          <div className="mb-2 w-full">
+                            <label className="block mb-2 text-sm text-white font-medium">
+                              Description
+                            </label>
+                            <textarea
+                              id="description"
+                              rows="4"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              placeholder="description"
+                              value={editPlanPricingForm.description}
+                              onChange={handleEditChange}
+                            />
+                            {editErrors.description && (
+                              <p className="text-red-600 text-sm font-medium">
+                                {editErrors.description}
+                              </p>
+                            )}
+                          </div>
+                          <div className="w-full">
+                            <label className="block mb-2 text-sm text-white font-medium">
+                              Features
+                            </label>
+                            <textarea
+                              id="features"
+                              rows="4"
+                              className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
+                              placeholder="features"
+                              value={editPlanPricingForm.features}
+                              onChange={handleEditChange}
+                            />
+                            <p className="text-xs text-gray-400 mt-1">
+                              ( Add commas to separate features )
                             </p>
-                          )}
-                        </div>
-                        <div>
-                          <label className="block mb-2 text-sm text-white font-medium">
-                            Features
-                          </label>
-                          <textarea
-                            id="features"
-                            rows="4"
-                            className="bg-transparent border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
-                            placeholder="features"
-                            value={editPlanPricingForm.features}
-                            onChange={handleEditChange}
-                          />
-                          <p className="text-xs text-gray-400 mt-1">
-                            ( Add commas to separate features )
-                          </p>
 
-                          {editErrors.features && (
-                            <p className="text-red-600 text-sm font-medium">
-                              {editErrors.features}
-                            </p>
-                          )}
+                            {editErrors.features && (
+                              <p className="text-red-600 text-sm font-medium">
+                                {editErrors.features}
+                              </p>
+                            )}
+                          </div>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mt-2">
                           <div>

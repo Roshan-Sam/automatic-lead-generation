@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import CreateCompany,UpdateCompanyView,DeleteCompany,SubscriptionPlanCreateView,UpdateSubscriptionPlanView,UpdateProfileView,UpdatePasswordView,AdminNotificationListView,MarkNotificationAsReadView,CompanySubscriptionListView,CompanySubscriptionUpdateStatusView,CompanySubscriptionDeleteView,ProductFeaturesView
+from .views import CreateCompany,UpdateCompanyView,DeleteCompany,SubscriptionPlanCreateView,UpdateSubscriptionPlanView,UpdateProfileView,UpdatePasswordView,AdminNotificationListView,MarkNotificationAsReadView,CompanySubscriptionListView,CompanySubscriptionUpdateStatusView,CompanySubscriptionDeleteView,ProductFeaturesView,AddCategoryView,SingleProductView
 
 urlpatterns = [
     path('admin/create/company/', CreateCompany.as_view()),
@@ -16,4 +16,6 @@ urlpatterns = [
     path('admin/subscriptions/<int:pk>/update/', CompanySubscriptionUpdateStatusView.as_view()),
     path('admin/subscriptions/<int:pk>/delete/', CompanySubscriptionDeleteView.as_view()),
     path('admin/product-features/', ProductFeaturesView.as_view()),
+    path('admin/product-features/details/<int:pid>/', SingleProductView.as_view()),
+    path('admin/add-category/', AddCategoryView.as_view()),
 ]

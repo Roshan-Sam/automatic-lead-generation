@@ -9,8 +9,8 @@ from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 from company.models import CompanyLog
 from company.serializers import CompanyLogSerializer
-from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage
-from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer
+from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category
+from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer,CategorySerializer
 import random
 import string   
 from django.db.models import Q
@@ -292,21 +292,74 @@ class CompanySubscriptionDeleteView(APIView):
         
 class ProductFeaturesView(APIView):
     def get(self, request):
-        products = ProductService.objects.all().order_by('-created_at')
+        limit = request.query_params.get('limit', None) 
+        offset = int(request.query_params.get('offset', 0))
+        search_term = request.query_params.get('search', '')
+        category = request.query_params.get('category', '')
+
+        if limit:
+            limit = int(limit)
+        
+        products_query = ProductService.objects.all().order_by('-created_at')
+        if search_term:
+            products_query = products_query.filter(Q(name__icontains=search_term))
+
+        if category:
+            products_query = products_query.filter(category__name__iexact=category)
+            
+        if limit is not None:
+            products = products_query[offset:offset + limit]
+        else:
+            products = products_query[offset:]
+            
+        total_count = products_query.count()
+
         serializer = ProductServiceSerializer(products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'products': serializer.data,'total_count': total_count}, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = ProductServiceSerializer(data=request.data, partial=True)
+        category_name = request.data.get('category', None)
+        category_instance = Category.objects.filter(name=category_name).first()
+        
+        product_data = {
+            'name': request.data.get('name'),
+            'description': request.data.get('description'),
+            'features': request.data.get('features'),
+            'price': request.data.get('price'),
+            'product_id': request.data.get('product_id'),
+            'category': category_instance,
+        }
+
+        product_instance = ProductService.objects.create(**product_data)
+
+        images_data = request.FILES.getlist("images")
+        for image_data in images_data:
+            ProductImage.objects.create(
+                product=product_instance,
+                image=image_data
+            )
+
+        product_serializer = ProductServiceSerializer(product_instance)
+        return Response(product_serializer.data, status=status.HTTP_200_OK)
+    
+class SingleProductView(APIView):
+    def get(self, request, pid):
+        try:
+            product = ProductService.objects.get(pk=pid)
+            serializer = ProductServiceSerializer(product)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ProductService.DoesNotExist:
+            return Response({"message": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+class AddCategoryView(APIView):
+    def post(self, request):
+        serializer = CategorySerializer(data=request.data)
         if serializer.is_valid():
-            product_instance = serializer.save()
-
-            images_data = request.FILES.getlist("images")
-            for image_data in images_data:
-                ProductImage.objects.create(
-                    product=product_instance,
-                    image=image_data
-                )
-
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def get(self, request):
+        categories = Category.objects.all()  
+        serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
