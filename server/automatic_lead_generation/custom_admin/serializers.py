@@ -3,9 +3,16 @@ from .models import SubscriptionPlan,AdminNotification,CompanySubscription,Produ
 from company.serializers import CompanyLogSerializer
 
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
+    products = serializers.SerializerMethodField()
+
     class Meta:
         model = SubscriptionPlan
         fields = '__all__'
+        
+    def get_products(self, obj):
+        products_queryset = obj.products.all()
+        serializer = ProductServiceSerializer(products_queryset, many=True, context=self.context)
+        return serializer.data
         
 class AdminNotificationSerializer(serializers.ModelSerializer):
     class Meta:

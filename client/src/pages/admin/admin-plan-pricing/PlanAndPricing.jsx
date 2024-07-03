@@ -12,6 +12,8 @@ import {
   FaTrashAlt,
   FaCheckCircle,
 } from "react-icons/fa";
+import { FiChevronDown } from "react-icons/fi";
+import { FaCheck } from "react-icons/fa6";
 import { AiOutlineDelete } from "react-icons/ai";
 import "react-responsive-modal/styles.css";
 import { Modal } from "react-responsive-modal";
@@ -36,6 +38,7 @@ const PlanAndPricing = () => {
     annual_price: "",
     custom_price: "",
     duration_in_months: "",
+    products: [],
   });
 
   const [editPlanPricingForm, setEditPlanPricingForm] = useState({
@@ -67,6 +70,13 @@ const PlanAndPricing = () => {
   const [deletePlanId, setDeletePlanId] = useState(null);
   const { isSidebarCollapsed, dispatch: sidebarDispatch } = useSidebarContext();
 
+  const [products, setProducts] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectProductsDropdown, setSelectProductsDropdown] = useState(false);
+
+  const [editSelectedProducts, setEditSelectedProducts] = useState([]);
+  const [editProductsDropdown, setEditProductsDropdown] = useState(false);
+
   const sidebarToggle = () => {
     sidebarDispatch({ type: "TOGGLE_SIDEBAR" });
   };
@@ -78,6 +88,8 @@ const PlanAndPricing = () => {
   useEffect(() => {
     if (!openModal) {
       setErrors({});
+      setSelectProductsDropdown(false);
+      setSelectedProducts([]);
       setPlanAndPricingForm({
         plan_name: "",
         description: "",
@@ -92,6 +104,8 @@ const PlanAndPricing = () => {
 
   useEffect(() => {
     if (!openEditModal) {
+      setEditProductsDropdown(false);
+      setEditSelectedProducts([]);
       setEditErrors({});
       setEditPlan(null);
       setEditPlanPricingForm({
@@ -252,6 +266,10 @@ const PlanAndPricing = () => {
       isValid = false;
       newErrors.plan_name = "Plan name already exists";
     }
+    if (selectedProducts.length === 0) {
+      isValid = false;
+      newErrors.products = "At least one product must be selected";
+    }
 
     setErrors(newErrors);
     return isValid;
@@ -292,6 +310,11 @@ const PlanAndPricing = () => {
       newEditErrors.plan_name = "Plan name already exists";
     }
 
+    if (editSelectedProducts.length === 0) {
+      isValid = false;
+      newEditErrors.products = "At least one product must be selected";
+    }
+
     setEditErrors(newEditErrors);
     return isValid;
   };
@@ -302,10 +325,19 @@ const PlanAndPricing = () => {
     if (!validateForm()) {
       return;
     }
+
+    const formattedFeatures = formatFeatures(planAndPricingForm.features);
+
+    const formData = {
+      ...planAndPricingForm,
+      products: selectedProducts.map((product) => product.id),
+      features: formattedFeatures,
+    };
+
     try {
       const res = await axios.post(
         `${config.baseApiUrl}admin/create-subscription-plan/`,
-        planAndPricingForm
+        formData
       );
       if (res.status === 200) {
         setSuccess(res.data.message);
@@ -326,10 +358,19 @@ const PlanAndPricing = () => {
     if (!validateEditForm()) {
       return;
     }
+
+    const formattedFeatures = formatFeatures(editPlanPricingForm.features);
+
+    const formData = {
+      ...editPlanPricingForm,
+      products: editSelectedProducts.map((product) => product.id),
+      features: formattedFeatures,
+    };
+
     try {
       const res = await axios.put(
         `${config.baseApiUrl}admin/update-subscription-plan/${editPlan.id}/`,
-        editPlanPricingForm
+        formData
       );
       if (res.status === 200) {
         setSuccess(res.data.message);
@@ -353,12 +394,13 @@ const PlanAndPricing = () => {
     setEditPlanPricingForm({
       plan_name: plan.plan_name,
       description: plan.description,
-      features: plan.features,
+      features: formatFeatures(plan.features),
       monthly_price: plan.monthly_price,
       annual_price: plan.annual_price,
       custom_price: plan.custom_price,
       duration_in_months: plan.duration_in_months,
     });
+    setEditSelectedProducts(plan.products.map((product) => product));
     onOpenEditModal();
   };
 
@@ -392,6 +434,68 @@ const PlanAndPricing = () => {
     setOpenDropdown(openDropdown === id ? null : id);
   };
 
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get(
+        `${config.baseApiUrl}admin/product-features/`
+      );
+      if (res.status === 200) {
+        setProducts(res.data.products);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleProductClick = (product) => {
+    let updatedSelectedProducts = [];
+
+    if (selectedProducts.includes(product)) {
+      updatedSelectedProducts = selectedProducts.filter((p) => p !== product);
+    } else {
+      updatedSelectedProducts = [...selectedProducts, product];
+    }
+
+    setSelectedProducts(updatedSelectedProducts);
+
+    if (updatedSelectedProducts.length > 0) {
+      const newErrors = { ...errors };
+      delete newErrors.products;
+      setErrors(newErrors);
+    }
+  };
+
+  const handleEditProductClick = (clickedProduct) => {
+    const isSelected = editSelectedProducts.some(
+      (item) => item.id === clickedProduct.id
+    );
+
+    if (isSelected) {
+      const updatedProducts = editSelectedProducts.filter(
+        (item) => item.id !== clickedProduct.id
+      );
+      setEditSelectedProducts(updatedProducts);
+    } else {
+      setEditSelectedProducts([...editSelectedProducts, clickedProduct]);
+    }
+    setEditErrors((prevErrors) => ({
+      ...prevErrors,
+      products: "",
+    }));
+  };
+
+  const formatFeatures = (features) => {
+    return features
+      .split(",")
+      .map((feature) => feature.trim())
+      .filter((feature) => feature !== "")
+      .join(", ");
+  };
+
   return (
     <>
       <div className="bg-[rgb(16,23,42)]">
@@ -406,12 +510,12 @@ const PlanAndPricing = () => {
               isSidebarCollapsed ? "md:ml-64 ml-0" : "md:ml-20 ml-0 md:px-16"
             }`}
           >
-            <div className="flex pt-10 px-4">
+            <div className="flex pt-10 px-4 overflow-auto">
               <ul className="bg-slate-900 border border-gray-700 rounded-full py-2 px-4 -space-x-4 w-max flex items-center mt-4">
                 <li className="bg-gray-800 text-purple-500 hover:underline rounded-full z-40 px-8 py-3 text-base cursor-pointer">
                   <Link to="/admin/dashboard">Dashboard</Link>
                 </li>
-                <li className="bg-purple-600 text-white underline rounded-r-full z-10 px-8 py-3 text-base cursor-pointer">
+                <li className="bg-purple-600 text-nowrap text-white underline rounded-r-full z-10 px-8 py-3 text-base cursor-pointer">
                   <Link to="/admin/plan-pricing">Plan & Pricing</Link>
                 </li>
               </ul>
@@ -450,7 +554,7 @@ const PlanAndPricing = () => {
                       </div>
                       {openDropdown === plan.id && (
                         <div
-                          className="absolute top-16 right-5 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-2 z-10"
+                          className="absolute top-16 right-5 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-10"
                           onMouseLeave={() => setOpenDropdown(null)}
                         >
                           <button
@@ -715,6 +819,61 @@ const PlanAndPricing = () => {
                             />
                           </div>
                         </div>
+                        <div className="w-full mt-2">
+                          <label className="block mb-2 text-sm text-white font-medium">
+                            Select products
+                          </label>
+                          <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
+                            <button
+                              onClick={() =>
+                                setSelectProductsDropdown(
+                                  !selectProductsDropdown
+                                )
+                              }
+                              className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
+                            >
+                              <span className="pr-4 text-sm text-white">
+                                Select products
+                              </span>
+                              <FiChevronDown
+                                id="rotate1"
+                                className="absolute z-10 cursor-pointer right-5 text-white"
+                                size={14}
+                              />
+                            </button>
+                            <div
+                              onMouseLeave={() =>
+                                setSelectProductsDropdown(false)
+                              }
+                              className={`absolute right-0 z-20 ${
+                                selectProductsDropdown ? "" : "hidden"
+                              } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
+                            >
+                              {products.map((product) => (
+                                <a key={product.id}>
+                                  <p
+                                    className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                    onClick={() => handleProductClick(product)}
+                                  >
+                                    <img
+                                      src={`${config.baseApiImageUrl}${product.images[0].image}`}
+                                      className="w-8 h-8 rounded-full shrink-0 mr-3"
+                                    />
+                                    {product.name}
+                                    {selectedProducts.includes(product) && (
+                                      <FaCheck className="ml-auto size-4" />
+                                    )}
+                                  </p>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                          {errors.products && (
+                            <p className="text-red-600 text-sm font-medium">
+                              {errors.products}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                     {success && (
@@ -954,6 +1113,62 @@ const PlanAndPricing = () => {
                               onChange={handleEditChange}
                             />
                           </div>
+                        </div>
+                        <div className="w-full mt-2">
+                          <label className="block mb-2 text-sm text-white font-medium">
+                            Select products
+                          </label>
+                          <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
+                            <button
+                              onClick={() =>
+                                setEditProductsDropdown(!editProductsDropdown)
+                              }
+                              className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
+                            >
+                              <span className="pr-4 text-sm text-white">
+                                Select products
+                              </span>
+                              <FiChevronDown
+                                id="rotate1"
+                                className="absolute z-10 cursor-pointer right-5 text-white"
+                                size={14}
+                              />
+                            </button>
+                            <div
+                              onMouseLeave={() =>
+                                setEditProductsDropdown(false)
+                              }
+                              className={`absolute right-0 z-20 ${
+                                editProductsDropdown ? "" : "hidden"
+                              } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll`}
+                            >
+                              {products.map((product) => (
+                                <a key={product.id}>
+                                  <p
+                                    className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                    onClick={() =>
+                                      handleEditProductClick(product)
+                                    }
+                                  >
+                                    <img
+                                      src={`${config.baseApiImageUrl}${product.images[0].image}`}
+                                      alt={`${product.name} image`}
+                                      className="w-8 h-8 rounded-full shrink-0 mr-3"
+                                    />
+                                    {product.name}
+                                    {editSelectedProducts.some(
+                                      (item) => item.id === product.id
+                                    ) && <FaCheck className="ml-auto size-4" />}
+                                  </p>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                          {editErrors.products && (
+                            <p className="text-red-600 text-sm font-medium">
+                              {editErrors.products}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>

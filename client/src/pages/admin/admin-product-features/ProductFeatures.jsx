@@ -26,6 +26,7 @@ import config from "../../../Functions/config";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { RiFileExcelLine } from "react-icons/ri";
+import { FaTimes, FaTrashAlt, FaCheckCircle } from "react-icons/fa";
 import "./productfeatures.css";
 
 const ProductFeatures = () => {
@@ -51,6 +52,7 @@ const ProductFeatures = () => {
   const [openCategoryModal, setOpenCategoryModal] = useState(false);
 
   const [success, setSuccess] = useState("");
+  const [success1, setSuccess1] = useState("");
   const [errors, setErrors] = useState({
     name: "",
     description: "",
@@ -74,6 +76,9 @@ const ProductFeatures = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const filePickerRef = useRef();
   const navigate = useNavigate();
+
+  const [openProductDeleteModal, setOpenProductDeleteModal] = useState(false);
+  const [productIdToDelete, setProductIdToDelete] = useState(null);
 
   const handleCategorySelect = (categoryName) => {
     setSelectedCategory(categoryName);
@@ -109,8 +114,8 @@ const ProductFeatures = () => {
       if (res.status === 200) {
         setProducts1(res.data.products);
       }
-    } catch (errors) {
-      console.log(errors);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -252,6 +257,14 @@ const ProductFeatures = () => {
     setErrors((prevErrors) => ({ ...prevErrors, ...errors }));
   };
 
+  const formatFeatures = (features) => {
+    return features
+      .split(",")
+      .map((feature) => feature.trim())
+      .filter((feature) => feature !== "")
+      .join(", ");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -282,11 +295,14 @@ const ProductFeatures = () => {
       setErrors(newErrors);
       return;
     }
+
+    const formattedFeatures = formatFeatures(addProductForm.features);
+
     try {
       const formData = new FormData();
       formData.append("name", addProductForm.name);
       formData.append("description", addProductForm.description);
-      formData.append("features", addProductForm.features);
+      formData.append("features", formattedFeatures);
       formData.append("category", addProductForm.category);
       formData.append("price", addProductForm.price);
       formData.append("product_id", addProductForm.product_id);
@@ -306,7 +322,7 @@ const ProductFeatures = () => {
 
       if (res.status === 200) {
         setSuccess("Product added successfully.");
-        setOffset(0);
+        handleClear();
         fetchProducts1();
         setTimeout(() => {
           setSuccess("");
@@ -459,6 +475,31 @@ const ProductFeatures = () => {
 
   const handleEdit = (product) => {
     navigate(`/admin/product-features-details/${product.id}`);
+  };
+
+  const handleDelete = (pid) => {
+    setProductIdToDelete(pid);
+    setOpenProductDeleteModal(true);
+  };
+
+  const confirmDeleteProduct = async (pid) => {
+    try {
+      const res = await axios.delete(
+        `${config.baseApiUrl}admin/product-features/details/${pid}/`
+      );
+      if (res.status === 200) {
+        setSuccess1(res.data.message);
+        fetchProducts1();
+        handleClear();
+        setTimeout(() => {
+          setSuccess1("");
+          setOpenProductDeleteModal(false);
+          setProductIdToDelete(null);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+    }
   };
 
   return (
@@ -653,7 +694,7 @@ const ProductFeatures = () => {
                                       <img
                                         src={`${config.baseApiImageUrl}${product.images[0].image}`}
                                         alt={product.name}
-                                        className="w-16 h-16 object-cover rounded-lg cursor-pointer"
+                                        className="w-16 h-16 object-cover rounded cursor-pointer"
                                       />
                                     </PhotoView>
                                   </PhotoProvider>
@@ -704,7 +745,7 @@ const ProductFeatures = () => {
                                           className="px-4 py-2 text-sm text-blue-600 hover:bg-gray-700 w-full text-left flex items-center"
                                         >
                                           <FiEdit className="mr-2" />
-                                          Edit
+                                          Edit / View
                                         </button>
                                         <button
                                           onClick={() =>
@@ -1166,6 +1207,77 @@ const ProductFeatures = () => {
                   </a>
                 </div>
               </div>
+            </div>
+          </Modal>
+
+          {/* delete product modal */}
+
+          <Modal
+            open={openProductDeleteModal}
+            onClose={() => setOpenProductDeleteModal(false)}
+            center
+            classNames={{
+              modal: "deleteModal",
+            }}
+            closeIcon
+          >
+            <div className="w-full max-w-lg bg-gray-900 shadow-lg rounded-lg p-6 relative">
+              <FaTimes
+                className="w-3.5 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500 float-right"
+                onClick={() => setOpenProductDeleteModal(false)}
+              />
+
+              <div className="my-4 text-center">
+                <FaTrashAlt className="size-16 text-red-600 inline" />
+                <h4 className="text-gray-200 text-base font-semibold mt-4">
+                  Are you sure you want to delete this product?
+                </h4>
+
+                <div className="text-center space-x-4 mt-8">
+                  <button
+                    onClick={() => setOpenProductDeleteModal(false)}
+                    type="button"
+                    className="px-4 py-2 rounded-lg text-gray-800 text-sm bg-gray-200 hover:bg-gray-300 active:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => confirmDeleteProduct(productIdToDelete)}
+                    type="button"
+                    className="px-4 py-2 rounded-lg text-white text-sm bg-red-600 hover:bg-red-700 active:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+              {success1 && (
+                <div
+                  id="dismiss-alert"
+                  className="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 bg-purple-50 border border-purple-200 text-sm text-purple-800 rounded-lg p-4 dark:bg-purple-800/10 dark:border-purple-900 dark:text-purple-500"
+                  role="alert"
+                >
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <FaCheckCircle className="flex-shrink-0 size-4 mt-0.5 text-purple-500" />
+                    </div>
+                    <div className="ms-2">
+                      <div className="text-sm font-medium">{success1}</div>
+                    </div>
+                    <div className="ps-3 ms-auto">
+                      <div className="-mx-1.5 -my-1.5">
+                        <button
+                          type="button"
+                          className="inline-flex bg-purple-50 rounded-lg p-1.5 text-purple-500 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-50 focus:ring-purple-600 dark:bg-transparent dark:hover:bg-purple-800/50 dark:text-purple-600"
+                          data-hs-remove-element="#dismiss-alert"
+                        >
+                          <span className="sr-only">Dismiss</span>
+                          <FaTimes className="flex-shrink-0 size-4 mt-1 " />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </Modal>
         </div>

@@ -10,7 +10,7 @@ from django.template.loader import render_to_string
 from company.models import CompanyLog
 from company.serializers import CompanyLogSerializer
 from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category
-from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer,CategorySerializer
+from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer,CategorySerializer,ProductImageSerializer
 import random
 import string   
 from django.db.models import Q
@@ -92,9 +92,17 @@ class DeleteCompany(APIView):
         
 class SubscriptionPlanCreateView(APIView):
     def post(self, request):
-        serializer = SubscriptionPlanSerializer(data=request.data, partial=True)
+        data = request.data
+        selected_products = data.pop('products', [])
+        
+        serializer = SubscriptionPlanSerializer(data=data, partial=True)
         if serializer.is_valid():
-            serializer.save()
+            subscription_plan = serializer.save()
+            
+            if selected_products:
+                products = ProductService.objects.filter(id__in=selected_products)
+                subscription_plan.products.set(products)
+                
             return Response({"data": serializer.data, 'message': 'Subscription plan created successfully.'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -110,9 +118,19 @@ class UpdateSubscriptionPlanView(APIView):
         except SubscriptionPlan.DoesNotExist:
             return Response({'error': 'Subscription plan not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = SubscriptionPlanSerializer(plan, data=request.data, partial=True)
+        data = request.data
+        selected_products = data.pop('products', [])
+        
+        serializer = SubscriptionPlanSerializer(plan, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            
+            if selected_products:
+                products = ProductService.objects.filter(id__in=selected_products)
+                plan.products.set(products)
+            else:
+                plan.products.clear()
+                
             return Response({"data": serializer.data, 'message': 'Subscription plan updated successfully.'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -342,6 +360,28 @@ class ProductFeaturesView(APIView):
         product_serializer = ProductServiceSerializer(product_instance)
         return Response(product_serializer.data, status=status.HTTP_200_OK)
     
+class ProductFeaturesUpdateView(APIView):
+    def put(self, request, pid):
+        try:
+            product = ProductService.objects.get(id=pid)
+            category_name = request.data.get('category', None)
+            category_instance = Category.objects.filter(name=category_name).first()
+            
+            product.name = request.data.get('name', product.name)
+            product.description = request.data.get('description', product.description)
+            product.features = request.data.get('features', product.features)
+            product.price = request.data.get('price', product.price)
+            product.availability_status = request.data.get('availability_status', product.availability_status)
+            product.product_id = request.data.get('product_id', product.product_id)
+            product.category = category_instance if category_instance else product.category
+            
+            product.save()
+            
+            serializer = ProductServiceSerializer(product)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ProductService.DoesNotExist:
+            return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+    
 class SingleProductView(APIView):
     def get(self, request, pid):
         try:
@@ -350,6 +390,35 @@ class SingleProductView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except ProductService.DoesNotExist:
             return Response({"message": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def delete(self, request, pid):
+        try:
+            product = ProductService.objects.get(pk=pid)
+            product.delete()
+            return Response({"message": "Product deleted successfully"}, status=status.HTTP_200_OK)
+        except ProductService.DoesNotExist:
+            return Response({"message": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+class ProductImagesView(APIView):
+    def get(self, request, product_id):
+        images = ProductImage.objects.filter(product_id=product_id)
+        serializer = ProductImageSerializer(images, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request, product_id):
+        images = request.FILES.getlist('images')
+        for image in images:
+            ProductImage.objects.create(product_id=product_id, image=image)
+        return Response({"message": "Images uploaded successfully"}, status=status.HTTP_200_OK)
+    
+class DeleteProductImageView(APIView):
+    def delete(self, request, image_id):
+        try:
+            image = ProductImage.objects.get(pk=image_id)
+            image.delete()
+            return Response({"message": "Image deleted successfully"}, status=status.HTTP_200_OK)
+        except ProductImage.DoesNotExist:
+            return Response({"message": "Image not found"}, status=status.HTTP_404_NOT_FOUND)
         
 class AddCategoryView(APIView):
     def post(self, request):
