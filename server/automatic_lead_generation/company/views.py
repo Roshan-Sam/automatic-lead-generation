@@ -16,6 +16,7 @@ from django.db.models import Q
 
 #George Change
 
+
 class CompanyRegistrationView(APIView):
     def post(self, request):
         data = request.data
