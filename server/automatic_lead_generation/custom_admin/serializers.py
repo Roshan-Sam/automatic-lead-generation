@@ -1,9 +1,16 @@
 from rest_framework import serializers
-from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category
+from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category,Plan
 from company.serializers import CompanyLogSerializer
 
+
+class PlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = '__all__'
+        
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
     products = serializers.SerializerMethodField()
+    plan = PlanSerializer(read_only=True)
 
     class Meta:
         model = SubscriptionPlan

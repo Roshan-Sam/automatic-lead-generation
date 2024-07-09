@@ -11,6 +11,8 @@ import Subscriptions from "./pages/admin/admin-subscriptions/Subscriptions";
 import Notification from "./pages/admin/admin-notification/Notification";
 import Profile from "./pages/admin/admin-profile/Profile";
 import ProductPreview from "./pages/admin/admin-product-features/ProductPreview";
+import Sample from "./pages/index/sample";
+import PlanPricingPlanView from "./pages/admin/admin-plan-pricing/PlanPricingPlanView";
 import "flowbite";
 import "./App.css";
 
@@ -19,13 +21,19 @@ function App() {
     <>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/admin/sample" element={<Sample />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
+
         <Route path="/admin">
           <Route path="dashboard" element={<AdminDash />} />
           <Route path="company" element={<Company />} />
           <Route path="product-features" element={<ProductFeatures />} />
           <Route path="plan-pricing" element={<PlanAndPricing />} />
+          <Route
+            path="plan-pricing/plan/:id"
+            element={<PlanPricingPlanView />}
+          />
           <Route path="subscriptions" element={<Subscriptions />} />
           <Route path="notifications" element={<Notification />} />
           <Route path="account" element={<Profile />} />
@@ -34,6 +42,7 @@ function App() {
             element={<ProductPreview />}
           />
         </Route>
+
         <Route path="/company-dash" element={<CompanyDashboard />} />
       </Routes>
     </>

@@ -8,9 +8,9 @@ import {
   FiPlus,
   FiChevronDown,
   FiCheckCircle,
+  FiSave,
 } from "react-icons/fi";
 import { CiFilter, CiMenuKebab } from "react-icons/ci";
-import { Modal } from "react-responsive-modal";
 import {
   MdOutlineCategory,
   MdOutlineAddCircle,
@@ -27,6 +27,8 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { RiFileExcelLine } from "react-icons/ri";
 import { FaTimes, FaTrashAlt, FaCheckCircle } from "react-icons/fa";
+import { Modal } from "react-responsive-modal";
+import "react-responsive-modal/styles.css";
 import "./productfeatures.css";
 
 const ProductFeatures = () => {
@@ -79,6 +81,14 @@ const ProductFeatures = () => {
 
   const [openProductDeleteModal, setOpenProductDeleteModal] = useState(false);
   const [productIdToDelete, setProductIdToDelete] = useState(null);
+
+  const [categoryList, setCategoryList] = useState([]);
+  const [categoryListDropdown, setCategoryListDropdown] = useState(false);
+  const [editCategoryId, setEditCategoryId] = useState(null);
+  const [editCategoryName, setEditCategoryName] = useState("");
+  const [deleteCategoryModal, setDeleteCategoryModal] = useState(false);
+  const [deleteCategoryId, setDeleteCategoryId] = useState(null);
+  const [categorySuccess, setCategorySuccess] = useState("");
 
   const handleCategorySelect = (categoryName) => {
     setSelectedCategory(categoryName);
@@ -411,6 +421,8 @@ const ProductFeatures = () => {
         setTimeout(() => {
           setSuccess("");
           setOpenCategoryModal(false);
+          fetchCategories();
+          fetchCategoryList();
         }, 3000);
       }
     } catch (error) {
@@ -502,6 +514,92 @@ const ProductFeatures = () => {
     }
   };
 
+  const fetchCategoryList = async () => {
+    try {
+      const res = await axios.get(`${config.baseApiUrl}admin/add-category/`);
+      if (res.status === 200) {
+        setCategoryList(res.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategoryList();
+  }, []);
+
+  const toogleCategoryListDropdown = () => {
+    setCategoryListDropdown(!categoryListDropdown);
+    setCategoryDropdown1(false);
+  };
+
+  useEffect(() => {
+    if (!categoryListDropdown) {
+      setEditCategoryId(null);
+      setEditCategoryName("");
+      setDeleteCategoryId(null);
+    }
+  }, [categoryListDropdown]);
+
+  const handleEditCategoryClick = (category) => {
+    setEditCategoryId(category.id);
+    setEditCategoryName(category.name);
+  };
+
+  const handleDeleteCategoryClick = (categoryId) => {
+    setDeleteCategoryId(categoryId);
+    setDeleteCategoryModal(true);
+  };
+
+  const handleEditCategory = async (categoryId) => {
+    try {
+      const res = await axios.put(
+        `${config.baseApiUrl}admin/update-category/${categoryId}/`,
+        { name: editCategoryName }
+      );
+      if (res.status === 200) {
+        setCategoryList((prevCategories) =>
+          prevCategories.map((cat) =>
+            cat.id === categoryId ? { ...cat, name: editCategoryName } : cat
+          )
+        );
+        setEditCategoryId(null);
+        setEditCategoryName("");
+        fetchCategories();
+        fetchCategoryList();
+      }
+    } catch (error) {
+      console.error("Failed to update category:", error);
+    }
+  };
+
+  const handleDeleteCategory = async (categoryId) => {
+    try {
+      const res = await axios.delete(
+        `${config.baseApiUrl}admin/update-category/${categoryId}/`
+      );
+      if (res.status === 200) {
+        setCategoryList((prevCategories) =>
+          prevCategories.filter((cat) => cat.id !== categoryId)
+        );
+        setCategorySuccess(res.data.message);
+        fetchCategories();
+        setTimeout(() => {
+          setCategorySuccess("");
+          setDeleteCategoryModal(false);
+          setDeleteCategoryId(null);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Failed to delete category:", error);
+    }
+  };
+
+  const confirmDeleteCategory = () => {
+    handleDeleteCategory(deleteCategoryId);
+  };
+
   return (
     <>
       <div className="bg-[rgb(16,23,42)]">
@@ -579,9 +677,10 @@ const ProductFeatures = () => {
                           <div className="flex gap-2 md:justify-end">
                             <div className="relative w-48  h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                               <button
-                                onClick={() =>
-                                  setCategoryDropdown1(!categoryDropdown1)
-                                }
+                                onClick={() => {
+                                  setCategoryDropdown1(!categoryDropdown1);
+                                  setCategoryListDropdown(false);
+                                }}
                                 className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                               >
                                 <span className="pr-4 text-sm text-white">
@@ -629,6 +728,80 @@ const ProductFeatures = () => {
                                 <RiFileExcelLine className="size-4 fill-white" />
                                 Export
                               </button>
+                            </div>
+                          </div>
+                          <div>
+                            <div className="relative rounded-lg w-max mx-auto">
+                              <button
+                                type="button"
+                                className="px-4 py-3 rounded-lg flex justify-center items-center bg-purple-600 hover:bg-purple-700 text-slate-950 text-sm font-medium border-purple-700 outline-none transition duration-300 ease-in-out transform"
+                                onClick={toogleCategoryListDropdown}
+                              >
+                                Category list
+                                <FiChevronDown
+                                  className="inline ml-3 size-5 transition-transform duration-300 ease-in-out transform"
+                                  style={{
+                                    transform: categoryListDropdown
+                                      ? "rotate(180deg)"
+                                      : "rotate(0deg)",
+                                  }}
+                                />
+                              </button>
+
+                              {categoryListDropdown && (
+                                <ul className="absolute shadow-xl bg-slate-900 border border-gray-800 mt-2 xl:right-0 py-2 z-[1000] min-w-full w-max rounded max-h-96 overflow-auto transition-opacity duration-300 ease-in-out opacity-100">
+                                  {categoryList.map((category) => (
+                                    <li
+                                      key={category.id}
+                                      className="py-2.5 px-5 text-white text-sm cursor-pointer flex justify-between items-center transition-transform duration-300 ease-in-out transform"
+                                    >
+                                      {editCategoryId === category.id ? (
+                                        <input
+                                          type="text"
+                                          value={editCategoryName}
+                                          onChange={(e) =>
+                                            setEditCategoryName(e.target.value)
+                                          }
+                                          className="px-2 py-1 rounded-lg bg-transparent border border-gray-700 focus:border-purple-600 focus:ring-0 focus:outline-none transition-transform duration-300 ease-in-out transform"
+                                        />
+                                      ) : (
+                                        <span>{category.name}</span>
+                                      )}
+                                      <div className="flex items-center ml-14 space-x-2">
+                                        {editCategoryId === category.id ? (
+                                          <button
+                                            className="text-green-700 hover:underline"
+                                            onClick={() =>
+                                              handleEditCategory(category.id)
+                                            }
+                                          >
+                                            <FiSave className="size-5 transition-transform duration-300 ease-in-out transform hover:scale-125" />
+                                          </button>
+                                        ) : (
+                                          <button
+                                            className="text-blue-600 hover:underline"
+                                            onClick={() =>
+                                              handleEditCategoryClick(category)
+                                            }
+                                          >
+                                            <FiEdit className="size-4 transition-transform duration-300 ease-in-out transform hover:scale-125" />
+                                          </button>
+                                        )}
+                                        <button
+                                          className="text-red-600 hover:underline"
+                                          onClick={() =>
+                                            handleDeleteCategoryClick(
+                                              category.id
+                                            )
+                                          }
+                                        >
+                                          <FiTrash className="size-4 transition-transform duration-300 ease-in-out transform hover:scale-125" />
+                                        </button>
+                                      </div>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -1262,6 +1435,79 @@ const ProductFeatures = () => {
                     </div>
                     <div className="ms-2">
                       <div className="text-sm font-medium">{success1}</div>
+                    </div>
+                    <div className="ps-3 ms-auto">
+                      <div className="-mx-1.5 -my-1.5">
+                        <button
+                          type="button"
+                          className="inline-flex bg-purple-50 rounded-lg p-1.5 text-purple-500 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-50 focus:ring-purple-600 dark:bg-transparent dark:hover:bg-purple-800/50 dark:text-purple-600"
+                          data-hs-remove-element="#dismiss-alert"
+                        >
+                          <span className="sr-only">Dismiss</span>
+                          <FaTimes className="flex-shrink-0 size-4 mt-1 " />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Modal>
+
+          {/* delete category modal */}
+
+          <Modal
+            open={deleteCategoryModal}
+            onClose={() => setDeleteCategoryModal(false)}
+            center
+            classNames={{
+              modal: "deleteModal",
+            }}
+            closeIcon
+          >
+            <div className="w-full max-w-lg bg-gray-900 shadow-lg rounded-lg p-6 relative">
+              <FaTimes
+                className="w-3.5 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500 float-right"
+                onClick={() => setDeleteCategoryModal(false)}
+              />
+
+              <div className="my-4 text-center">
+                <FaTrashAlt className="size-16 text-red-600 inline" />
+                <h4 className="text-gray-200 text-base font-semibold mt-4">
+                  Are you sure you want to delete this category?
+                </h4>
+
+                <div className="text-center space-x-4 mt-8">
+                  <button
+                    onClick={() => setDeleteCategoryModal(false)}
+                    type="button"
+                    className="px-4 py-2 rounded-lg text-gray-800 text-sm bg-gray-200 hover:bg-gray-300 active:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmDeleteCategory}
+                    type="button"
+                    className="px-4 py-2 rounded-lg text-white text-sm bg-red-600 hover:bg-red-700 active:bg-red-600"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+              {categorySuccess && (
+                <div
+                  id="dismiss-alert"
+                  className="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 bg-purple-50 border border-purple-200 text-sm text-purple-800 rounded-lg p-4 dark:bg-purple-800/10 dark:border-purple-900 dark:text-purple-500"
+                  role="alert"
+                >
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <FaCheckCircle className="flex-shrink-0 size-4 mt-0.5 text-purple-500" />
+                    </div>
+                    <div className="ms-2">
+                      <div className="text-sm font-medium">
+                        {categorySuccess}
+                      </div>
                     </div>
                     <div className="ps-3 ms-auto">
                       <div className="-mx-1.5 -my-1.5">

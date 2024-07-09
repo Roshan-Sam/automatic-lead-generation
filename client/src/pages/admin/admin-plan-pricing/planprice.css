@@ -13,6 +13,21 @@
   }
 }
 
+.planpriceplanaddmodal {
+  background: #111827;
+  max-width: 500px;
+  width: 100% !important;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+}
+
+@media (max-width: 600px) {
+  .planpriceplanaddmodal {
+    max-width: 90%;
+  }
+}
+
 .deleteModal {
   background: #111827;
   max-width: fit-content;

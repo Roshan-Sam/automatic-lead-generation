@@ -9,8 +9,8 @@ from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 from company.models import CompanyLog
 from company.serializers import CompanyLogSerializer
-from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category
-from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer,CategorySerializer,ProductImageSerializer
+from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category,Plan
+from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer,CategorySerializer,ProductImageSerializer,PlanSerializer
 import random
 import string   
 from django.db.models import Q
@@ -90,11 +90,46 @@ class DeleteCompany(APIView):
         except CompanyLog.DoesNotExist:
             return Response({"error": "Company not found"}, status=status.HTTP_404_NOT_FOUND)
         
+class AddPlanAPIView(APIView):
+    def get(self, request):
+        plans = Plan.objects.all()
+        serializer = PlanSerializer(plans, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def post(self, request):
+        serializer = PlanSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Plan created successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, pk):
+        try:
+            plan = Plan.objects.get(pk=pk)
+        except Plan.DoesNotExist:
+            return Response({"error": "Plan not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PlanSerializer(plan, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Plan updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        try:
+            plan = Plan.objects.get(pk=pk)
+        except Plan.DoesNotExist:
+            return Response({"error": "Plan not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        plan.delete()
+        return Response({"message": "Plan deleted successfully"}, status=status.HTTP_200_OK)
+
 class SubscriptionPlanCreateView(APIView):
     def post(self, request):
         data = request.data
         selected_products = data.pop('products', [])
-        
+        selected_plan_id = data.pop('plan', None)
+
         serializer = SubscriptionPlanSerializer(data=data, partial=True)
         if serializer.is_valid():
             subscription_plan = serializer.save()
@@ -103,11 +138,21 @@ class SubscriptionPlanCreateView(APIView):
                 products = ProductService.objects.filter(id__in=selected_products)
                 subscription_plan.products.set(products)
                 
-            return Response({"data": serializer.data, 'message': 'Subscription plan created successfully.'}, status=status.HTTP_200_OK)
+            if selected_plan_id:
+                selected_plan = Plan.objects.get(id=selected_plan_id)
+                subscription_plan.plan = selected_plan
+                subscription_plan.save()
+                
+            return Response({"data": serializer.data, 'message': 'Product plan created successfully.'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def get(self, request):
-        plans = SubscriptionPlan.objects.all()
+        plan_id = request.query_params.get('plan_id', None)
+        if plan_id:
+            plans = SubscriptionPlan.objects.filter(plan__id=plan_id)
+        else:
+            plans = SubscriptionPlan.objects.all()
+        
         serializer = SubscriptionPlanSerializer(plans, many=True)
         return Response({"data": serializer.data}, status=status.HTTP_200_OK)
     
@@ -141,6 +186,7 @@ class UpdateSubscriptionPlanView(APIView):
             return Response({'message': 'Subscription plan deleted successfully.'}, status=status.HTTP_200_OK)
         except SubscriptionPlan.DoesNotExist:
             return Response({'error': 'Subscription plan not found.'}, status=status.HTTP_404_NOT_FOUND)
+        
         
 class UpdateProfileView(APIView):
     def put(self, request, profile_id):
@@ -432,3 +478,24 @@ class AddCategoryView(APIView):
         categories = Category.objects.all()  
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+     
+    def put(self, request, pk):
+        try:
+            category = Category.objects.get(pk=pk)
+        except Category.DoesNotExist:
+            return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = CategorySerializer(category, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        try:
+            category = Category.objects.get(pk=pk)
+        except Category.DoesNotExist:
+            return Response({"error": "Category not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        category.delete()
+        return Response({"message": "Category deleted successfully"}, status=status.HTTP_200_OK)

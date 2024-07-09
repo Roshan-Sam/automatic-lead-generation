@@ -26,6 +26,10 @@ class ProductImage(models.Model):
     product = models.ForeignKey(ProductService, related_name='images', on_delete=models.CASCADE, null=True, blank=True)
     image = models.ImageField(upload_to='product_images/', null=True, blank=True)
     
+class Plan(models.Model):
+    name = models.CharField(max_length=255, unique=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
 class SubscriptionPlan(models.Model):
     plan_name = models.CharField(max_length=255, unique=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
@@ -36,7 +40,8 @@ class SubscriptionPlan(models.Model):
     duration_in_months = models.PositiveIntegerField(default=1, null=True, blank=True)
     is_active = models.BooleanField(default=True, null=True, blank=True) 
     products = models.ManyToManyField(ProductService, related_name='subscription_plans',null=True, blank=True)
-    
+    plan = models.ForeignKey(Plan, related_name='subscription_plans', on_delete=models.CASCADE, null=True, blank=True)
+
 class CompanySubscription(models.Model):
     company_name = models.ForeignKey(CompanyLog, on_delete=models.CASCADE, null=True, blank=True)
     subscription_plan = models.ForeignKey(SubscriptionPlan, on_delete=models.CASCADE, null=True, blank=True)
@@ -44,3 +49,4 @@ class CompanySubscription(models.Model):
     end_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, default='Pending', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    plan = models.ForeignKey(Plan, related_name='company_subscriptions', on_delete=models.CASCADE, null=True, blank=True)
