@@ -9,17 +9,19 @@ class PlanSerializer(serializers.ModelSerializer):
         fields = '__all__'
         
 class SubscriptionPlanSerializer(serializers.ModelSerializer):
-    products = serializers.SerializerMethodField()
+    product = serializers.SerializerMethodField()
     plan = PlanSerializer(read_only=True)
 
     class Meta:
         model = SubscriptionPlan
         fields = '__all__'
         
-    def get_products(self, obj):
-        products_queryset = obj.products.all()
-        serializer = ProductServiceSerializer(products_queryset, many=True, context=self.context)
-        return serializer.data
+    def get_product(self, obj):
+        product_instance = obj.product
+        if product_instance:
+            serializer = ProductServiceSerializer(product_instance)
+            return serializer.data
+        return None
         
 class AdminNotificationSerializer(serializers.ModelSerializer):
     class Meta:

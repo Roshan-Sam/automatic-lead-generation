@@ -4,7 +4,7 @@ import config from "../../../Functions/config";
 import AdminNav from "../../../components/admin/admin-nav/AdminNav";
 import AdminSidebar from "../../../components/admin/admin-sidebar/AdminSidebar";
 import { useSidebarContext } from "../../../hooks/useSidebarContext";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { CiMenuKebab } from "react-icons/ci";
 import {
   FaEdit,
@@ -35,7 +35,7 @@ const PlanPricingPlanView = () => {
     annual_price: "",
     custom_price: "",
     duration_in_months: "",
-    products: [],
+    product: {},
     plan: "",
   });
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -54,16 +54,14 @@ const PlanPricingPlanView = () => {
   const [deletePlanId, setDeletePlanId] = useState(null);
 
   const [products, setProducts] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectProductsDropdown, setSelectProductsDropdown] = useState(false);
-
-  const [editSelectedProducts, setEditSelectedProducts] = useState([]);
+  const [editSelectedProduct, setEditSelectedProduct] = useState(null);
   const [editProductsDropdown, setEditProductsDropdown] = useState(false);
 
   const [selectedPlan, setSelectedPlan] = useState("");
   const [selectPlanDropdown, setSelectPlanDropdown] = useState(false);
 
   const [addedPlans, setAddedPlans] = useState([]);
+  const naviagate = useNavigate();
 
   const sidebarToggle = () => {
     sidebarDispatch({ type: "TOGGLE_SIDEBAR" });
@@ -108,7 +106,7 @@ const PlanPricingPlanView = () => {
     if (!openEditModal) {
       setEditProductsDropdown(false);
       setSelectPlanDropdown(false);
-      setEditSelectedProducts([]);
+      setEditSelectedProduct(null);
       setEditErrors({});
       setEditPlan(null);
       setEditPlanPricingForm({
@@ -119,7 +117,7 @@ const PlanPricingPlanView = () => {
         annual_price: "",
         custom_price: "",
         duration_in_months: "",
-        products: [],
+        product: {},
         plan: "",
       });
     }
@@ -170,7 +168,7 @@ const PlanPricingPlanView = () => {
       if (field !== "custom_price" && field !== "duration_in_months") {
         const value = editPlanPricingForm[field];
 
-        if (field === "products" || field === "plan") {
+        if (field === "product" || field === "plan") {
           return;
         }
 
@@ -190,9 +188,9 @@ const PlanPricingPlanView = () => {
       newEditErrors.features = "Features are required";
     }
 
-    if (editSelectedProducts.length === 0) {
+    if (!editSelectedProduct) {
       isValid = false;
-      newEditErrors.products = "At least one product must be selected";
+      newEditErrors.product = "At least one product must be selected";
     }
 
     setEditErrors(newEditErrors);
@@ -210,7 +208,7 @@ const PlanPricingPlanView = () => {
 
     const formData = {
       ...editPlanPricingForm,
-      products: editSelectedProducts.map((product) => product.id),
+      product: editSelectedProduct.id,
       features: formattedFeatures,
     };
 
@@ -221,11 +219,15 @@ const PlanPricingPlanView = () => {
       );
       if (res.status === 200) {
         setSuccess(res.data.message);
-        setPlans((prevPlans) => {
-          return prevPlans.map((plan) =>
-            plan.id === editPlan.id ? res.data.data : plan
-          );
-        });
+        if (editPlanPricingForm.plan.id === id) {
+          setPlans((prevPlans) => {
+            return prevPlans.map((plan) =>
+              plan.id === editPlan.id ? res.data.data : plan
+            );
+          });
+        } else {
+          fetchPlans();
+        }
         setTimeout(() => {
           setSuccess("");
           onCloseEditModal();
@@ -248,7 +250,7 @@ const PlanPricingPlanView = () => {
       duration_in_months: plan.duration_in_months,
       plan: plan.plan.id,
     });
-    setEditSelectedProducts(plan.products.map((product) => product));
+    setEditSelectedProduct(plan.product);
     setSelectedPlan(plan.plan.name);
     onOpenEditModal();
   };
@@ -301,21 +303,14 @@ const PlanPricingPlanView = () => {
   }, []);
 
   const handleEditProductClick = (clickedProduct) => {
-    const isSelected = editSelectedProducts.some(
-      (item) => item.id === clickedProduct.id
-    );
-
-    if (isSelected) {
-      const updatedProducts = editSelectedProducts.filter(
-        (item) => item.id !== clickedProduct.id
-      );
-      setEditSelectedProducts(updatedProducts);
+    if (editSelectedProduct?.id === clickedProduct.id) {
+      setEditSelectedProduct(null);
     } else {
-      setEditSelectedProducts([...editSelectedProducts, clickedProduct]);
+      setEditSelectedProduct(clickedProduct);
     }
     setEditErrors((prevErrors) => ({
       ...prevErrors,
-      products: "",
+      product: "",
     }));
   };
 
@@ -356,8 +351,13 @@ const PlanPricingPlanView = () => {
                 <li className="bg-gray-800 text-purple-500 hover:underline rounded-full z-40 px-8 py-3 text-base cursor-pointer">
                   <Link to="/admin/dashboard">Dashboard</Link>
                 </li>
-                <li className="bg-purple-600 text-nowrap text-white underline rounded-r-full z-10 px-8 py-3 text-base cursor-pointer">
+                <li className="bg-gray-800 text-nowrap text-purple-500 hover:underline rounded-r-full z-40 px-8 py-3 text-base cursor-pointer">
                   <Link to="/admin/plan-pricing">Plan & Pricing</Link>
+                </li>
+                <li className="bg-purple-600 text-nowrap text-white underline rounded-r-full z-10 px-8 py-3 text-base cursor-pointer">
+                  <Link to={`/admin/plan-pricing/plan/${id}`}>
+                    Plan & Pricing Plan
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -373,12 +373,19 @@ const PlanPricingPlanView = () => {
                     >
                       <div className="p-2 pb-4">
                         <img
-                          src={`${config.baseApiImageUrl}${plan.products[0].images[0].image}`}
-                          alt={plan.products.name}
+                          src={`${config.baseApiImageUrl}${plan.product.images[0].image}`}
+                          alt={plan.product.name}
                           className="w-full h-52 object-cover rounded-md mb-4 cursor-pointer"
                         />
-                        <h3 className="text-2xl text-center underline cursor-pointer">
-                          {plan.products[0].name}
+                        <h3
+                          onClick={() =>
+                            naviagate(
+                              `/admin/product-features-details/${plan.product.id}`
+                            )
+                          }
+                          className="text-2xl text-center underline cursor-pointer"
+                        >
+                          {plan.product.name}
                         </h3>
                       </div>
                       <div className="p-6">
@@ -536,14 +543,14 @@ const PlanPricingPlanView = () => {
           <div className="p-4 overflow-y-auto">
             <div className="text-center">
               <h3 className="text-lg font-semibold text-white">
-                Update Plan and Pricing
+                Update Product Subscription Plan
               </h3>
             </div>
             <div className="px-4 py-10 sm:px-6 lg:px-8 mx-auto w-full">
               <div className="mt-0 w-full mx-auto">
                 <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
                   <h2 className="mb-8 text-xl font-semibold text-white">
-                    Fill the plan details
+                    Fill the product plan details
                   </h2>
                   <div className="mb-2">
                     <label className="block mb-2 text-sm text-white font-medium">
@@ -708,7 +715,9 @@ const PlanPricingPlanView = () => {
                         className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                       >
                         <span className="pr-4 text-sm text-white">
-                          Select product
+                          {editSelectedProduct
+                            ? editSelectedProduct.name
+                            : "Select product"}
                         </span>
                         <FiChevronDown
                           id="rotate1"
@@ -720,7 +729,7 @@ const PlanPricingPlanView = () => {
                         onMouseLeave={() => setEditProductsDropdown(false)}
                         className={`absolute right-0 z-20 ${
                           editProductsDropdown ? "" : "hidden"
-                        } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll`}
+                        } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
                       >
                         {products.map((product) => (
                           <a key={product.id}>
@@ -734,24 +743,17 @@ const PlanPricingPlanView = () => {
                                 className="w-8 h-8 rounded-full shrink-0 mr-3"
                               />
                               {product.name}
-                              {editSelectedProducts.some(
-                                (item) => item.id === product.id
-                              ) && <FaCheck className="ml-auto size-4" />}
+                              {editSelectedProduct?.id === product.id && (
+                                <FaCheck className="ml-auto size-5" />
+                              )}
                             </p>
                           </a>
                         ))}
                       </div>
                     </div>
-                    {editSelectedProducts.length > 0 && (
-                      <p className="text-gray-500 text-sm mt-1">
-                        {editSelectedProducts
-                          .map((product) => product.name)
-                          .join(", ")}
-                      </p>
-                    )}
-                    {editErrors.products && (
+                    {editErrors.product && (
                       <p className="text-red-600 text-sm font-medium">
-                        {editErrors.products}
+                        {editErrors.product}
                       </p>
                     )}
                   </div>
@@ -784,7 +786,7 @@ const PlanPricingPlanView = () => {
                     </div>
                     <div className="ms-3">
                       <h3 className="text-gray-800 font-semibold dark:text-white">
-                        Product Plan.
+                        Product Subscription Plan.
                       </h3>
                       <p className="text-sm text-gray-700 dark:text-neutral-400">
                         {success}
@@ -827,7 +829,7 @@ const PlanPricingPlanView = () => {
           <div className="my-4 text-center">
             <FaTrashAlt className="size-16 text-red-600 inline" />
             <h4 className="text-gray-200 text-base font-semibold mt-4">
-              Are you sure you want to delete this product plan?
+              Are you sure you want to delete this product subscription plan?
             </h4>
 
             <div className="text-center space-x-4 mt-8">
@@ -850,21 +852,21 @@ const PlanPricingPlanView = () => {
           {success && (
             <div
               id="dismiss-alert"
-              class="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 bg-purple-50 border border-purple-200 text-sm text-purple-800 rounded-lg p-4 dark:bg-purple-800/10 dark:border-purple-900 dark:text-purple-500"
+              className="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 bg-purple-50 border border-purple-200 text-sm text-purple-800 rounded-lg p-4 dark:bg-purple-800/10 dark:border-purple-900 dark:text-purple-500"
               role="alert"
             >
-              <div class="flex">
-                <div class="flex-shrink-0">
+              <div className="flex">
+                <div className="flex-shrink-0">
                   <FaCheckCircle className="flex-shrink-0 size-4 mt-0.5 text-purple-500" />
                 </div>
-                <div class="ms-2">
-                  <div class="text-sm font-medium">{success}</div>
+                <div className="ms-2">
+                  <div className="text-sm font-medium">{success}</div>
                 </div>
-                <div class="ps-3 ms-auto">
-                  <div class="-mx-1.5 -my-1.5">
+                <div className="ps-3 ms-auto">
+                  <div className="-mx-1.5 -my-1.5">
                     <button
                       type="button"
-                      class="inline-flex bg-purple-50 rounded-lg p-1.5 text-purple-500 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-50 focus:ring-purple-600 dark:bg-transparent dark:hover:bg-purple-800/50 dark:text-purple-600"
+                      className="inline-flex bg-purple-50 rounded-lg p-1.5 text-purple-500 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-purple-50 focus:ring-purple-600 dark:bg-transparent dark:hover:bg-purple-800/50 dark:text-purple-600"
                       data-hs-remove-element="#dismiss-alert"
                     >
                       <span className="sr-only">Dismiss</span>
