@@ -300,11 +300,11 @@ const PlanAndPricing = () => {
 
   const handlePlanSubmit = async () => {
     if (planName === "") {
-      setPlanError({ plan_name: "Plan name is required" });
+      setPlanError({plan_name: "Plan name is required"});
       return;
     }
     if (checkPlanNameExists(planName)) {
-      setPlanError({ plan_name: "Plan name already exists" });
+      setPlanError({plan_name: "Plan name already exists"});
       return;
     }
     const formattedName =

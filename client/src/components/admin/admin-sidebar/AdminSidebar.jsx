@@ -9,6 +9,7 @@ import {
   MdBusiness,
   MdSubscriptions,
   MdNotifications,
+  MdOutlineAssessment,
   MdSettings,
   MdLock,
   MdExitToApp,
@@ -81,6 +82,11 @@ const AdminSidebar = ({ sidebarToggle }) => {
       name: "Notifications",
       link: "/admin/notifications",
       icon: MdNotifications,
+    },
+    {
+      name: "Report",
+      link: "/admin/report",
+      icon: MdOutlineAssessment
     },
     {
       name: "Account Settings",

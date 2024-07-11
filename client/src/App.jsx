@@ -9,6 +9,7 @@ import ProductFeatures from "./pages/admin/admin-product-features/ProductFeature
 import PlanAndPricing from "./pages/admin/admin-plan-pricing/PlanAndPricing";
 import Subscriptions from "./pages/admin/admin-subscriptions/Subscriptions";
 import Notification from "./pages/admin/admin-notification/Notification";
+import Report from "./pages/admin/admin-report/Report";
 import Profile from "./pages/admin/admin-profile/Profile";
 import ProductPreview from "./pages/admin/admin-product-features/ProductPreview";
 import Sample from "./pages/index/sample";
@@ -36,6 +37,7 @@ function App() {
           />
           <Route path="subscriptions" element={<Subscriptions />} />
           <Route path="notifications" element={<Notification />} />
+          <Route path="report" element={<Report />} />
           <Route path="account" element={<Profile />} />
           <Route
             path="product-features-details/:id"
