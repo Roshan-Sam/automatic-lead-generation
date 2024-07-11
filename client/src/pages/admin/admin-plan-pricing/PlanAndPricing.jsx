@@ -66,6 +66,7 @@ const PlanAndPricing = () => {
   const [deletePlanModal, setDeletePlanModal] = useState(false);
   const [planIdToDelete, setPlanIdToDelete] = useState(null);
   const [planSuccess, setPlanSuccess] = useState("");
+  const [deleteSuccess, setDeleteSuccess] = useState("");
 
   const navigate = useNavigate();
 
@@ -316,11 +317,11 @@ const PlanAndPricing = () => {
       });
       if (response.status === 200) {
         setSuccess(response.data.message);
+        fetchAddedPlans();
         setTimeout(() => {
           setPlanName("");
           setPlanModal(false);
           setSuccess("");
-          fetchAddedPlans();
         }, 3000);
       }
     } catch (error) {
@@ -370,12 +371,12 @@ const PlanAndPricing = () => {
         `${config.baseApiUrl}admin/update-plan/${planIdToDelete}/`
       );
       if (res.status === 200) {
-        setPlanSuccess(res.data.message);
+        setDeleteSuccess(res.data.message);
         fetchAddedPlans();
-        setDeletePlanModal(false);
         setPlanIdToDelete(null);
         setTimeout(() => {
-          setPlanSuccess("");
+          setDeleteSuccess("");
+          setDeletePlanModal(false);
         }, 3000);
       }
     } catch (error) {
@@ -700,7 +701,7 @@ const PlanAndPricing = () => {
                 <div className="p-4 overflow-y-auto">
                   <div className="text-center">
                     <h3 className="text-lg font-semibold text-white">
-                      Add Product Plan
+                      Add Product Subscription Plan
                     </h3>
                   </div>
                   <div className="px-4 py-10 sm:px-6 lg:px-8 mx-auto w-full">
@@ -868,7 +869,7 @@ const PlanAndPricing = () => {
                         </div>
                         <div className="w-full mt-2">
                           <label className="block mb-2 text-sm text-white font-medium">
-                            Select product
+                            Select products
                           </label>
                           <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
                             <button
@@ -880,7 +881,7 @@ const PlanAndPricing = () => {
                               className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                             >
                               <span className="pr-4 text-sm text-white">
-                                Select product
+                                Select products
                               </span>
                               <FiChevronDown
                                 id="rotate1"
@@ -957,7 +958,7 @@ const PlanAndPricing = () => {
                           </div>
                           <div className="ms-3">
                             <h3 className="text-gray-800 font-semibold dark:text-white">
-                              Product Plan.
+                              Product Subscription Plan.
                             </h3>
                             <p className="text-sm text-gray-700 dark:text-neutral-400">
                               {success}
@@ -1020,7 +1021,7 @@ const PlanAndPricing = () => {
                     </button>
                   </div>
                 </div>
-                {planSuccess && (
+                {deleteSuccess && (
                   <div
                     id="dismiss-alert"
                     className="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 bg-purple-50 border border-purple-200 text-sm text-purple-800 rounded-lg p-4 dark:bg-purple-800/10 dark:border-purple-900 dark:text-purple-500"
@@ -1031,7 +1032,9 @@ const PlanAndPricing = () => {
                         <FaCheckCircle className="flex-shrink-0 size-4 mt-0.5 text-purple-500" />
                       </div>
                       <div className="ms-2">
-                        <div className="text-sm font-medium">{planSuccess}</div>
+                        <div className="text-sm font-medium">
+                          {deleteSuccess}
+                        </div>
                       </div>
                       <div className="ps-3 ms-auto">
                         <div className="-mx-1.5 -my-1.5">
