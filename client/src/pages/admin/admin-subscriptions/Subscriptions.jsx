@@ -1,6 +1,14 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { FiChevronDown, FiEdit, FiTrash, FiBell } from "react-icons/fi";
+import {
+  FiChevronDown,
+  FiEdit,
+  FiTrash,
+  FiBell,
+  FiPlus,
+  FiCheckCircle,
+  FiSearch,
+} from "react-icons/fi";
 import { MdClose } from "react-icons/md";
 import { CiMenuKebab, CiFilter } from "react-icons/ci";
 import {
@@ -19,67 +27,80 @@ import "./subscriptions.css";
 
 const Subscriptions = () => {
   const [companySubscriptions, setCompanySubscriptions] = useState([]);
-  const [companies, setCompanies] = useState([]);
-  const [subScriptionPlans, setSubscriptionPlans] = useState([]);
 
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [openDropdown1, setOpenDropdown1] = useState(null);
-  const [open, setOpen] = useState(false);
-  const onOpenModal = () => setOpen(true);
-  const onCloseModal = () => setOpen(false);
-  const [open1, setOpen1] = useState(false);
-  const onOpenModal1 = () => setOpen1(true);
-  const onCloseModal1 = () => setOpen1(false);
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const onOpenDeleteModal = () => setOpenDeleteModal(true);
-  const onCloseDeleteModal = () => setOpenDeleteModal(false);
-  const [success, setSuccess] = useState("");
-  const [createSubForm, setCreateSubForm] = useState({
-    company_name: "",
-    subscription_plan: "",
-    start_date: "",
-    end_date: "",
-  });
-  const [updateSubForm, setUpdateSubForm] = useState({
-    subscription_plan: "",
-    start_date: "",
-    end_date: "",
-  });
-  const [editingCompanySubscription, setEditingCompanySubscription] = useState(
-    {}
-  );
-  const [deleteCompanySubscriptionId, setDeleteCompanySubscriptionId] =
-    useState(null);
-  const [errors, setErrors] = useState({});
-  const [errors1, setErrors1] = useState({});
-  const [selectedLayout1, setSelectedLayout1] = useState("Company");
-  const [selectedLayout2, setSelectedLayout2] = useState("Subscription Plan");
-  const [selectedLayout3, setSelectedLayout3] = useState("Period");
-  const [selectedLayout4, setSelectedLayout4] = useState("Subscription Plan");
-  const [selectedLayout5, setSelectedLayout5] = useState("Period");
-  const [selectedLayout6, setSelectedLayout6] = useState("Status");
-  const [dropdownVisible1, setDropdownVisible1] = useState(false);
-  const [dropdownVisible2, setDropdownVisible2] = useState(false);
-  const [dropdownVisible3, setDropdownVisible3] = useState(false);
-  const [dropdownVisible4, setDropdownVisible4] = useState(false);
-  const [dropdownVisible5, setDropdownVisible5] = useState(false);
-  const [dropdownVisible6, setDropdownVisible6] = useState(false);
+  const [companies, setCompanies] = useState([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState([]);
+  const [products, setproducts] = useState([]);
+  const [plans, setPlans] = useState([]);
+  const [addCompanySubscriptionModal, setAddCompanySubscriptionModal] =
+    useState(false);
   const [periodOptions, setPeriodOptions] = useState([
     "Monthly",
     "Annual",
     "Custom",
   ]);
+  const [selectedCompany, setSelectedCompany] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [selectedPeriod, setSelectedPeriod] = useState(null);
+  const [selectCompanyDropdown, setSelectCompanyDropdown] = useState(false);
+  const [selectProductDropdown, setSelectProductDropdown] = useState(false);
+  const [selectPlanDropdown, setSelectPlanDropdown] = useState(false);
+  const [selectPeriodDropdown, setSelectPeriodDropdown] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState(null);
+  const [createCompSubForm, setCreateCompSubForm] = useState({
+    company: null,
+    subscription_plan: null,
+    start_date: null,
+    end_date: null,
+    period: null,
+  });
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [offset, setOffset] = useState(0);
+  const LIMIT = 2;
+  const [totalCount, setTotalCount] = useState(0);
+
   const [statusOptions, setStatusOptions] = useState([
     "Active",
     "Pending",
     "Inactive",
     "Canceled",
   ]);
-  const [status, setStatus] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [offset, setOffset] = useState(0);
-  const LIMIT = 2;
-  const [hasMore, setHasMore] = useState(true);
+  const [statusDropdown, setStatusDropdown] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState("");
+
+  const [statusChangeDropdown, setStatusChangeDropdown] = useState(false);
+  const [editDeleteDropdown, setEditDeleteDropdown] = useState(false);
+
+  const [editCompSubForm, setEditCompSubForm] = useState({
+    subscription_plan: null,
+    start_date: null,
+    end_date: null,
+    period: null,
+  });
+  const [editCompanySubscriptionModal, setEditCompanySubscriptionModal] =
+    useState(false);
+  const [editSelectedSubscription, setEditSelectedSubscription] =
+    useState(null);
+  const [editSelectedCompany, setEditSelectedCompany] = useState(null);
+  const [editSelectedProduct, setEditSelectedProduct] = useState(null);
+  const [editSelectedPlan, setEditSelectedPlan] = useState(null);
+  const [editSelectedPeriod, setEditSelectedPeriod] = useState("");
+  const [editSelectProductDropdown, setEditSelectProductDropdown] =
+    useState(false);
+  const [editSelectPlanDropdown, setEditSelectPlanDropdown] = useState(false);
+  const [editSelectPeriodDropdown, setEditSelectPeriodDropdown] =
+    useState(false);
+  const [editErrors, setEditErrors] = useState({});
+  const [editSuccess, setEditSuccess] = useState(false);
+
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteCompanySubscriptionId, setDeleteCompanySubscriptionId] =
+    useState(null);
+  const [deleteSuccess, setDeleteSuccess] = useState("");
+
   const { isSidebarCollapsed, dispatch: sidebarDispatch } = useSidebarContext();
 
   const sidebarToggle = () => {
@@ -91,37 +112,16 @@ const Subscriptions = () => {
       const res = await axios.get(`${config.baseApiUrl}admin/subscriptions/`, {
         params: {
           search: searchTerm,
-          status: status,
+          status: selectedStatus,
           limit: LIMIT,
           offset: offset,
         },
       });
       if (res.status === 200) {
-        const newCompanySubscriptions = res.data;
-        if (offset === 0) {
-          setCompanySubscriptions(res.data);
-        } else {
-          setCompanySubscriptions((prevCompanySubscriptions) => [
-            ...prevCompanySubscriptions,
-            ...newCompanySubscriptions,
-          ]);
-        }
-        setHasMore(newCompanySubscriptions.length === LIMIT);
+        const { company_subscriptions, total_count } = res.data;
+        setCompanySubscriptions(company_subscriptions);
+        setTotalCount(total_count);
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const fetchCompaniesAndPlans = async () => {
-    try {
-      const companyRes = await axios.get(`${config.baseApiUrl}companies/`);
-      setCompanies(companyRes.data);
-
-      const subScriptionsRes = await axios.get(
-        `${config.baseApiUrl}admin/create-subscription-plan/`
-      );
-      setSubscriptionPlans(subScriptionsRes.data.data);
     } catch (error) {
       console.log(error);
     }
@@ -129,11 +129,7 @@ const Subscriptions = () => {
 
   useEffect(() => {
     fetchCompanySubscriptions();
-  }, [searchTerm, offset, status]);
-
-  useEffect(() => {
-    fetchCompaniesAndPlans();
-  }, []);
+  }, [searchTerm, offset, selectedStatus]);
 
   const calculatePeriod = (start_date, end_date) => {
     const startDate = new Date(start_date);
@@ -145,220 +141,124 @@ const Subscriptions = () => {
     return `${diffDays} Days`;
   };
 
-  const toggleDropdown = (id) => {
-    setOpenDropdown(openDropdown === id ? null : id);
-    setOpenDropdown1(null);
-  };
+  const fetchCompaniesAndPlans = async () => {
+    try {
+      const companyRes = await axios.get(`${config.baseApiUrl}companies/`);
+      setCompanies(companyRes.data);
 
-  const toggleDropdown1 = (id) => {
-    setOpenDropdown1(openDropdown1 === id ? null : id);
-    setOpenDropdown(null);
-  };
-
-  const showDropDownMenuOne_form_layout_wizard4 = () => {
-    setDropdownVisible1(!dropdownVisible1);
-  };
-
-  const swaptextone_form_layout_wizard4 = (e) => {
-    const targetText = e.target.innerText;
-    setSelectedLayout1(targetText);
-    setDropdownVisible1(false);
-    if (targetText !== "Company") {
-      const selectedCompany = companies.find(
-        (company) => company.company_name === targetText
+      const subScriptionsRes = await axios.get(
+        `${config.baseApiUrl}admin/create-subscription-plan/`
       );
-      setCreateSubForm((prevData) => ({
-        ...prevData,
-        company_name: selectedCompany.id,
-      }));
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        company_name: "",
-      }));
-    }
-  };
+      const plans = subScriptionsRes.data.data;
+      setSubscriptionPlans(plans);
 
-  const handleOutsideClick1 = (e) => {
-    const dropdown = document.getElementById(
-      "drop-down-div-one_form_layout_wizard4"
-    );
-    if (
-      dropdown &&
-      !dropdown.contains(e.target) &&
-      e.target.id !== "drop-down-content-setter-one_form_layout_wizard4"
-    ) {
-      setDropdownVisible1(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick1);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick1);
-    };
-  }, []);
-
-  const showDropDownMenuOne_form_layout_wizard5 = () => {
-    setDropdownVisible2(!dropdownVisible2);
-  };
-
-  const swaptextone_form_layout_wizard5 = (e) => {
-    const targetText = e.target.innerText;
-    setSelectedLayout2(targetText);
-    setDropdownVisible2(false);
-    if (targetText !== "Subscription Plan") {
-      const selectedPlan = subScriptionPlans.find(
-        (plan) => plan.plan_name === targetText
-      );
-      setCreateSubForm((prevData) => ({
-        ...prevData,
-        subscription_plan: selectedPlan.id,
-      }));
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        subscription_plan: "",
-      }));
-    }
-  };
-
-  const handleOutsideClick2 = (e) => {
-    const dropdown = document.getElementById(
-      "drop-down-div-one_form_layout_wizard5"
-    );
-    if (
-      dropdown &&
-      !dropdown.contains(e.target) &&
-      e.target.id !== "drop-down-content-setter-one_form_layout_wizard5"
-    ) {
-      setDropdownVisible2(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick2);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick2);
-    };
-  }, []);
-
-  const showDropDownMenuOne_form_layout_wizard6 = () => {
-    setDropdownVisible3(!dropdownVisible3);
-  };
-
-  const swaptextone_form_layout_wizard6 = (e) => {
-    const targetText = e.target.innerText;
-    setSelectedLayout3(targetText);
-    setDropdownVisible3(false);
-
-    if (
-      targetText !== "Period" &&
-      selectedLayout2 !== "" &&
-      selectedLayout2 !== "Subscription Plan"
-    ) {
-      const startDate = new Date();
-      let endDate;
-
-      if (targetText === "Monthly") {
-        endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + 1);
-      } else if (targetText === "Annual") {
-        endDate = new Date(startDate);
-        endDate.setFullYear(endDate.getFullYear() + 1);
-      } else {
-        const selectedPlan = subScriptionPlans.find(
-          (plan) => plan.id === createSubForm.subscription_plan
-        );
-        endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + selectedPlan.duration_in_months);
-      }
-
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
-
-      setCreateSubForm((prevData) => ({
-        ...prevData,
-        start_date: startDate.toLocaleDateString("en-CA"),
-        end_date: endDate.toLocaleDateString("en-CA"),
-      }));
-    }
-  };
-
-  useEffect(() => {
-    if (selectedLayout3 !== "" && selectedLayout3 !== "Period") {
-      const startDate = new Date();
-      let endDate;
-      if (selectedLayout3 === "Monthly") {
-        endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + 1);
-      } else if (selectedLayout3 === "Annual") {
-        endDate = new Date(startDate);
-        endDate.setFullYear(endDate.getFullYear() + 1);
-      } else {
-        const selectedPlan = subScriptionPlans.find(
-          (plan) => plan.id === createSubForm.subscription_plan
-        );
-        endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + selectedPlan.duration_in_months);
-      }
-
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
-
-      setCreateSubForm((prevData) => ({
-        ...prevData,
-        start_date: startDate.toLocaleDateString("en-CA"),
-        end_date: endDate.toLocaleDateString("en-CA"),
-      }));
-    }
-  }, [selectedLayout2]);
-
-  const handleOutsideClick3 = (e) => {
-    const dropdown = document.getElementById(
-      "drop-down-div-one_form_layout_wizard6"
-    );
-    if (
-      dropdown &&
-      !dropdown.contains(e.target) &&
-      e.target.id !== "drop-down-content-setter-one_form_layout_wizard6"
-    ) {
-      setDropdownVisible3(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick3);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick3);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!open) {
-      setSelectedLayout1("Company");
-      setSelectedLayout2("Subscription Plan");
-      setSelectedLayout3("Period");
-      setCreateSubForm({
-        company_name: "",
-        subscription_plan: "",
-        start_date: "",
-        end_date: "",
+      const uniqueProductSet = new Set();
+      plans.forEach((plan) => {
+        if (plan.product && plan.product.id) {
+          uniqueProductSet.add(JSON.stringify(plan.product));
+        }
       });
-      setErrors({});
+
+      const uniqueProductArray = Array.from(uniqueProductSet).map((product) =>
+        JSON.parse(product)
+      );
+      setproducts(uniqueProductArray);
+    } catch (error) {
+      console.log(error);
     }
-  }, [open]);
+  };
+
+  useEffect(() => {
+    fetchCompaniesAndPlans();
+  }, []);
+
+  const handleCompanyClick = (company) => {
+    setSelectedCompany(company);
+    setSelectCompanyDropdown(false);
+    setCreateCompSubForm((prevData) => ({ ...prevData, company: company.id }));
+    setErrors((prevErrors) => ({ ...prevErrors, company: "" }));
+  };
+
+  const handleProductClick = (product) => {
+    setSelectedProduct(product);
+    setSelectProductDropdown(false);
+    setSelectedPlan(null);
+    setPlans(
+      subscriptionPlans.filter((plan) => plan.product.id === product.id)
+    );
+    setCreateCompSubForm((prevData) => ({
+      ...prevData,
+      subscription_plan: null,
+    }));
+    setErrors((prevErrors) => ({ ...prevErrors, product: "" }));
+  };
+
+  const calculateEndDate = (startDate, months) => {
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + months);
+    endDate.setHours(0, 0, 0, 0);
+    return endDate.toLocaleDateString("en-CA");
+  };
+
+  const handlePeriodClick = (period) => {
+    setSelectedPeriod(period);
+    setSelectPeriodDropdown(false);
+
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+    let endDate = null;
+
+    if (period === "Monthly") {
+      endDate = calculateEndDate(startDate, 1);
+    } else if (period === "Annual") {
+      endDate = calculateEndDate(startDate, 12);
+    } else if (period === "Custom" && selectedPlan) {
+      endDate = calculateEndDate(startDate, selectedPlan.duration_in_months);
+    }
+
+    setCreateCompSubForm((prevData) => ({
+      ...prevData,
+      start_date: startDate.toLocaleDateString("en-CA"),
+      end_date: endDate,
+      period: period,
+    }));
+    setErrors((prevErrors) => ({ ...prevErrors, period: "" }));
+  };
+
+  const handlePlanClick = (plan) => {
+    setSelectedPlan(plan);
+    setSelectPlanDropdown(false);
+    setCreateCompSubForm((prevData) => ({
+      ...prevData,
+      subscription_plan: plan.id,
+    }));
+    if (selectedPeriod === "Custom") {
+      const startDate = new Date();
+      const endDate = calculateEndDate(startDate, plan.duration_in_months);
+      setCreateCompSubForm((prevData) => ({
+        ...prevData,
+        start_date: startDate.toLocaleDateString("en-CA"),
+        end_date: endDate,
+      }));
+    }
+    setErrors((prevErrors) => ({ ...prevErrors, plan: "" }));
+  };
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!createSubForm.company_name) {
-      newErrors.company_name = "Company is required";
+    if (!createCompSubForm.company) {
+      newErrors.company = "Company is required";
     }
 
-    if (!createSubForm.subscription_plan) {
-      newErrors.subscription_plan = "Subscription plan is required";
+    if (!selectedProduct) {
+      newErrors.product = "Product is required";
     }
 
-    if (selectedLayout3 === "Period") {
+    if (!selectedPlan) {
+      newErrors.plan = "Plan is required";
+    }
+    if (!selectedPeriod) {
       newErrors.period = "Period is required";
     }
 
@@ -366,35 +266,22 @@ const Subscriptions = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  useEffect(() => {
-    if (selectedLayout3 !== "Period") {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        period: "",
-      }));
-    }
-  }, [selectedLayout3]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       return;
     }
-
     try {
       const response = await axios.post(
         `${config.baseApiUrl}admin/subscriptions/`,
-        createSubForm
+        createCompSubForm
       );
       if (response.status === 200) {
         setSuccess("Company Subscription created successfully.");
-        handleClear();
-        fetchCompaniesAndPlans();
         fetchCompanySubscriptionsAfterCreation();
         setTimeout(() => {
           setSuccess("");
-          onCloseModal();
+          setAddCompanySubscriptionModal(false);
         }, 3000);
       }
     } catch (error) {
@@ -406,21 +293,41 @@ const Subscriptions = () => {
     try {
       const res = await axios.get(`${config.baseApiUrl}admin/subscriptions/`, {
         params: {
-          search: searchTerm,
-          status: status,
+          search: "",
+          status: "",
           limit: LIMIT,
           offset: 0,
         },
       });
       if (res.status === 200) {
-        const newCompanySubscriptions = res.data;
-        setCompanySubscriptions(newCompanySubscriptions);
-        setHasMore(newCompanySubscriptions.length === LIMIT);
+        const { company_subscriptions, total_count } = res.data;
+        setCompanySubscriptions(company_subscriptions);
+        setTotalCount(total_count);
       }
     } catch (error) {
       console.log(error);
     }
   };
+
+  useEffect(() => {
+    if (!addCompanySubscriptionModal) {
+      setSelectedCompany(null);
+      setSelectedProduct(null);
+      setSelectedPlan(null);
+      setSelectedPeriod(null);
+      setSelectCompanyDropdown(false);
+      setSelectProductDropdown(false);
+      setSelectPlanDropdown(false);
+      setSelectPeriodDropdown(false);
+      setCreateCompSubForm({
+        company: null,
+        subscription_plan: null,
+        start_date: null,
+        end_date: null,
+      });
+      setErrors([]);
+    }
+  }, [addCompanySubscriptionModal]);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -428,7 +335,7 @@ const Subscriptions = () => {
         `${config.baseApiUrl}admin/subscriptions/${id}/update/`,
         { status: newStatus }
       );
-      if (searchTerm === "" && status === "") {
+      if (searchTerm === "" && selectedStatus === "") {
         setCompanySubscriptions((prevSubscriptions) =>
           prevSubscriptions.map((subscription) =>
             subscription.id === id
@@ -439,290 +346,11 @@ const Subscriptions = () => {
       } else {
         handleClear();
         fetchCompaniesAndPlans();
-        fetchCompanySubscriptionsAfterCreation();
-        setOpenDropdown1(null);
       }
     } catch (error) {
       console.error("Error updating status:", error);
     }
   };
-
-  const showDropDownMenuOne_form_layout_wizard7 = () => {
-    setDropdownVisible4(!dropdownVisible4);
-  };
-
-  const swaptextone_form_layout_wizard7 = (e) => {
-    const targetText = e.target.innerText;
-    setSelectedLayout4(targetText);
-    setDropdownVisible4(false);
-    if (targetText !== "Subscription Plan") {
-      const selectedPlan = subScriptionPlans.find(
-        (plan) => plan.plan_name === targetText
-      );
-      setUpdateSubForm((prevData) => ({
-        ...prevData,
-        subscription_plan: selectedPlan.id,
-      }));
-      setErrors1((prevErrors) => ({
-        ...prevErrors,
-        subscription_plan: "",
-      }));
-    }
-  };
-
-  const handleOutsideClick4 = (e) => {
-    const dropdown = document.getElementById(
-      "drop-down-div-one_form_layout_wizard7"
-    );
-    if (
-      dropdown &&
-      !dropdown.contains(e.target) &&
-      e.target.id !== "drop-down-content-setter-one_form_layout_wizard7"
-    ) {
-      setDropdownVisible4(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick4);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick4);
-    };
-  }, []);
-
-  const showDropDownMenuOne_form_layout_wizard8 = () => {
-    setDropdownVisible5(!dropdownVisible5);
-  };
-
-  const swaptextone_form_layout_wizard8 = (e) => {
-    const targetText = e.target.innerText;
-    setSelectedLayout5(targetText);
-    setDropdownVisible5(false);
-
-    if (
-      targetText !== "Period" &&
-      selectedLayout4 !== "" &&
-      selectedLayout4 !== "Subscription Plan"
-    ) {
-      const startDate = new Date();
-      let endDate;
-
-      if (targetText === "Monthly") {
-        endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + 1);
-      } else if (targetText === "Annual") {
-        endDate = new Date(startDate);
-        endDate.setFullYear(endDate.getFullYear() + 1);
-      } else {
-        const selectedPlan = subScriptionPlans.find(
-          (plan) => plan.id === updateSubForm.subscription_plan
-        );
-        endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + selectedPlan.duration_in_months);
-      }
-
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
-
-      setUpdateSubForm((prevData) => ({
-        ...prevData,
-        start_date: startDate.toLocaleDateString("en-CA"),
-        end_date: endDate.toLocaleDateString("en-CA"),
-      }));
-    }
-  };
-
-  useEffect(() => {
-    if (selectedLayout5 !== "" && selectedLayout5 !== "Period") {
-      const startDate = new Date();
-      let endDate;
-      if (selectedLayout5 === "Monthly") {
-        endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + 1);
-      } else if (selectedLayout5 === "Annual") {
-        endDate = new Date(startDate);
-        endDate.setFullYear(endDate.getFullYear() + 1);
-      } else {
-        const selectedPlan = subScriptionPlans.find(
-          (plan) => plan.id === updateSubForm.subscription_plan
-        );
-        endDate = new Date(startDate);
-        endDate.setMonth(endDate.getMonth() + selectedPlan.duration_in_months);
-      }
-
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(0, 0, 0, 0);
-
-      setUpdateSubForm((prevData) => ({
-        ...prevData,
-        start_date: startDate.toLocaleDateString("en-CA"),
-        end_date: endDate.toLocaleDateString("en-CA"),
-      }));
-    }
-  }, [selectedLayout4]);
-
-  const handleOutsideClick5 = (e) => {
-    const dropdown = document.getElementById(
-      "drop-down-div-one_form_layout_wizard8"
-    );
-    if (
-      dropdown &&
-      !dropdown.contains(e.target) &&
-      e.target.id !== "drop-down-content-setter-one_form_layout_wizard8"
-    ) {
-      setDropdownVisible5(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick5);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick5);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (selectedLayout5 !== "Period") {
-      setErrors1((prevErrors) => ({
-        ...prevErrors,
-        period: "",
-      }));
-    }
-  }, [selectedLayout5]);
-
-  useEffect(() => {
-    if (!open1) {
-      setSelectedLayout4("Subscription Plan");
-      setSelectedLayout5("Period");
-      setUpdateSubForm({
-        subscription_plan: "",
-        start_date: "",
-        end_date: "",
-      });
-      setErrors1({});
-      setEditingCompanySubscription({});
-    }
-  }, [open1]);
-
-  const handleEdit = (id) => {
-    const editedCompanySub = companySubscriptions.find(
-      (item) => item.id === id
-    );
-    setEditingCompanySubscription(editedCompanySub);
-    onOpenModal1();
-  };
-
-  const validateUpdateForm = () => {
-    const newErrors1 = {};
-
-    if (!updateSubForm.subscription_plan) {
-      newErrors1.subscription_plan = "Subscription plan is required";
-    }
-
-    if (selectedLayout5 === "Period") {
-      newErrors1.period = "Period is required";
-    }
-
-    setErrors1(newErrors1);
-    return Object.keys(newErrors1).length === 0;
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-
-    if (!validateUpdateForm()) {
-      return;
-    }
-
-    try {
-      const response = await axios.put(
-        `${config.baseApiUrl}admin/subscriptions/${editingCompanySubscription.id}/update/`,
-        updateSubForm
-      );
-      if (response.status === 200) {
-        setSuccess("Company subscription updated successfully.");
-        if (searchTerm === "" && status === "") {
-          setCompanySubscriptions((prevSubscriptions) =>
-            prevSubscriptions.map((subscription) =>
-              subscription.id === editingCompanySubscription.id
-                ? response.data
-                : subscription
-            )
-          );
-        } else {
-          handleClear();
-          fetchCompanySubscriptionsAfterCreation();
-          fetchCompaniesAndPlans();
-        }
-        setTimeout(() => {
-          setSuccess("");
-          onCloseModal1();
-        }, 3000);
-      }
-    } catch (error) {
-      console.error("Error updating subscription:", error);
-    }
-  };
-
-  const handleDelete = (id) => {
-    setDeleteCompanySubscriptionId(id);
-    onOpenDeleteModal();
-  };
-
-  const confirmDelete = async () => {
-    try {
-      const response = await axios.delete(
-        `${config.baseApiUrl}admin/subscriptions/${deleteCompanySubscriptionId}/delete/`
-      );
-      if (response.status === 200) {
-        setSuccess("Company subscription deleted successfully.");
-        handleClear();
-        fetchCompanySubscriptionsAfterCreation();
-        fetchCompaniesAndPlans();
-        setTimeout(() => {
-          setSuccess("");
-          onCloseDeleteModal();
-          setDeleteCompanySubscriptionId(null);
-        }, 3000);
-      }
-    } catch (error) {
-      console.error("Error deleting subscription:", error);
-    }
-  };
-
-  const showDropDownMenuOne_form_layout_wizard9 = () => {
-    setDropdownVisible6(!dropdownVisible6);
-  };
-
-  const swaptextone_form_layout_wizard9 = (e) => {
-    const targetText = e.target.innerText;
-    setSelectedLayout6(targetText);
-    setDropdownVisible6(false);
-    if (e.target.innerText !== "Status") {
-      setStatus(e.target.innerText);
-      setOffset(0);
-    }
-  };
-
-  const handleOutsideClick6 = (e) => {
-    const dropdown = document.getElementById(
-      "drop-down-div-one_form_layout_wizard9"
-    );
-    if (
-      dropdown &&
-      !dropdown.contains(e.target) &&
-      e.target.id !== "drop-down-content-setter-one_form_layout_wizard9"
-    ) {
-      setDropdownVisible6(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousedown", handleOutsideClick6);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick6);
-    };
-  }, []);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -731,14 +359,20 @@ const Subscriptions = () => {
 
   const handleClear = () => {
     setSearchTerm("");
-    setStatus("");
-    setSelectedLayout6("Status");
+    setSelectedStatus("");
     setOffset(0);
   };
 
-  const loadMoreCompanySubscriptions = () => {
-    const newOffset = offset + LIMIT;
-    setOffset(newOffset);
+  const handleNext = () => {
+    if (offset + LIMIT < totalCount) {
+      setOffset((prevOffset) => prevOffset + LIMIT);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (offset > 0) {
+      setOffset((prevOffset) => prevOffset - LIMIT);
+    }
   };
 
   const getStatusClasses = (status) => {
@@ -753,6 +387,191 @@ const Subscriptions = () => {
         return "text-red-400 border-red-400";
       default:
         return "text-white border-white";
+    }
+  };
+
+  const handleStatusSelect = (status) => {
+    setSelectedStatus(status);
+    setOffset(0);
+    setStatusDropdown(false);
+  };
+
+  const toggleStatusChange = (id) => {
+    setStatusChangeDropdown((prev) => (prev === id ? null : id));
+  };
+
+  const toggleEditDelete = (id) => {
+    setEditDeleteDropdown((prev) => (prev === id ? null : id));
+  };
+
+  const handleEdit = (subscription) => {
+    setEditSelectedSubscription(subscription);
+    setEditSelectedCompany(subscription.company);
+    setEditSelectedProduct(subscription.subscription_plan.product);
+    setEditSelectedPlan(subscription.subscription_plan);
+    setEditSelectedPeriod(subscription.period);
+    setEditCompanySubscriptionModal(true);
+    setEditCompSubForm((prevData) => ({
+      ...prevData,
+      subscription_plan: subscription.subscription_plan.id,
+      start_date: subscription.start_date,
+      end_date: subscription.end_date,
+      period: subscription.period,
+    }));
+    setPlans(
+      subscriptionPlans.filter(
+        (plan) => plan.product.id === subscription.subscription_plan.product.id
+      )
+    );
+  };
+
+  const handleEditProductClick = (product) => {
+    setEditSelectedProduct(product);
+    setEditSelectProductDropdown(false);
+    setEditSelectedPlan(null);
+    setPlans(
+      subscriptionPlans.filter((plan) => plan.product.id === product.id)
+    );
+    setEditCompSubForm((prevData) => ({
+      ...prevData,
+      subscription_plan: null,
+    }));
+  };
+
+  const handleEditPeriodClick = (period) => {
+    setEditSelectedPeriod(period);
+    setEditSelectPeriodDropdown(false);
+
+    const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+    let endDate = null;
+
+    if (period === "Monthly") {
+      endDate = calculateEndDate(startDate, 1);
+    } else if (period === "Annual") {
+      endDate = calculateEndDate(startDate, 12);
+    } else if (period === "Custom" && editSelectedPlan) {
+      endDate = calculateEndDate(
+        startDate,
+        editSelectedPlan.duration_in_months
+      );
+    }
+
+    setEditCompSubForm((prevData) => ({
+      ...prevData,
+      start_date: startDate.toLocaleDateString("en-CA"),
+      end_date: endDate,
+      period: period,
+    }));
+  };
+
+  const handleEditPlanClick = (plan) => {
+    setEditSelectedPlan(plan);
+    setEditSelectPlanDropdown(false);
+    setEditCompSubForm((prevData) => ({
+      ...prevData,
+      subscription_plan: plan.id,
+    }));
+    if (editSelectedPeriod === "Custom") {
+      const startDate = new Date();
+      const endDate = calculateEndDate(startDate, plan.duration_in_months);
+      setEditCompSubForm((prevData) => ({
+        ...prevData,
+        start_date: startDate.toLocaleDateString("en-CA"),
+        end_date: endDate,
+      }));
+    }
+    setEditErrors((prevErrors) => ({ ...prevErrors, plan: "" }));
+  };
+
+  const validateEditForm = () => {
+    const newErrors = {};
+
+    if (!editSelectedPlan) {
+      newErrors.plan = "Plan is required";
+    }
+
+    setEditErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleEditCompanySubscription = async (e) => {
+    e.preventDefault();
+
+    if (!validateEditForm()) {
+      return;
+    }
+    try {
+      const response = await axios.put(
+        `${config.baseApiUrl}admin/subscriptions/${editSelectedSubscription.id}/update/`,
+        editCompSubForm
+      );
+      if (response.status === 200) {
+        setEditSuccess("Company subscription updated successfully.");
+        if (searchTerm === "" && selectedStatus === "") {
+          setCompanySubscriptions((prevSubscriptions) =>
+            prevSubscriptions.map((subscription) =>
+              subscription.id === editSelectedSubscription.id
+                ? response.data
+                : subscription
+            )
+          );
+        } else {
+          handleClear();
+          fetchCompaniesAndPlans();
+        }
+        setTimeout(() => {
+          setEditSuccess("");
+          setEditCompanySubscriptionModal(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error updating subscription:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!editCompanySubscriptionModal) {
+      setEditSelectedCompany(null);
+      setEditSelectedProduct(null);
+      setEditSelectedPlan(null);
+      setEditSelectedPeriod(null);
+      setEditSelectProductDropdown(false);
+      setEditSelectPlanDropdown(false);
+      setEditSelectPeriodDropdown(false);
+      setEditCompSubForm({
+        subscription_plan: null,
+        start_date: null,
+        end_date: null,
+        period: null,
+      });
+      setEditSelectedSubscription(null);
+      setEditErrors({});
+    }
+  }, [editCompanySubscriptionModal]);
+
+  const handleDelete = (id) => {
+    setDeleteCompanySubscriptionId(id);
+    setOpenDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      const response = await axios.delete(
+        `${config.baseApiUrl}admin/subscriptions/${deleteCompanySubscriptionId}/delete/`
+      );
+      if (response.status === 200) {
+        setDeleteSuccess("Company subscription deleted successfully.");
+        fetchCompanySubscriptionsAfterCreation();
+        fetchCompaniesAndPlans();
+        setTimeout(() => {
+          setDeleteSuccess("");
+          setOpenDeleteModal(false);
+          setDeleteCompanySubscriptionId(null);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Error deleting subscription:", error);
     }
   };
 
@@ -780,7 +599,6 @@ const Subscriptions = () => {
                 </li>
               </ul>
             </div>
-
             <div className="text-white px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
               <div className="flex flex-col">
                 <div className="-m-1.5 overflow-x-auto">
@@ -808,21 +626,7 @@ const Subscriptions = () => {
                                 onChange={handleSearchChange}
                               />
                               <div className="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-4">
-                                <svg
-                                  className="flex-shrink-0 size-4 text-slate-400 dark:text-neutral-500"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="24"
-                                  height="24"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <circle cx="11" cy="11" r="8" />
-                                  <path d="m21 21-4.3-4.3" />
-                                </svg>
+                                <FiSearch className="flex-shrink-0 size-4 text-slate-400 dark:text-neutral-500" />
                               </div>
                             </div>
                           </div>
@@ -830,40 +634,25 @@ const Subscriptions = () => {
                         <div className="flex flex-col gap-4">
                           <div className="flex md:justify-end">
                             <button
-                              onClick={onOpenModal}
+                              onClick={() =>
+                                setAddCompanySubscriptionModal(true)
+                              }
                               className="py-3 px-3 inline-flex items-center gap-x-2 text-sm font-semibold rounded-lg border border-purple-700 text-slate-950 hover:bg-purple-700 bg-purple-600 disabled:opacity-50 disabled:pointer-events-none"
                             >
-                              <svg
-                                className="flex-shrink-0 size-4"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M5 12h14" />
-                                <path d="M12 5v14" />
-                              </svg>
-                              Add New Subscription
+                              <FiPlus className="flex-shrink-0 size-4" />
+                              Add New Company Subscription
                             </button>
                           </div>
                           <div className="flex gap-2">
-                            <div className="relative w-48 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
+                            <div className="relative w-48  h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                               <button
-                                onClick={
-                                  showDropDownMenuOne_form_layout_wizard9
-                                }
+                                onClick={() => {
+                                  setStatusDropdown(!statusDropdown);
+                                }}
                                 className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                               >
-                                <span
-                                  className="pr-4 text-sm text-white"
-                                  id="drop-down-content-setter-one_form_layout_wizard9"
-                                >
-                                  {selectedLayout6}
+                                <span className="pr-4 text-sm text-white">
+                                  {selectedStatus ? selectedStatus : "Status"}
                                 </span>
                                 <FiChevronDown
                                   id="rotate1"
@@ -873,15 +662,14 @@ const Subscriptions = () => {
                               </button>
                               <div
                                 className={`absolute right-0 z-20 ${
-                                  dropdownVisible6 ? "" : "hidden"
-                                } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-10 max-h-28 overflow-y-scroll select`}
-                                id="drop-down-div-one_form_layout_wizard9"
+                                  statusDropdown ? "block" : "hidden"
+                                } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
                               >
                                 {statusOptions.map((status, index) => (
                                   <a key={index}>
                                     <p
                                       className="p-3 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
-                                      onClick={swaptextone_form_layout_wizard9}
+                                      onClick={() => handleStatusSelect(status)}
                                     >
                                       {status}
                                     </p>
@@ -928,6 +716,12 @@ const Subscriptions = () => {
                               scope="col"
                               className="px-6 py-3 text-start text-xs font-semibold uppercase tracking-wide text-white"
                             >
+                              Subscription Plan Product
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3 text-start text-xs font-semibold uppercase tracking-wide text-white"
+                            >
                               Start Date
                             </th>
                             <th
@@ -969,10 +763,13 @@ const Subscriptions = () => {
                                 {index + 1}
                               </td>
                               <td className="px-6 py-3 whitespace-nowrap">
-                                {subscription.company_name.company_name}
+                                {subscription.company.company_name}
                               </td>
                               <td className="px-6 py-3 whitespace-nowrap">
-                                {subscription.subscription_plan.plan_name}
+                                {subscription.subscription_plan.plan.name}
+                              </td>
+                              <td className="px-6 py-3 whitespace-nowrap">
+                                {subscription.subscription_plan.product.name}
                               </td>
                               <td className="px-6 py-3 whitespace-nowrap">
                                 {new Date(
@@ -997,7 +794,8 @@ const Subscriptions = () => {
                                 {calculatePeriod(
                                   subscription.start_date,
                                   subscription.end_date
-                                )}
+                                )}{" "}
+                                / {subscription.period}
                               </td>
                               <td className="px-6 py-3 whitespace-nowrap">
                                 <span
@@ -1010,21 +808,23 @@ const Subscriptions = () => {
                               </td>
                               <td
                                 className="px-6 py-3 whitespace-nowrap"
-                                onMouseLeave={() => setOpenDropdown1(null)}
+                                onMouseLeave={() =>
+                                  setStatusChangeDropdown(null)
+                                }
                               >
                                 <div className="relative">
                                   <button
                                     className="flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-700 text-white px-3 py-2"
                                     onClick={() =>
-                                      toggleDropdown1(subscription.id)
+                                      toggleStatusChange(subscription.id)
                                     }
                                   >
                                     {subscription.status} <FiChevronDown />
                                   </button>
-                                  {openDropdown1 === subscription.id && (
+                                  {statusChangeDropdown === subscription.id && (
                                     <div
                                       onMouseLeave={() =>
-                                        setOpenDropdown1(null)
+                                        setStatusChangeDropdown(null)
                                       }
                                       className="absolute mt-1 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-20 overflow-y-scroll max-h-20"
                                     >
@@ -1053,29 +853,29 @@ const Subscriptions = () => {
                               </td>
                               <td
                                 className="px-6 py-3 whitespace-nowrap"
-                                onMouseLeave={() => setOpenDropdown(null)}
+                                onMouseLeave={() => setEditDeleteDropdown(null)}
                               >
                                 <div className="relative flex justify-center text-left w-full">
                                   <div className="relative group rounded-xl w-fit border border-gray-700">
                                     <button
                                       onClick={() =>
-                                        toggleDropdown(subscription.id)
+                                        toggleEditDelete(subscription.id)
                                       }
                                       type="button"
                                       className="bg-primary flex items-center rounded-lg px-3 py-2 text-base font-medium"
                                     >
                                       <CiMenuKebab className="rotate-90 text-white" />
                                     </button>
-                                    {openDropdown === subscription.id && (
+                                    {editDeleteDropdown === subscription.id && (
                                       <div
                                         onMouseLeave={() =>
-                                          setOpenDropdown(null)
+                                          setEditDeleteDropdown(null)
                                         }
                                         className="absolute mt-1 right-0 bg-gray-800 border border-gray-700 rounded-md shadow-lg z-10"
                                       >
                                         <button
                                           onClick={() =>
-                                            handleEdit(subscription.id)
+                                            handleEdit(subscription)
                                           }
                                           className="px-4 py-2 text-sm text-blue-600 hover:bg-gray-700 w-full text-left flex items-center"
                                         >
@@ -1112,28 +912,20 @@ const Subscriptions = () => {
                         </div>
 
                         <div>
-                          <div className="inline-flex gap-x-2">
+                          <div className="flex justify-between items-center gap-1">
                             <button
-                              onClick={loadMoreCompanySubscriptions}
-                              disabled={!hasMore}
-                              type="button"
-                              className="py-1.5 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-700 text-white shadow-sm hover:bg-slate-800 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
+                              onClick={handlePrevious}
+                              disabled={offset === 0}
+                              className="py-1.5 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-700 text-white shadow-sm hover:bg-gray-800 disabled:opacity-50"
                             >
-                              Load Next
-                              <svg
-                                className="flex-shrink-0 size-4"
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="24"
-                                height="24"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M5 9l6 6 6-6" />
-                              </svg>
+                              Previous
+                            </button>
+                            <button
+                              onClick={handleNext}
+                              disabled={offset + LIMIT >= totalCount}
+                              className="py-1.5 px-2 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-700 text-white shadow-sm hover:bg-gray-800 disabled:opacity-50"
+                            >
+                              Next
                             </button>
                           </div>
                         </div>
@@ -1143,12 +935,11 @@ const Subscriptions = () => {
                 </div>
               </div>
             </div>
-
             {/* create company subscription modal */}
 
             <Modal
-              open={open}
-              onClose={() => setOpen(false)}
+              open={addCompanySubscriptionModal}
+              onClose={() => setAddCompanySubscriptionModal(false)}
               center
               classNames={{
                 modal: "customModal",
@@ -1159,7 +950,7 @@ const Subscriptions = () => {
                 <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center">
                   <div className="absolute top-2 end-2">
                     <button
-                      onClick={onCloseModal}
+                      onClick={() => setAddCompanySubscriptionModal(false)}
                       type="button"
                       className="inline-flex flex-shrink-0 justify-center items-center size-8 rounded-md text-gray-500 hover:text-gray-400 focus:outline-none focus:border-none focus:ring-2 focus:ring-purple-600 transition-all text-sm"
                     >
@@ -1201,46 +992,50 @@ const Subscriptions = () => {
                     <div className="mt-0 w-full mx-auto">
                       <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
                         <h2 className="mb-8 text-xl font-semibold text-white dark:text-neutral-200">
-                          Fill the subscription details
+                          Fill the company subscription details
                         </h2>
                         <div>
                           <div className="flex flex-col">
                             <div>
                               <label className="block mb-2 text-sm text-white font-medium dark:text-white">
-                                Company Name
+                                Select Company
                               </label>
-                              <div className="relative h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
+                              <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
                                 <button
-                                  onClick={
-                                    showDropDownMenuOne_form_layout_wizard4
-                                  }
-                                  className="relative flex items-center justify-between w-full p-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
+                                  onClick={() => {
+                                    setSelectCompanyDropdown(
+                                      !selectCompanyDropdown
+                                    );
+                                    setSelectPeriodDropdown(false);
+                                    setSelectProductDropdown(false);
+                                    setSelectPlanDropdown(false);
+                                  }}
+                                  className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                                 >
-                                  <span
-                                    className="pr-4 text-sm text-white"
-                                    id="drop-down-content-setter-one_form_layout_wizard4"
-                                  >
-                                    {selectedLayout1}
+                                  <span className="pr-4 text-sm text-white">
+                                    {selectedCompany
+                                      ? selectedCompany.company_name
+                                      : "Select company"}
                                   </span>
                                   <FiChevronDown
-                                    id="rotate1"
-                                    className="absolute z-10 cursor-pointer right-5"
+                                    className="absolute z-10 cursor-pointer right-5 text-white"
                                     size={14}
-                                    color="white"
                                   />
                                 </button>
                                 <div
+                                  onMouseLeave={() =>
+                                    setSelectCompanyDropdown(false)
+                                  }
                                   className={`absolute right-0 z-20 ${
-                                    dropdownVisible1 ? "" : "hidden"
-                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-24 overflow-y-scroll select`}
-                                  id="drop-down-div-one_form_layout_wizard4"
+                                    selectCompanyDropdown ? "" : "hidden"
+                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
                                 >
-                                  {companies.map((company, id) => (
-                                    <a key={id}>
+                                  {companies.map((company) => (
+                                    <a key={company.id}>
                                       <p
-                                        className="p-3 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
-                                        onClick={
-                                          swaptextone_form_layout_wizard4
+                                        className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                        onClick={() =>
+                                          handleCompanyClick(company)
                                         }
                                       >
                                         {company.company_name}
@@ -1249,100 +1044,163 @@ const Subscriptions = () => {
                                   ))}
                                 </div>
                               </div>
-                              {errors.company_name && (
+                              {errors.company && (
                                 <p className="text-red-600 text-sm font-medium">
-                                  {errors.company_name}
+                                  {errors.company}
                                 </p>
                               )}
                             </div>
 
                             <div className="mt-4">
                               <label className="block mb-2 text-sm text-white font-medium dark:text-white">
-                                Subscription Plan
+                                Select Product
                               </label>
-                              <div className="relative h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
+                              <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
                                 <button
-                                  onClick={
-                                    showDropDownMenuOne_form_layout_wizard5
-                                  }
-                                  className="relative flex items-center justify-between w-full p-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
+                                  onClick={() => {
+                                    setSelectProductDropdown(
+                                      !selectProductDropdown
+                                    );
+                                    setSelectPeriodDropdown(false);
+                                    setSelectCompanyDropdown(false);
+                                    setSelectPlanDropdown(false);
+                                  }}
+                                  className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                                 >
-                                  <span
-                                    className="pr-4 text-sm text-white"
-                                    id="drop-down-content-setter-one_form_layout_wizard5"
-                                  >
-                                    {selectedLayout2}
+                                  <span className="pr-4 text-sm text-white">
+                                    {selectedProduct
+                                      ? selectedProduct.name
+                                      : "Select product"}
                                   </span>
                                   <FiChevronDown
-                                    id="rotate1"
-                                    className="absolute z-10 cursor-pointer right-5"
+                                    className="absolute z-10 cursor-pointer right-5 text-white"
                                     size={14}
-                                    color="white"
                                   />
                                 </button>
                                 <div
+                                  onMouseLeave={() =>
+                                    setSelectProductDropdown(false)
+                                  }
                                   className={`absolute right-0 z-20 ${
-                                    dropdownVisible2 ? "" : "hidden"
-                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-24 overflow-y-scroll select`}
-                                  id="drop-down-div-one_form_layout_wizard5"
+                                    selectProductDropdown ? "" : "hidden"
+                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
                                 >
-                                  {subScriptionPlans.map((subscription, id) => (
-                                    <a key={id}>
+                                  {products.map((product) => (
+                                    <a key={product.id}>
                                       <p
-                                        className="p-3 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
-                                        onClick={
-                                          swaptextone_form_layout_wizard5
+                                        className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                        onClick={() =>
+                                          handleProductClick(product)
                                         }
                                       >
-                                        {subscription.plan_name}
+                                        {product.name}
                                       </p>
                                     </a>
                                   ))}
                                 </div>
                               </div>
-                              {errors.subscription_plan && (
+                              {errors.product && (
                                 <p className="text-red-600 text-sm font-medium">
-                                  {errors.subscription_plan}
+                                  {errors.product}
                                 </p>
                               )}
                             </div>
 
+                            {selectedProduct && (
+                              <div className="mt-4">
+                                <label className="block mb-2 text-sm text-white font-medium dark:text-white">
+                                  Select Plan
+                                </label>
+                                <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
+                                  <button
+                                    onClick={() => {
+                                      setSelectPlanDropdown(
+                                        !selectPlanDropdown
+                                      );
+                                      setSelectPeriodDropdown(false);
+                                      setSelectProductDropdown(false);
+                                      setSelectCompanyDropdown(false);
+                                    }}
+                                    className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
+                                  >
+                                    <span className="pr-4 text-sm text-white">
+                                      {selectedPlan
+                                        ? selectedPlan.plan_name
+                                        : "Select plan"}
+                                    </span>
+                                    <FiChevronDown
+                                      className="absolute z-10 cursor-pointer right-5 text-white"
+                                      size={14}
+                                    />
+                                  </button>
+                                  <div
+                                    onMouseLeave={() =>
+                                      setSelectPlanDropdown(false)
+                                    }
+                                    className={`absolute right-0 z-20 ${
+                                      selectPlanDropdown ? "" : "hidden"
+                                    } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
+                                  >
+                                    {plans.map((plan) => (
+                                      <a key={plan.id}>
+                                        <p
+                                          className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                          onClick={() => handlePlanClick(plan)}
+                                        >
+                                          {plan.plan_name}
+                                        </p>
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+                                {errors.plan && (
+                                  <p className="text-red-600 text-sm font-medium">
+                                    {errors.plan}
+                                  </p>
+                                )}
+                              </div>
+                            )}
+
                             <div className="mt-4">
                               <label className="block mb-2 text-sm text-white font-medium dark:text-white">
-                                Period
+                                Select Period
                               </label>
-                              <div className="relative h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
+                              <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
                                 <button
-                                  onClick={
-                                    showDropDownMenuOne_form_layout_wizard6
-                                  }
-                                  className="relative flex items-center justify-between w-full p-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
+                                  onClick={() => {
+                                    setSelectPeriodDropdown(
+                                      !selectPeriodDropdown
+                                    );
+                                    setSelectCompanyDropdown(false);
+                                    setSelectProductDropdown(false);
+                                    setSelectPlanDropdown(false);
+                                  }}
+                                  className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                                 >
-                                  <span
-                                    className="pr-4 text-sm text-white"
-                                    id="drop-down-content-setter-one_form_layout_wizard6"
-                                  >
-                                    {selectedLayout3}
+                                  <span className="pr-4 text-sm text-white">
+                                    {selectedPeriod
+                                      ? selectedPeriod
+                                      : "Select period"}
                                   </span>
                                   <FiChevronDown
-                                    id="rotate1"
-                                    className="absolute z-10 cursor-pointer right-5"
+                                    className="absolute z-10 cursor-pointer right-5 text-white"
                                     size={14}
-                                    color="white"
                                   />
                                 </button>
                                 <div
+                                  onMouseLeave={() =>
+                                    setSelectPeriodDropdown(false)
+                                  }
                                   className={`absolute right-0 z-20 ${
-                                    dropdownVisible3 ? "" : "hidden"
-                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-24 overflow-y-scroll select`}
-                                  id="drop-down-div-one_form_layout_wizard6"
+                                    selectPeriodDropdown ? "" : "hidden"
+                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
                                 >
-                                  {periodOptions.map((period, index) => (
-                                    <a key={index}>
+                                  {periodOptions.map((period) => (
+                                    <a key={period}>
                                       <p
-                                        className="p-3 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
-                                        onClick={
-                                          swaptextone_form_layout_wizard6
+                                        className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                        onClick={() =>
+                                          handlePeriodClick(period)
                                         }
                                       >
                                         {period}
@@ -1367,26 +1225,12 @@ const Subscriptions = () => {
                             <div className="flex">
                               <div className="flex-shrink-0">
                                 <span className="inline-flex justify-center items-center size-8 rounded-full border-4 border-purple-100 bg-purple-200 text-purple-800 dark:border-purple-900 dark:bg-purple-800 dark:text-purple-400">
-                                  <svg
-                                    className="flex-shrink-0 size-4"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-                                    <path d="m9 12 2 2 4-4"></path>
-                                  </svg>
+                                  <FiCheckCircle className="flex-shrink-0 size-4" />
                                 </span>
                               </div>
                               <div className="ms-3">
                                 <h3 className="text-gray-800 font-semibold dark:text-white">
-                                  Company account.
+                                  Company Subscription Plan.
                                 </h3>
                                 <p className="text-sm text-gray-700 dark:text-neutral-400">
                                   {success}
@@ -1411,12 +1255,11 @@ const Subscriptions = () => {
                 </div>
               </div>
             </Modal>
-
-            {/* edit company subscription */}
+            {/* Edit company subscription modal */}
 
             <Modal
-              open={open1}
-              onClose={() => setOpen1(false)}
+              open={editCompanySubscriptionModal}
+              onClose={() => setEditCompanySubscriptionModal(false)}
               center
               classNames={{
                 modal: "customModal",
@@ -1427,7 +1270,7 @@ const Subscriptions = () => {
                 <div className="relative overflow-hidden min-h-32 bg-gray-900 text-center">
                   <div className="absolute top-2 end-2">
                     <button
-                      onClick={onCloseModal1}
+                      onClick={() => setEditCompanySubscriptionModal(false)}
                       type="button"
                       className="inline-flex flex-shrink-0 justify-center items-center size-8 rounded-md text-gray-500 hover:text-gray-400 focus:outline-none focus:border-none focus:ring-2 focus:ring-purple-600 transition-all text-sm"
                     >
@@ -1435,7 +1278,6 @@ const Subscriptions = () => {
                       <MdClose className="flex-shrink-0 size-4" />
                     </button>
                   </div>
-
                   <figure className="absolute inset-x-0 bottom-0">
                     <svg
                       preserveAspectRatio="none"
@@ -1452,132 +1294,188 @@ const Subscriptions = () => {
                     </svg>
                   </figure>
                 </div>
-
                 <div className="relative z-10 -mt-12">
                   <span className="mx-auto flex justify-center items-center size-[62px] rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm dark:bg-neutral-800 dark:border-neutral-700 dark:text-neutral-400">
                     <FiBell className="size-8 text-gray-800" />
                   </span>
                 </div>
-
                 <div className="p-4 sm:p-7 overflow-y-auto">
                   <div className="text-center">
                     <h3 className="text-lg font-semibold text-white dark:text-neutral-200">
-                      Update Company subscription
+                      Edit Company Subscription
                     </h3>
                   </div>
                   <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-10 mx-auto w-full">
                     <div className="mt-0 w-full mx-auto">
                       <div className="flex flex-col border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8 dark:border-neutral-700">
                         <h2 className="mb-8 text-xl font-semibold text-white dark:text-neutral-200">
-                          Update the subscription plan and period
+                          Edit the company subscription details
                         </h2>
                         <div>
                           <div className="flex flex-col">
                             <div>
                               <label className="block mb-2 text-sm text-white font-medium dark:text-white">
-                                Company Name
+                                Select Company
                               </label>
-                              <input
-                                type="text"
-                                id="company_name"
-                                className="bg-gray-800 border border-gray-700 text-white text-sm rounded-lg focus:ring-purple-600 focus:border-purple-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-purple-600 dark:focus:border-purple-600"
-                                placeholder="company name"
-                                required
-                                value={
-                                  editingCompanySubscription?.company_name
-                                    ?.company_name || ""
-                                }
-                                readOnly
-                              />
+                              <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
+                                <button className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg bg-gray-800 focus:bg-transparent">
+                                  <span className="pr-4 text-sm text-white">
+                                    {editSelectedCompany
+                                      ? editSelectedCompany.company_name
+                                      : "Select company"}
+                                  </span>
+                                  <FiChevronDown
+                                    className="absolute z-10 cursor-pointer right-5 text-white"
+                                    size={14}
+                                  />
+                                </button>
+                              </div>
                             </div>
 
                             <div className="mt-4">
                               <label className="block mb-2 text-sm text-white font-medium dark:text-white">
-                                Subscription Plan
+                                Select Product
                               </label>
-                              <div className="relative h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
+                              <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
                                 <button
-                                  onClick={
-                                    showDropDownMenuOne_form_layout_wizard7
-                                  }
-                                  className="relative flex items-center justify-between w-full p-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
+                                  onClick={() => {
+                                    setEditSelectProductDropdown(
+                                      !editSelectProductDropdown
+                                    );
+                                    setEditSelectPeriodDropdown(false);
+                                    setEditSelectPlanDropdown(false);
+                                  }}
+                                  className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                                 >
-                                  <span
-                                    className="pr-4 text-sm text-white"
-                                    id="drop-down-content-setter-one_form_layout_wizard7"
-                                  >
-                                    {selectedLayout4}
+                                  <span className="pr-4 text-sm text-white">
+                                    {editSelectedProduct
+                                      ? editSelectedProduct.name
+                                      : "Select product"}
                                   </span>
                                   <FiChevronDown
-                                    id="rotate1"
-                                    className="absolute z-10 cursor-pointer right-5"
+                                    className="absolute z-10 cursor-pointer right-5 text-white"
                                     size={14}
-                                    color="white"
                                   />
                                 </button>
                                 <div
+                                  onMouseLeave={() =>
+                                    setEditSelectProductDropdown(false)
+                                  }
                                   className={`absolute right-0 z-20 ${
-                                    dropdownVisible4 ? "" : "hidden"
-                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-24 overflow-y-scroll select`}
-                                  id="drop-down-div-one_form_layout_wizard7"
+                                    editSelectProductDropdown ? "" : "hidden"
+                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
                                 >
-                                  {subScriptionPlans.map((subscription, id) => (
-                                    <a key={id}>
+                                  {products.map((product) => (
+                                    <a key={product.id}>
                                       <p
-                                        className="p-3 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
-                                        onClick={
-                                          swaptextone_form_layout_wizard7
+                                        className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                        onClick={() =>
+                                          handleEditProductClick(product)
                                         }
                                       >
-                                        {subscription.plan_name}
+                                        {product.name}
                                       </p>
                                     </a>
                                   ))}
                                 </div>
                               </div>
-                              {errors1.subscription_plan && (
-                                <p className="text-red-600 text-sm font-medium">
-                                  {errors1.subscription_plan}
-                                </p>
-                              )}
                             </div>
+
+                            {editSelectedProduct && (
+                              <div className="mt-4">
+                                <label className="block mb-2 text-sm text-white font-medium dark:text-white">
+                                  Select Plan
+                                </label>
+                                <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
+                                  <button
+                                    onClick={() => {
+                                      setEditSelectPlanDropdown(
+                                        !editSelectPlanDropdown
+                                      );
+                                      setEditSelectPeriodDropdown(false);
+                                      setEditSelectProductDropdown(false);
+                                    }}
+                                    className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
+                                  >
+                                    <span className="pr-4 text-sm text-white">
+                                      {editSelectedPlan
+                                        ? editSelectedPlan.plan_name
+                                        : "Select plan"}
+                                    </span>
+                                    <FiChevronDown
+                                      className="absolute z-10 cursor-pointer right-5 text-white"
+                                      size={14}
+                                    />
+                                  </button>
+                                  <div
+                                    onMouseLeave={() =>
+                                      setEditSelectPlanDropdown(false)
+                                    }
+                                    className={`absolute right-0 z-20 ${
+                                      editSelectPlanDropdown ? "" : "hidden"
+                                    } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
+                                  >
+                                    {plans.map((plan) => (
+                                      <a key={plan.id}>
+                                        <p
+                                          className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                          onClick={() =>
+                                            handleEditPlanClick(plan)
+                                          }
+                                        >
+                                          {plan.plan_name}
+                                        </p>
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+                                {editErrors.plan && (
+                                  <p className="text-red-600 text-sm font-medium">
+                                    {editErrors.plan}
+                                  </p>
+                                )}
+                              </div>
+                            )}
 
                             <div className="mt-4">
                               <label className="block mb-2 text-sm text-white font-medium dark:text-white">
-                                Period
+                                Select Period
                               </label>
-                              <div className="relative h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
+                              <div className="relative w-full h-fit border border-gray-700 rounded-lg outline-none">
                                 <button
-                                  onClick={
-                                    showDropDownMenuOne_form_layout_wizard8
-                                  }
-                                  className="relative flex items-center justify-between w-full p-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg"
+                                  onClick={() => {
+                                    setEditSelectPeriodDropdown(
+                                      !editSelectPeriodDropdown
+                                    );
+                                    setEditSelectProductDropdown(false);
+                                    setEditSelectPlanDropdown(false);
+                                  }}
+                                  className="relative flex items-center justify-between w-full px-3 py-2.5 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                                 >
-                                  <span
-                                    className="pr-4 text-sm text-white"
-                                    id="drop-down-content-setter-one_form_layout_wizard8"
-                                  >
-                                    {selectedLayout5}
+                                  <span className="pr-4 text-sm text-white">
+                                    {editSelectedPeriod
+                                      ? editSelectedPeriod
+                                      : "Select period"}
                                   </span>
                                   <FiChevronDown
-                                    id="rotate1"
-                                    className="absolute z-10 cursor-pointer right-5"
+                                    className="absolute z-10 cursor-pointer right-5 text-white"
                                     size={14}
-                                    color="white"
                                   />
                                 </button>
                                 <div
+                                  onMouseLeave={() =>
+                                    setEditSelectPeriodDropdown(false)
+                                  }
                                   className={`absolute right-0 z-20 ${
-                                    dropdownVisible5 ? "" : "hidden"
-                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-24 overflow-y-scroll select`}
-                                  id="drop-down-div-one_form_layout_wizard8"
+                                    editSelectPeriodDropdown ? "" : "hidden"
+                                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
                                 >
-                                  {periodOptions.map((period, index) => (
-                                    <a key={index}>
+                                  {periodOptions.map((period) => (
+                                    <a key={period}>
                                       <p
-                                        className="p-3 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
-                                        onClick={
-                                          swaptextone_form_layout_wizard8
+                                        className="p-3 flex items-center text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                                        onClick={() =>
+                                          handleEditPeriodClick(period)
                                         }
                                       >
                                         {period}
@@ -1586,57 +1484,37 @@ const Subscriptions = () => {
                                   ))}
                                 </div>
                               </div>
-                              {errors1.period && (
-                                <p className="text-red-600 text-sm font-medium">
-                                  {errors1.period}
-                                </p>
-                              )}
                             </div>
+                            {editSuccess && (
+                              <div
+                                className="mt-3 bg-purple-100 border-t-2 border-purple-600 rounded-lg p-4 dark:bg-purple-800/30"
+                                role="alert"
+                              >
+                                <div className="flex">
+                                  <div className="flex-shrink-0">
+                                    <span className="inline-flex justify-center items-center size-8 rounded-full border-4 border-purple-100 bg-purple-200 text-purple-800 dark:border-purple-900 dark:bg-purple-800 dark:text-purple-400">
+                                      <FiCheckCircle className="flex-shrink-0 size-4" />
+                                    </span>
+                                  </div>
+                                  <div className="ms-3">
+                                    <h3 className="text-gray-800 font-semibold dark:text-white">
+                                      Company Subscription Plan.
+                                    </h3>
+                                    <p className="text-sm text-gray-700 dark:text-neutral-400">
+                                      {editSuccess}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {success && (
-                          <div
-                            className="mt-3 bg-purple-100 border-t-2 border-purple-600 rounded-lg p-4 dark:bg-purple-800/30"
-                            role="alert"
-                          >
-                            <div className="flex">
-                              <div className="flex-shrink-0">
-                                <span className="inline-flex justify-center items-center size-8 rounded-full border-4 border-purple-100 bg-purple-200 text-purple-800 dark:border-purple-900 dark:bg-purple-800 dark:text-purple-400">
-                                  <svg
-                                    className="flex-shrink-0 size-4"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-                                    <path d="m9 12 2 2 4-4"></path>
-                                  </svg>
-                                </span>
-                              </div>
-                              <div className="ms-3">
-                                <h3 className="text-gray-800 font-semibold dark:text-white">
-                                  Company account.
-                                </h3>
-                                <p className="text-sm text-gray-700 dark:text-neutral-400">
-                                  {success}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
-
                   <div className="flex justify-end gap-x-2">
                     <a
-                      onClick={handleUpdate}
+                      onClick={handleEditCompanySubscription}
                       className="py-2 inline-flex items-center gap-x-2 px-2 text-sm font-medium cursor-pointer rounded-lg border border-gray-700 bg-transparent text-white hover:bg-gray-800 disabled:opacity-50 disabled:pointer-events-none"
                     >
                       <FaRegPaperPlane className="size-4" />
@@ -1651,7 +1529,7 @@ const Subscriptions = () => {
 
             <Modal
               open={openDeleteModal}
-              onClose={onCloseDeleteModal}
+              onClose={() => setOpenDeleteModal(false)}
               center
               classNames={{
                 modal: "deleteModal",
@@ -1661,7 +1539,7 @@ const Subscriptions = () => {
               <div className="w-full max-w-lg bg-gray-900 shadow-lg rounded-lg p-6 relative">
                 <FaTimes
                   className="w-3.5 cursor-pointer shrink-0 fill-gray-400 hover:fill-red-500 float-right"
-                  onClick={onCloseDeleteModal}
+                  onClick={() => setOpenDeleteModal(false)}
                 />
 
                 <div className="my-4 text-center">
@@ -1672,7 +1550,7 @@ const Subscriptions = () => {
 
                   <div className="text-center space-x-4 mt-8">
                     <button
-                      onClick={onCloseDeleteModal}
+                      onClick={() => setOpenDeleteModal(false)}
                       type="button"
                       className="px-4 py-2 rounded-lg text-gray-800 text-sm bg-gray-200 hover:bg-gray-300 active:bg-gray-200"
                     >
@@ -1687,7 +1565,7 @@ const Subscriptions = () => {
                     </button>
                   </div>
                 </div>
-                {success && (
+                {deleteSuccess && (
                   <div
                     id="dismiss-alert"
                     className="hs-removing:translate-x-5 hs-removing:opacity-0 transition duration-300 bg-purple-50 border border-purple-200 text-sm text-purple-800 rounded-lg p-4 dark:bg-purple-800/10 dark:border-purple-900 dark:text-purple-500"
@@ -1698,7 +1576,9 @@ const Subscriptions = () => {
                         <FaCheckCircle className="flex-shrink-0 size-4 mt-0.5 text-purple-500" />
                       </div>
                       <div className="ms-2">
-                        <div className="text-sm font-medium">{success}</div>
+                        <div className="text-sm font-medium">
+                          {deleteSuccess}
+                        </div>
                       </div>
                       <div className="ps-3 ms-auto">
                         <div className="-mx-1.5 -my-1.5">

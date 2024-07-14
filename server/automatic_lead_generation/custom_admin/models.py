@@ -43,10 +43,12 @@ class SubscriptionPlan(models.Model):
     plan = models.ForeignKey(Plan, related_name='subscription_plans', on_delete=models.CASCADE, null=True, blank=True)
 
 class CompanySubscription(models.Model):
-    company_name = models.ForeignKey(CompanyLog, on_delete=models.CASCADE, null=True, blank=True)
+    company = models.ForeignKey(CompanyLog, on_delete=models.CASCADE, null=True, blank=True)
     subscription_plan = models.ForeignKey(SubscriptionPlan, related_name='company_subscription', on_delete=models.CASCADE, null=True, blank=True)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     status = models.CharField(max_length=10, default='Pending', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    plan = models.ForeignKey(Plan, related_name='company_subscriptions', on_delete=models.CASCADE, null=True, blank=True)
+    period = models.CharField(max_length=50, null=True, blank=True)
+    notify_before_expire = models.BooleanField(default=False, null=True, blank=True)
+    notify_on_expire = models.BooleanField(default=False, null=True, blank=True)
