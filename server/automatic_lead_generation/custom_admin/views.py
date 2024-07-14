@@ -256,6 +256,13 @@ class AdminNotificationListView(APIView):
         serializer = AdminNotificationSerializer(notifications, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    def post(self, request):
+        serializer = AdminNotificationSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class MarkNotificationAsReadView(APIView):
     def put(self, request, notification_id):
         try:
@@ -283,33 +290,35 @@ class CompanySubscriptionListView(APIView):
         except ValueError:
             return Response({"error": "Invalid limit or offset parameter"}, status=status.HTTP_400_BAD_REQUEST)
         
-        subscriptions = CompanySubscription.objects.select_related('subscription_plan', 'company_name').order_by('-created_at')
+        subscriptions = CompanySubscription.objects.select_related('subscription_plan', 'company').order_by('-created_at')
         
         if search_term:
             subscriptions = subscriptions.filter(
-                Q(company_name__company_name__icontains=search_term) |
-                Q(subscription_plan__plan_name__icontains=search_term)
+                Q(company__company_name__icontains=search_term) |
+                Q(subscription_plan__plan_name__icontains=search_term)          
             )
             
         if status_filter:
             subscriptions = subscriptions.filter(status=status_filter)
             
+        total_count = subscriptions.count()
+        
         if limit is not None:
             subscriptions = subscriptions[offset:offset + limit]
         else:
             subscriptions = subscriptions[offset:]
             
         serializer = CompanySubscriptionSerializer(subscriptions, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"company_subscriptions": serializer.data, 'total_count':total_count}, status=status.HTTP_200_OK)
     
     def post(self, request):
         data = request.data
         
-        company_name_id = data.get('company_name')
+        company_id = data.get('company')
         subscription_plan_id = data.get('subscription_plan')
 
         try:
-            company_log = CompanyLog.objects.get(id=company_name_id)
+            company_log = CompanyLog.objects.get(id=company_id)
         except CompanyLog.DoesNotExist:
             return Response({'error': 'Company name does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -319,10 +328,11 @@ class CompanySubscriptionListView(APIView):
             return Response({'error': 'Subscription plan does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
         company_subscription = CompanySubscription.objects.create(
-            company_name=company_log,
+            company=company_log,
             subscription_plan=subscription_plan_obj,
             start_date=data.get('start_date'),
             end_date=data.get('end_date'),
+            period=data.get('period')
         )
 
         serializer = CompanySubscriptionSerializer(company_subscription)
@@ -357,6 +367,25 @@ class CompanySubscriptionUpdateStatusView(APIView):
         subscription.subscription_plan = subscription_plan
         subscription.start_date = data.get('start_date')
         subscription.end_date = data.get('end_date')
+        subscription.period=data.get('period')
+        subscription.save()
+
+        serializer = CompanySubscriptionSerializer(subscription)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CompanySubscriptionUpdateNotifyView(APIView):
+    def patch(self, request, pk):
+        try:
+            subscription = CompanySubscription.objects.get(pk=pk)
+        except CompanySubscription.DoesNotExist:
+            return Response({'error': 'CompanySubscription does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        if 'notify_before_expire' in request.data:
+            subscription.notify_before_expire = request.data['notify_before_expire']
+
+        if 'notify_on_expire' in request.data:
+            subscription.notify_on_expire = request.data['notify_on_expire']
+
         subscription.save()
 
         serializer = CompanySubscriptionSerializer(subscription)
@@ -394,7 +423,7 @@ class ProductFeaturesView(APIView):
             products = products_query[offset:]
             
         total_count = products_query.count()
-
+        
         serializer = ProductServiceSerializer(products, many=True)
         return Response({'products': serializer.data,'total_count': total_count}, status=status.HTTP_200_OK)
     

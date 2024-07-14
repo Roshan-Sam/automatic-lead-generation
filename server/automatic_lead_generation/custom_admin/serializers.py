@@ -30,7 +30,7 @@ class AdminNotificationSerializer(serializers.ModelSerializer):
         
 class CompanySubscriptionSerializer(serializers.ModelSerializer):
     subscription_plan = serializers.SerializerMethodField()
-    company_name = serializers.SerializerMethodField()
+    company = serializers.SerializerMethodField()
 
     class Meta:
         model = CompanySubscription
@@ -41,9 +41,9 @@ class CompanySubscriptionSerializer(serializers.ModelSerializer):
         serializer = SubscriptionPlanSerializer(subscription_plan_obj)
         return serializer.data
 
-    def get_company_name(self, obj):
-        company_name_obj = obj.company_name
-        serializer = CompanyLogSerializer(company_name_obj)
+    def get_company(self, obj):
+        company_obj = obj.company
+        serializer = CompanyLogSerializer(company_obj)
         return serializer.data
     
 class ProductImageSerializer(serializers.ModelSerializer):
