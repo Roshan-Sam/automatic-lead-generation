@@ -366,11 +366,13 @@ const PlanPricingPlanView = () => {
               <div className="px-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {plans.map((plan) => (
+                    
                     <div
                       onMouseLeave={() => setOpenDropdown(null)}
                       key={plan.id}
                       className="relative bg-slate-900 rounded-lg border border-b-2 border-gray-700 shadow-sm shadow-gray-500 transition-shadow duration-300 hover:-translate-y-1"
                     >
+                      
                       <div className="p-2 pb-4">
                         <img
                           src={`${config.baseApiImageUrl}${plan.product.images[0].image}`}

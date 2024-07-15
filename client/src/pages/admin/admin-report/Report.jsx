@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import AdminNav from "../../../components/admin/admin-nav/AdminNav";
 import AdminSidebar from "../../../components/admin/admin-sidebar/AdminSidebar";
 import { useSidebarContext } from "../../../hooks/useSidebarContext";
@@ -12,10 +12,46 @@ import {
     Legend,
     ResponsiveContainer
 } from 'recharts';
+import axios from "axios";
+import config from "../../../Functions/config";
 
 const Report = () => {
 
     const { isSidebarCollapsed, dispatch: sidebarDispatch } = useSidebarContext()
+    const [allSubscriptionPlans,setAllSubscriptionPlans] = useState()
+    const [products,setProducts] = useState()
+
+    useEffect(()=>{
+        fetchAllSubscriptionPlans()
+        fetchProducts()
+    },[])
+
+
+    const fetchAllSubscriptionPlans = async () => {
+
+        try{
+           const res = await axios.get(`${config.baseApiUrl}admin/create-subscription-plan/`)
+           if(res.status === 200){
+              setAllSubscriptionPlans(res.data)
+           }
+        }catch (error) {
+            console.log(error)
+        }
+
+    }
+
+    const fetchProducts = async () => {
+        try {
+          const res = await axios.get(
+            `${config.baseApiUrl}admin/product-features/`
+          );
+          if (res.status === 200) {
+            setProducts(res.data.products);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+    };
 
     const sidebarToggle = () => {
         sidebarDispatch({ type: "TOGGLE_SIDEBAR" });
@@ -23,7 +59,7 @@ const Report = () => {
 
     const data = [
         {
-          name: 'Jan', Adobe: 4000, 'Basic Netflix Plan': 2400, 'Premium Netflix Plan': 1200, Peloton: 2400,
+          name: 'Jan', 'Adobe': 4000, 'Basic Netflix Plan': 2400, 'Premium Netflix Plan': 1200, Peloton: 2400,
         },
         {
           name: 'Feb', Adobe: 3000, 'Basic Netflix Plan': 1398, 'Premium Netflix Plan': 900, Peloton: 2210,
