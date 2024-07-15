@@ -147,8 +147,8 @@ const ProductFeatures = () => {
         }
       );
       if (res.status === 200) {
-        const { products: newProducts, total_count } = res.data;
-        setProducts(newProducts);
+        const { products, total_count } = res.data;
+        setProducts(products);
         setTotalCount(total_count);
       }
     } catch (error) {
