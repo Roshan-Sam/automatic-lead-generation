@@ -25,9 +25,17 @@ import { useSidebarContext } from "../../../hooks/useSidebarContext";
 import config from "../../../Functions/config";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
-import { RiFileExcelLine } from "react-icons/ri";
-import { FaTimes, FaTrashAlt, FaCheckCircle } from "react-icons/fa";
+import { AiOutlineFileExcel } from "react-icons/ai";
+import {
+  FaTimes,
+  FaTrashAlt,
+  FaCheckCircle,
+  FaRegFilePdf,
+} from "react-icons/fa";
+import AdminProductFeaturesReport from "../../../components/admin/admin-product-features-report/AdminProductFeaturesReport";
 import { Modal } from "react-responsive-modal";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 import "react-responsive-modal/styles.css";
 import "./productfeatures.css";
 
@@ -600,6 +608,89 @@ const ProductFeatures = () => {
     handleDeleteCategory(deleteCategoryId);
   };
 
+  const handleDownloadPdf = () => {
+    const newProducts = products.map((product) => ({
+      ...product,
+      features: formatFeatures(product.features),
+    }));
+
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "A4",
+    });
+
+    const tableColumn = [
+      "PRODUCT_ID",
+      "NAME",
+      "DESCRIPTION",
+      "FEATURES",
+      "PRICE",
+      "AVAILABILITY_STATUS",
+      "CATEGORY",
+      "CREATED_AT",
+    ];
+
+    const tableRows = newProducts.map((product) => [
+      product.product_id,
+      product.name,
+      product.description,
+      product.features,
+      product.price,
+      product.availability_status,
+      product.category.name,
+      new Date(product.created_at).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+    ]);
+
+    doc.setFontSize(12);
+    doc.text("Product Listing with Details", 20, 30);
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 50,
+      styles: {
+        fontSize: 8,
+        cellPadding: { top: 3, right: 8, bottom: 3, left: 2 },
+        overflow: "linebreak",
+        valign: "middle",
+      },
+      headStyles: {
+        fillColor: [52, 58, 64],
+        textColor: [255, 255, 255],
+        fontSize: 10,
+        fontStyle: "bold",
+      },
+      columnStyles: {
+        0: { cellWidth: "auto" },
+        1: { cellWidth: 100 },
+        2: { cellWidth: 120 },
+        3: { cellWidth: 120 },
+        4: { cellWidth: "auto" },
+        5: { cellWidth: "auto" },
+        6: { cellWidth: "auto" },
+        7: { cellWidth: "auto" },
+      },
+      didDrawPage: function (data) {
+        let str = "Page " + doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(
+          str,
+          data.settings.margin.left,
+          doc.internal.pageSize.height - 10
+        );
+      },
+      margin: { top: 20 },
+      pageBreak: "auto",
+    });
+
+    doc.save("products.pdf");
+  };
+
   return (
     <>
       <div className="bg-[rgb(16,23,42)]">
@@ -721,12 +812,20 @@ const ProductFeatures = () => {
                                 Clear
                               </button>
                               <button
+                                onClick={handleDownloadPdf}
+                                type="button"
+                                className="py-2 px-4 text-white inline-flex items-center gap-x-1 hover:bg-gray-800 focus:bg-transparent focus:ring-1 focus:ring-purple-600 focus:border-purple-600 text-sm rounded-lg border border-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
+                              >
+                                <FaRegFilePdf className="size-4 fill-white" />
+                                Export pdf
+                              </button>
+                              <button
                                 onClick={handleDownloadExcel}
                                 type="button"
                                 className="py-2 px-4 text-white inline-flex items-center gap-x-1 hover:bg-gray-800 focus:bg-transparent focus:ring-1 focus:ring-purple-600 focus:border-purple-600 text-sm rounded-lg border border-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
                               >
-                                <RiFileExcelLine className="size-4 fill-white" />
-                                Export
+                                <AiOutlineFileExcel className="size-5 fill-white" />
+                                Export excel
                               </button>
                             </div>
                           </div>
@@ -973,6 +1072,7 @@ const ProductFeatures = () => {
                 </div>
               </div>
             </div>
+            <AdminProductFeaturesReport />
           </div>
           {/* add new prodduct modal */}
 

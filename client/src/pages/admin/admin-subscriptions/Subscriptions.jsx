@@ -23,6 +23,7 @@ import AdminNav from "../../../components/admin/admin-nav/AdminNav";
 import AdminSidebar from "../../../components/admin/admin-sidebar/AdminSidebar";
 import { useSidebarContext } from "../../../hooks/useSidebarContext";
 import config from "../../../Functions/config";
+import AdminSubscriptionsReport from "../../../components/admin/admin-subscriptions-report/AdminSubscriptionsReport";
 import "./subscriptions.css";
 
 const Subscriptions = () => {
@@ -935,6 +936,8 @@ const Subscriptions = () => {
                 </div>
               </div>
             </div>
+            <AdminSubscriptionsReport />
+
             {/* create company subscription modal */}
 
             <Modal

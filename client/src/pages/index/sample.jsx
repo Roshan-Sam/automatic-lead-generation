@@ -19,6 +19,7 @@ import {
   FaTrashAlt,
   FaCheckCircle,
   FaRegPaperPlane,
+  FaRegFilePdf,
 } from "react-icons/fa";
 import {
   FiEdit,
@@ -34,7 +35,9 @@ import config from "../../Functions/config";
 const Sample = () => {
   return (
     <>
-      <div className="mt-20"></div>
+      <div className="min-h-screen w-full bg-slate-900 pt-20">
+        <div className="flex justify-center"></div>
+      </div>
     </>
   );
 };

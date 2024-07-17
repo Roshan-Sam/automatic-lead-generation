@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useAdminNotificationContext } from "../../../hooks/useAdminNotificationContext";
 import config from "../../../Functions/config";
@@ -6,6 +6,7 @@ import config from "../../../Functions/config";
 const AdminSubscriptionUpdates = () => {
   const [companySubscriptions, setCompanySubscriptions] = useState([]);
   const { dispatch } = useAdminNotificationContext();
+  const isCheckingSubscriptions = useRef(false);
 
   const fetchCompanySubscriptions = async () => {
     try {
@@ -13,7 +14,6 @@ const AdminSubscriptionUpdates = () => {
       if (res.status === 200) {
         const { company_subscriptions } = res.data;
         setCompanySubscriptions(company_subscriptions);
-        await checkSubscriptionsAndNotify(company_subscriptions);
       }
     } catch (error) {
       console.log(error);
@@ -29,7 +29,16 @@ const AdminSubscriptionUpdates = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const checkSubscriptionsAndNotify = async (companySubscriptions) => {
+  useEffect(() => {
+    if (companySubscriptions.length > 0) {
+      checkSubscriptionsAndNotify();
+    }
+  }, [companySubscriptions]);
+
+  const checkSubscriptionsAndNotify = async () => {
+    if (isCheckingSubscriptions.current) return;
+    isCheckingSubscriptions.current = true;
+
     const now = new Date();
     const twoDaysLater = new Date(now);
     twoDaysLater.setDate(now.getDate() + 2);
@@ -42,7 +51,7 @@ const AdminSubscriptionUpdates = () => {
         !subscription.notify_before_expire
       ) {
         await axios.post(`${config.baseApiUrl}admin/notifications/`, {
-          message: `Subscription for ${subscription.company.company_name} is expiring in 2 days.`,
+          message: `Subscription for ${subscription.company.company_name}, ${subscription.subscription_plan.product.name} product, ${subscription.subscription_plan.plan.name} plan is expiring in 2 days.`,
           type: "subscription",
         });
         await axios.patch(
@@ -53,7 +62,7 @@ const AdminSubscriptionUpdates = () => {
         );
       } else if (endDate < now && !subscription.notify_on_expire) {
         await axios.post(`${config.baseApiUrl}admin/notifications/`, {
-          message: `Subscription for ${subscription.company.company_name} has expired.`,
+          message: `Subscription for ${subscription.company.company_name}, ${subscription.subscription_plan.product.name} product, ${subscription.subscription_plan.plan.name} plan has expired.`,
           type: "subscription",
         });
         await axios.patch(
@@ -64,12 +73,9 @@ const AdminSubscriptionUpdates = () => {
         );
       }
     }
+    isCheckingSubscriptions.current = false;
     fetchNotifications();
   };
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
 
   const fetchNotifications = async () => {
     try {
@@ -86,7 +92,6 @@ const AdminSubscriptionUpdates = () => {
     }
   };
 
-  console.log(companySubscriptions);
   return <></>;
 };
 
