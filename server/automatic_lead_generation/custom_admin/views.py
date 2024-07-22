@@ -9,8 +9,8 @@ from django.utils.html import strip_tags
 from django.template.loader import render_to_string
 from company.models import CompanyLog
 from company.serializers import CompanyLogSerializer
-from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category,Plan
-from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer,CategorySerializer,ProductImageSerializer,PlanSerializer
+from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category,Plan,ProductPurchases
+from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,CompanySubscriptionSerializer,ProductServiceSerializer,CategorySerializer,ProductImageSerializer,PlanSerializer,ProductPurchasesSerializer
 import random
 import string   
 from django.db.models import Q
@@ -545,3 +545,65 @@ class AddCategoryView(APIView):
         
         category.delete()
         return Response({"message": "Category deleted successfully"}, status=status.HTTP_200_OK)
+
+class ProductPurchaseSalesView(APIView):
+    def get(self, request):
+        limit = request.query_params.get('limit', None) 
+        offset = int(request.query_params.get('offset', 0))
+        search_term = request.query_params.get('search', '')
+        product_name = request.query_params.get('product', '')
+        company_name = request.query_params.get('company', '')
+        sector_name = request.query_params.get('sector', '')
+
+        if limit:
+            limit = int(limit)
+        
+        purchases_query = ProductPurchases.objects.all().order_by('-purchase_date')
+
+        if search_term:
+            purchases_query = purchases_query.filter(
+                Q(product__name__icontains=search_term) | 
+                Q(company__company_name__icontains=search_term) |
+                Q(status__icontains=search_term)
+            )
+
+        if product_name:
+            purchases_query = purchases_query.filter(product__name__icontains=product_name)
+
+        if company_name:
+            purchases_query = purchases_query.filter(company__company_name__icontains=company_name)
+            
+        if sector_name:
+            purchases_query = purchases_query.filter(company__sector__icontains=sector_name)
+
+        if limit is not None:
+            purchases = purchases_query[offset:offset + limit]
+        else:
+            purchases = purchases_query[offset:]
+            
+        total_count = purchases_query.count()
+        
+        serializer = ProductPurchasesSerializer(purchases, many=True)
+        return Response({'purchases': serializer.data, 'total_count': total_count}, status=status.HTTP_200_OK)
+    
+    def delete(self, request, pk):
+        try:
+            purchase = ProductPurchases.objects.get(pk=pk)
+            purchase.delete()
+            return Response(status=status.HTTP_200_OK)
+        except ProductPurchases.DoesNotExist:
+            return Response({'error': 'Purchase not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class ProductPurchaseSalesUpdateView(APIView):
+    def patch(self, request, pk):
+        try:
+            purchase = ProductPurchases.objects.get(pk=pk)
+        except ProductPurchases.DoesNotExist:
+            return Response({'error': 'ProductPurchase does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        purchase.status = request.data.get('status', purchase.status)
+        purchase.save()
+
+        serializer = ProductPurchasesSerializer(purchase)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    

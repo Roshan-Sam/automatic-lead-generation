@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  Brush,
 } from "recharts";
 import config from "../../../Functions/config";
 import { FiChevronDown } from "react-icons/fi";
@@ -20,9 +21,11 @@ const AdminSubscriptionsReport = () => {
   const [selectedCompany, setSelectedCompany] = useState("Select Company");
   const [selectedStatus, setSelectedStatus] = useState("Select Status");
   const [selectedProduct, setSelectedProduct] = useState("Select Product");
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [companyDropdown, setCompanyDropdown] = useState(false);
   const [statusDropdown, setStatusDropdown] = useState(false);
   const [productDropdown, setProductDropdown] = useState(false);
+  const [yearDropdown, setYearDropdown] = useState(false);
 
   const [companies, setCompanies] = useState([]);
   const [products, setProducts] = useState([]);
@@ -33,21 +36,16 @@ const AdminSubscriptionsReport = () => {
       const res = await axios.get(`${config.baseApiUrl}admin/subscriptions/`);
       if (res.status === 200) {
         const { company_subscriptions } = res.data;
-        const currentYear = new Date().getFullYear();
 
-        const transformedSubscriptions = company_subscriptions
-          .filter((sub) => {
-            const startYear = new Date(sub.start_date).getFullYear();
-            return startYear === currentYear;
-          })
-          .map((sub) => ({
-            company: sub.company.company_name,
-            start_date: sub.start_date,
-            end_date: sub.end_date,
-            subscription_plan: sub.subscription_plan.plan_name,
-            product: sub.subscription_plan.product.name,
-            status: sub.status,
-          }));
+        const transformedSubscriptions = company_subscriptions.map((sub) => ({
+          company: sub.company.company_name,
+          start_date: sub.start_date,
+          end_date: sub.end_date,
+          subscription_plan: sub.subscription_plan.plan_name,
+          product: sub.subscription_plan.product.name,
+          status: sub.status,
+          year: new Date(sub.start_date).getFullYear(),
+        }));
 
         setCompanySubscriptions(transformedSubscriptions);
       }
@@ -88,7 +86,18 @@ const AdminSubscriptionsReport = () => {
   }, []);
 
   useEffect(() => {
-    if (companySubscriptions.length > 0) {
+    filterDataByYear(companySubscriptions, selectedYear);
+  }, [
+    companySubscriptions,
+    plans,
+    selectedCompany,
+    selectedStatus,
+    selectedProduct,
+    selectedYear,
+  ]);
+
+  const filterDataByYear = (subscriptions, year) => {
+    if (subscriptions.length > 0) {
       const months = [
         "January",
         "February",
@@ -109,9 +118,10 @@ const AdminSubscriptionsReport = () => {
         details: Object.fromEntries(plans.map((plan) => [plan, []])),
       }));
 
-      companySubscriptions
+      subscriptions
         .filter((sub) => {
           return (
+            sub.year === year &&
             (selectedCompany === "Select Company" ||
               sub.company === selectedCompany) &&
             (selectedStatus === "Select Status" ||
@@ -140,13 +150,7 @@ const AdminSubscriptionsReport = () => {
 
       setDataByMonth(monthData);
     }
-  }, [
-    companySubscriptions,
-    plans,
-    selectedCompany,
-    selectedStatus,
-    selectedProduct,
-  ]);
+  };
 
   const handleCompanySelect = (company) => {
     setSelectedCompany(company === "All" ? "Select Company" : company);
@@ -163,11 +167,16 @@ const AdminSubscriptionsReport = () => {
     setProductDropdown(false);
   };
 
+  const handleYearSelect = (year) => {
+    setSelectedYear(year);
+    setYearDropdown(false);
+  };
+
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="p-2 bg-gray-800 text-white rounded shadow-lg">
+        <div className="p-2 bg-gray-800 text-white rounded shadow-lg max-w-[200px]">
           <p className="font-semibold">{label}</p>
           {Object.keys(data.details).map((plan) => {
             const uniqueCompanies =
@@ -201,6 +210,7 @@ const AdminSubscriptionsReport = () => {
   const ORANGE_700 = "#DD6B20";
   const BLUE_700 = "#4535C1";
   const WHITE = "#FFFFFF";
+  const GRAY_900 = "#1A202C";
 
   const getBarColor = (plan) => {
     switch (plan) {
@@ -215,18 +225,20 @@ const AdminSubscriptionsReport = () => {
     }
   };
 
-  console.log(dataByMonth);
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
   return (
     <div className="px-4 bg-[rgb(16,23,42)] min-h-screen overflow-auto">
       <h1 className="text-white text-2xl mb-4">Company Subscription Plans</h1>
-      <div className="flex space-x-4 mb-8">
+      <div className="flex md:gap-4 gap-2 mb-8 flex-wrap md:justify-start justify-center">
         <div className="relative w-64 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
           <button
             onClick={() => {
               setCompanyDropdown(!companyDropdown);
               setStatusDropdown(false);
               setProductDropdown(false);
+              setYearDropdown(false);
             }}
             className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
           >
@@ -260,6 +272,7 @@ const AdminSubscriptionsReport = () => {
               setStatusDropdown(!statusDropdown);
               setCompanyDropdown(false);
               setProductDropdown(false);
+              setYearDropdown(false);
             }}
             className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
           >
@@ -293,6 +306,7 @@ const AdminSubscriptionsReport = () => {
               setProductDropdown(!productDropdown);
               setCompanyDropdown(false);
               setStatusDropdown(false);
+              setYearDropdown(false);
             }}
             className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
           >
@@ -320,6 +334,40 @@ const AdminSubscriptionsReport = () => {
             ))}
           </div>
         </div>
+        <div className="relative w-48 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
+          <button
+            onClick={() => {
+              setYearDropdown(!yearDropdown);
+              setCompanyDropdown(false);
+              setStatusDropdown(false);
+              setProductDropdown(false);
+            }}
+            className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
+          >
+            <span className="pr-4 text-sm text-white">{selectedYear}</span>
+            <FiChevronDown
+              id="rotate1"
+              className="absolute z-10 cursor-pointer right-5 text-white"
+              size={14}
+            />
+          </button>
+          <div
+            className={`absolute right-0 z-20 ${
+              yearDropdown ? "" : "hidden"
+            } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
+          >
+            {yearOptions.map((year, index) => (
+              <a key={index}>
+                <p
+                  className="p-3 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
+                  onClick={() => handleYearSelect(year)}
+                >
+                  {year}
+                </p>
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
       <div className="w-full h-[800px]">
         {dataByMonth.length === 0 ? (
@@ -331,13 +379,13 @@ const AdminSubscriptionsReport = () => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={dataByMonth}
-              margin={{ top: 20, right: 20, left: 10, bottom: 140 }}
+              margin={{ top: 20, right: 75, left: 40, bottom: 140 }}
             >
               <Legend
                 wrapperStyle={{
                   color: "white",
                   fontSize: "18px",
-                  bottom: "50px",
+                  bottom: "20px",
                 }}
                 align="center"
                 verticalAlign="bottom"
@@ -349,7 +397,7 @@ const AdminSubscriptionsReport = () => {
                 dataKey="month"
                 tick={{ fill: "white" }}
                 stroke={WHITE}
-                angle={isMediumScreenOrBelow ? -80 : 0}
+                angle={isMediumScreenOrBelow ? -90 : 0}
                 dx={isMediumScreenOrBelow ? -10 : 0}
                 dy={isMediumScreenOrBelow ? 10 : 10}
                 textAnchor={isMediumScreenOrBelow ? "end" : "middle"}
@@ -362,6 +410,15 @@ const AdminSubscriptionsReport = () => {
               {plans.map((plan) => (
                 <Bar key={plan} dataKey={plan} fill={getBarColor(plan)} />
               ))}
+              <Brush
+                dataKey="month"
+                height={20}
+                y={800 - 110}
+                stroke={PURPLE_700}
+                fill={GRAY_900}
+                travellerWidth={15}
+                tickFormatter={(month) => month.substring(0, 3)}
+              />
             </BarChart>
           </ResponsiveContainer>
         )}

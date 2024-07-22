@@ -8,15 +8,15 @@ import { SidebarContextProvider } from "./context/sidebarContext.jsx";
 import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AdminNotificationContextProvider>
-      <AdminProfileContextProvider>
-        <SidebarContextProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </SidebarContextProvider>
-      </AdminProfileContextProvider>
-    </AdminNotificationContextProvider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <AdminNotificationContextProvider>
+    <AdminProfileContextProvider>
+      <SidebarContextProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </SidebarContextProvider>
+    </AdminProfileContextProvider>
+  </AdminNotificationContextProvider>
+  // </React.StrictMode>
 );

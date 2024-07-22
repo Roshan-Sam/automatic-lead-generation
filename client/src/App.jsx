@@ -13,6 +13,7 @@ import Profile from "./pages/admin/admin-profile/Profile";
 import ProductPreview from "./pages/admin/admin-product-features/ProductPreview";
 import Sample from "./pages/index/sample";
 import PlanPricingPlanView from "./pages/admin/admin-plan-pricing/PlanPricingPlanView";
+import PurchaseSales from "./pages/admin/admin-purchase-sales/PurchaseSales";
 import "flowbite";
 import "./App.css";
 
@@ -35,6 +36,7 @@ function App() {
             element={<PlanPricingPlanView />}
           />
           <Route path="subscriptions" element={<Subscriptions />} />
+          <Route path="product-purchase-sales" element={<PurchaseSales />} />
           <Route path="notifications" element={<Notification />} />
           <Route path="account" element={<Profile />} />
           <Route

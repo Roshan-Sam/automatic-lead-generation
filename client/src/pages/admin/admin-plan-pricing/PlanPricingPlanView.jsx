@@ -21,6 +21,7 @@ import { GiCheckMark } from "react-icons/gi";
 import { Modal } from "react-responsive-modal";
 import "react-responsive-modal/styles.css";
 import "./planprice.css";
+
 const PlanPricingPlanView = () => {
   const { isSidebarCollapsed, dispatch: sidebarDispatch } = useSidebarContext();
   const { id } = useParams();

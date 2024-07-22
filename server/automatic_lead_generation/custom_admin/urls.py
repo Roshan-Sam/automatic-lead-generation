@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import CreateCompany,UpdateCompanyView,DeleteCompany,SubscriptionPlanCreateView,UpdateSubscriptionPlanView,UpdateProfileView,UpdatePasswordView,AdminNotificationListView,MarkNotificationAsReadView,CompanySubscriptionListView,CompanySubscriptionUpdateStatusView,CompanySubscriptionDeleteView,ProductFeaturesView,AddCategoryView,SingleProductView,ProductFeaturesUpdateView,ProductImagesView,DeleteProductImageView,AddPlanAPIView,CompanySubscriptionUpdateNotifyView
+from .views import CreateCompany,UpdateCompanyView,DeleteCompany,SubscriptionPlanCreateView,UpdateSubscriptionPlanView,UpdateProfileView,UpdatePasswordView,AdminNotificationListView,MarkNotificationAsReadView,CompanySubscriptionListView,CompanySubscriptionUpdateStatusView,CompanySubscriptionDeleteView,ProductFeaturesView,AddCategoryView,SingleProductView,ProductFeaturesUpdateView,ProductImagesView,DeleteProductImageView,AddPlanAPIView,CompanySubscriptionUpdateNotifyView,ProductPurchaseSalesView,ProductPurchaseSalesUpdateView
 
 urlpatterns = [
     path('admin/create/company/', CreateCompany.as_view()),
@@ -32,4 +32,8 @@ urlpatterns = [
     
     path('admin/add-category/', AddCategoryView.as_view()),
     path('admin/update-category/<int:pk>/', AddCategoryView.as_view()),
+    
+    path('admin/product-purchase-sales/', ProductPurchaseSalesView.as_view()),
+    path('admin/product-purchase-sales/<int:pk>/update/', ProductPurchaseSalesUpdateView.as_view()),
+    path('admin/product-purchase-sales/<int:pk>/delete/', ProductPurchaseSalesView.as_view()),
 ]

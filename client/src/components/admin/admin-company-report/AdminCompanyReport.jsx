@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  Brush,
 } from "recharts";
 import { FiChevronDown } from "react-icons/fi";
 import config from "../../../Functions/config";
@@ -15,21 +16,20 @@ import { useMediaQuery } from "react-responsive";
 
 const PURPLE_700 = "#6B46C1";
 
-const sectorMapping = {
-  tech: 2,
-  finance: 3,
-  healthcare: 4,
-  education: 5,
-  "real-estate": 6,
-  energy: 7,
-  "consumer-goods": 8,
-  utilities: 9,
-  industrials: 10,
-  telecom: 11,
-};
+const sectors = [
+  "tech",
+  "finance",
+  "healthcare",
+  "education",
+  "real-estate",
+  "energy",
+  "consumer-goods",
+  "utilities",
+  "industrials",
+  "telecom",
+];
 
-const sectorOptions = ["All", ...Object.keys(sectorMapping)];
-
+const sectorOptions = ["All", ...sectors];
 const statusOptions = ["All", "Active", "Inactive"];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -62,7 +62,6 @@ const AdminCompanyReport = () => {
           sector: company.sector,
           status: company.status,
           register_date: company.register_date,
-          sector_value: sectorMapping[company.sector.toLowerCase()],
         }));
         setCompanies(formattedCompanies);
       }
@@ -94,7 +93,7 @@ const AdminCompanyReport = () => {
     );
   });
 
-  const aggregatedData = Object.keys(sectorMapping).map((sector) => {
+  const aggregatedData = sectors.map((sector) => {
     const sectorCompanies = filteredCompanies.filter(
       (company) => company.sector.toLowerCase() === sector
     );
@@ -177,7 +176,7 @@ const AdminCompanyReport = () => {
         </div>
       </div>
       <div className="w-full mb-8 overflow-x-auto">
-        <div className="min-w-[1200px] h-[800px]">
+        <div className="w-full h-[800px]">
           {filteredCompanies.length === 0 ? (
             <div className="text-white text-center mt-40">
               No companies available for the selected sector / status.
@@ -188,16 +187,17 @@ const AdminCompanyReport = () => {
                 data={aggregatedData}
                 margin={{
                   top: 20,
-                  right: 20,
-                  left: 10,
+                  right: 75,
+                  left: 40,
                   bottom: 140,
                 }}
+                barGap={10}
+                barSize={80}
               >
                 <XAxis
                   dataKey="sector"
-                  type="category"
                   stroke="white"
-                  angle={isMediumScreenOrBelow ? -45 : 0}
+                  angle={isMediumScreenOrBelow ? -90 : 0}
                   dx={isMediumScreenOrBelow ? -10 : 0}
                   dy={isMediumScreenOrBelow ? 10 : 10}
                   textAnchor={isMediumScreenOrBelow ? "end" : "middle"}
@@ -207,11 +207,19 @@ const AdminCompanyReport = () => {
                   content={<CustomTooltip />}
                   cursor={{ fill: "rgba(255, 255, 255, 0.1)" }}
                 />
-                <Bar dataKey="count" fill={PURPLE_700} barSize={80}>
+                <Bar dataKey="count" fill={PURPLE_700}>
                   {aggregatedData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={PURPLE_700} />
                   ))}
                 </Bar>
+                <Brush
+                  dataKey="sector"
+                  height={20}
+                  stroke={PURPLE_700}
+                  fill="#1A202C"
+                  travellerWidth={15}
+                  y={800 - 40}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}

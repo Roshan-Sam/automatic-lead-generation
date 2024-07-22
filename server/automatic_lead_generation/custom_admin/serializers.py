@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category,Plan
+from .models import SubscriptionPlan,AdminNotification,CompanySubscription,ProductService,ProductImage,Category,Plan,ProductPurchases
 from company.serializers import CompanyLogSerializer
 
 
@@ -74,3 +74,25 @@ class ProductServiceSerializer(serializers.ModelSerializer):
         images_queryset = ProductImage.objects.filter(product=obj)
         serializer = ProductImageSerializer(images_queryset, many=True, context=self.context)
         return serializer.data
+    
+class ProductPurchasesSerializer(serializers.ModelSerializer):
+    product = serializers.SerializerMethodField()
+    company = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ProductPurchases
+        fields = '__all__'
+
+    def get_product(self, obj):
+        product_instance = obj.product
+        if product_instance:
+            serializer = ProductServiceSerializer(product_instance)
+            return serializer.data
+        return None
+
+    def get_company(self, obj):
+        company_instance = obj.company
+        if company_instance:
+            serializer = CompanyLogSerializer(company_instance)
+            return serializer.data
+        return None

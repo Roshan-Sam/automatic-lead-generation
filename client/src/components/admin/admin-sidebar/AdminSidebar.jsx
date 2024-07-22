@@ -12,6 +12,7 @@ import {
   MdSettings,
   MdLock,
   MdExitToApp,
+  MdProductionQuantityLimits,
 } from "react-icons/md";
 import React from "react";
 import { useSidebarContext } from "../../../hooks/useSidebarContext";
@@ -76,6 +77,11 @@ const AdminSidebar = ({ sidebarToggle }) => {
       name: "Subscriptions",
       link: "/admin/subscriptions",
       icon: MdSubscriptions,
+    },
+    {
+      name: "Product Purchase & Sales",
+      link: "/admin/product-purchase-sales",
+      icon: MdProductionQuantityLimits,
     },
     {
       name: "Notifications",

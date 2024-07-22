@@ -24,6 +24,7 @@ import AdminSidebar from "../../../components/admin/admin-sidebar/AdminSidebar";
 import { useSidebarContext } from "../../../hooks/useSidebarContext";
 import config from "../../../Functions/config";
 import AdminSubscriptionsReport from "../../../components/admin/admin-subscriptions-report/AdminSubscriptionsReport";
+import "react-responsive-modal/styles.css";
 import "./subscriptions.css";
 
 const Subscriptions = () => {
@@ -590,7 +591,7 @@ const Subscriptions = () => {
               isSidebarCollapsed ? "md:ml-64 ml-0" : "md:ml-20 ml-0 md:px-16"
             }`}
           >
-            <div className="flex pt-10 mb-12 px-4">
+            <div className="flex pt-10 mb-12 px-4 overflow-x-auto">
               <ul className="bg-slate-900 border border-gray-700 rounded-full py-2 px-4 -space-x-4 w-max flex items-center mt-4">
                 <li className="bg-gray-800 text-purple-500 hover:underline rounded-full z-40 px-8 py-3 text-base cursor-pointer">
                   <Link to="/admin-dash?tab=dash">Dashboard</Link>

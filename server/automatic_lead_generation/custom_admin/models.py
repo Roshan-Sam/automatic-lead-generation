@@ -52,3 +52,13 @@ class CompanySubscription(models.Model):
     period = models.CharField(max_length=50, null=True, blank=True)
     notify_before_expire = models.BooleanField(default=False, null=True, blank=True)
     notify_on_expire = models.BooleanField(default=False, null=True, blank=True)
+    
+class ProductPurchases(models.Model):
+    purchase_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    product = models.ForeignKey(ProductService, on_delete=models.CASCADE, null=True, blank=True)
+    company = models.ForeignKey(CompanyLog, on_delete=models.CASCADE, null=True, blank=True)
+    purchase_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    status = models.CharField(max_length=20, default='Pending', null=True, blank=True)
+    quantity = models.PositiveIntegerField(default=1, null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    

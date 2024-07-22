@@ -765,7 +765,7 @@ const ProductFeatures = () => {
                               Add new category
                             </button>
                           </div>
-                          <div className="flex gap-2 md:justify-end">
+                          <div className="flex gap-2 md:justify-end flex-wrap">
                             <div className="relative w-48  h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
                               <button
                                 onClick={() => {

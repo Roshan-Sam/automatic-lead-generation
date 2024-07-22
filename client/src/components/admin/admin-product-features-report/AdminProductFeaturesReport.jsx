@@ -8,6 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  Brush,
 } from "recharts";
 import { useMediaQuery } from "react-responsive";
 import { FiChevronDown } from "react-icons/fi"; // Ensure you import this icon
@@ -73,6 +74,7 @@ const AdminProductFeaturesReport = () => {
 
   const PURPLE_700 = "#6B46C1";
   const WHITE = "#FFFFFF";
+  const GRAY_900 = "#1A202C";
 
   const isMediumScreenOrBelow = useMediaQuery({ query: "(max-width: 1500px)" });
 
@@ -158,7 +160,7 @@ const AdminProductFeaturesReport = () => {
         </div>
       </div>
       <div className="w-full mb-8 overflow-x-auto">
-        <div className="min-w-[1200px] h-[800px]">
+        <div className="w-full h-[800px]">
           {data.length === 0 ? (
             <div className="text-white text-center mt-40">
               No products available for the selected category / status.
@@ -167,8 +169,9 @@ const AdminProductFeaturesReport = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={data}
-                margin={{ top: 20, right: 20, left: 10, bottom: 140 }}
-                barSize={150}
+                margin={{ top: 20, right: 75, left: 40, bottom: 140 }}
+                barGap={10}
+                barSize={80}
               >
                 <XAxis
                   dataKey="name"
@@ -188,6 +191,14 @@ const AdminProductFeaturesReport = () => {
                     <Cell key={`cell-${index}`} fill={PURPLE_700} />
                   ))}
                 </Bar>
+                <Brush
+                  dataKey="name"
+                  height={20}
+                  y={800 - 80}
+                  stroke={PURPLE_700}
+                  fill={GRAY_900}
+                  travellerWidth={15}
+                />
               </BarChart>
             </ResponsiveContainer>
           )}
