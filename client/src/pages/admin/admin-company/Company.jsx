@@ -18,6 +18,7 @@ import AdminNav from "../../../components/admin/admin-nav/AdminNav";
 import AdminSidebar from "../../../components/admin/admin-sidebar/AdminSidebar";
 import { useSidebarContext } from "../../../hooks/useSidebarContext";
 import config from "../../../Functions/config";
+import AdminCompanyReport from "../../../components/admin/admin-company-report/AdminCompanyReport";
 import "./company.css";
 
 const Company = () => {
@@ -923,7 +924,7 @@ const Company = () => {
                                   />
                                 </button>
                                 <div
-                                  className={`absolute right-0 z-20 ${
+                                  className={`absolute mt-2 right-0 z-20 ${
                                     dropdownVisible ? "" : "hidden"
                                   } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-10 max-h-28 overflow-y-scroll select`}
                                   id="drop-down-div-one_form_layout_wizard3"
@@ -962,7 +963,7 @@ const Company = () => {
                                   />
                                 </button>
                                 <div
-                                  className={`absolute right-0 z-20 ${
+                                  className={`absolute mt-2 right-0 z-20 ${
                                     dropdownVisible1 ? "" : "hidden"
                                   } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-10 max-h-40 select`}
                                   id="drop-down-div-one_form_layout_wizard4"
@@ -998,17 +999,11 @@ const Company = () => {
                         <table className="min-w-full divide-y divide-gray-700 dark:divide-neutral-700">
                           <thead className="bg-gray-800 dark:bg-neutral-800">
                             <tr>
-                              <th scope="col" className="ps-6 py-3 text-start">
-                                <label
-                                  htmlFor="hs-at-with-checkboxes-main"
-                                  className="flex"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    className="shrink-0 border-gray-700 bg-slate-900 rounded text-purple-600 focus:ring-purple-600 focus:ring-1"
-                                  />
-                                  <span className="sr-only">Checkbox</span>
-                                </label>
+                              <th
+                                scope="col"
+                                className="px-6 py-3 text-start text-xs font-semibold uppercase tracking-wide text-white"
+                              >
+                                No
                               </th>
                               <th
                                 scope="col"
@@ -1069,7 +1064,7 @@ const Company = () => {
                                   </span>
                                 </div>
                               </th>
-                              <th scope="col" className="px-6 py-3 text-end">
+                              <th scope="col" className="px-6 py-3">
                                 <span className="text-xs font-semibold uppercase tracking-wide text-white">
                                   Action
                                 </span>
@@ -1080,24 +1075,12 @@ const Company = () => {
                             className="divide-y divide-gray-700 dark:divide-neutral-700"
                             onMouseLeave={() => setOpenDropdown(null)}
                           >
-                            {companies.map((company) => (
+                            {companies.map((company, index) => (
                               <tr key={company.id}>
-                                <td className="size-px whitespace-nowrap">
-                                  <div className="ps-6 py-3">
-                                    <label
-                                      htmlFor={`checkbox-${company.id}`}
-                                      className="flex"
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        className="shrink-0 border-gray-700 bg-transparent rounded text-purple-600 focus:ring-purple-500 focus:ring-1"
-                                        id={`checkbox-${company.id}`}
-                                      />
-                                      <span className="sr-only">Checkbox</span>
-                                    </label>
-                                  </div>
+                                <td className="px-6 py-3 whitespace-nowrap text-white">
+                                  {index + 1}
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="ps-6 lg:ps-3 xl:ps-0 pe-6 py-3">
                                     <div className="flex items-center gap-x-3">
                                       <img
@@ -1113,28 +1096,28 @@ const Company = () => {
                                     </div>
                                   </div>
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="px-6 py-3">
                                     <span className="block text-sm font-semibold text-white">
                                       {company.email}
                                     </span>
                                   </div>
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="px-6 py-3">
                                     <span className="block text-sm font-semibold text-white">
                                       {company.phone}
                                     </span>
                                   </div>
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="px-6 py-3">
                                     <span className="block text-sm font-semibold text-white">
                                       {company.sector}
                                     </span>
                                   </div>
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="px-6 py-3">
                                     <span className="block text-sm font-semibold text-white">
                                       {new Date(
@@ -1143,14 +1126,14 @@ const Company = () => {
                                     </span>
                                   </div>
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="px-6 py-3">
                                     <span className=" text-green-400 text-sm font-medium me-2 px-2.5 py-0.5 rounded border border-green-400">
                                       {company.status}
                                     </span>
                                   </div>
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="px-6 py-3">
                                     <span className="block text-sm font-semibold text-white">
                                       {company.log_in
@@ -1161,7 +1144,7 @@ const Company = () => {
                                     </span>
                                   </div>
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="px-6 py-3">
                                     <span className="block text-sm font-semibold text-white">
                                       {company.log_out
@@ -1172,7 +1155,7 @@ const Company = () => {
                                     </span>
                                   </div>
                                 </td>
-                                <td className="size-px whitespace-nowrap">
+                                <td className="whitespace-nowrap">
                                   <div className="relative flex justify-center text-left w-full ">
                                     <div className="reative group rounded-xl w-fit border border-gray-700">
                                       <button
@@ -1262,6 +1245,8 @@ const Company = () => {
                 </div>
               </div>
             </div>
+
+            <AdminCompanyReport />
 
             {/* create company modal */}
 

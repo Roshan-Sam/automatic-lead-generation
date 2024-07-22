@@ -127,24 +127,32 @@ class AddPlanAPIView(APIView):
 class SubscriptionPlanCreateView(APIView):
     def post(self, request):
         data = request.data
-        selected_products = data.pop('products', [])
-        selected_plan_id = data.pop('plan', None)
+        plan_id = data.pop('plan', None)
+        product_ids = data.pop('products', [])
+        
+        try:
+            plan_instance = Plan.objects.get(id=plan_id)
+        except Plan.DoesNotExist:
+            return Response({'error': 'Plan does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = SubscriptionPlanSerializer(data=data, partial=True)
-        if serializer.is_valid():
-            subscription_plan = serializer.save()
-            
-            if selected_products:
-                products = ProductService.objects.filter(id__in=selected_products)
-                subscription_plan.products.set(products)
-                
-            if selected_plan_id:
-                selected_plan = Plan.objects.get(id=selected_plan_id)
-                subscription_plan.plan = selected_plan
-                subscription_plan.save()
-                
-            return Response({"data": serializer.data, 'message': 'Product plan created successfully.'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        for product_id in product_ids:
+            try:
+                product_instance = ProductService.objects.get(id=product_id)
+            except ProductService.DoesNotExist:
+                return Response({'error': f'Product with id {product_id} does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+            SubscriptionPlan.objects.create(
+                plan_name=data.get('plan_name'),
+                description=data.get('description'),
+                features=data.get('features'),
+                monthly_price=data.get('monthly_price'),
+                annual_price=data.get('annual_price'),
+                custom_price=data.get('custom_price'),
+                duration_in_months=data.get('duration_in_months'),
+                product=product_instance,
+                plan=plan_instance
+            )
+        return Response({'message': 'Product subscription plan created successfully'}, status=status.HTTP_200_OK)
     
     def get(self, request):
         plan_id = request.query_params.get('plan_id', None)
@@ -158,34 +166,43 @@ class SubscriptionPlanCreateView(APIView):
     
 class UpdateSubscriptionPlanView(APIView):
     def put(self, request, plan_id):
-        try:
-            plan = SubscriptionPlan.objects.get(id=plan_id)
-        except SubscriptionPlan.DoesNotExist:
-            return Response({'error': 'Subscription plan not found.'}, status=status.HTTP_404_NOT_FOUND)
-
         data = request.data
-        selected_products = data.pop('products', [])
-        
-        serializer = SubscriptionPlanSerializer(plan, data=data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            
-            if selected_products:
-                products = ProductService.objects.filter(id__in=selected_products)
-                plan.products.set(products)
-            else:
-                plan.products.clear()
-                
-            return Response({"data": serializer.data, 'message': 'Subscription plan updated successfully.'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        product_id = data.pop('product', None)
+        plan_instance = Plan.objects.filter(id=data.get('plan', None)).first()
+        product_instance = ProductService.objects.filter(id=product_id).first()
+
+        if not plan_instance:
+            return Response({'error': 'Plan does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        if not product_instance:
+            return Response({'error': 'Product does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            subscription_plan = SubscriptionPlan.objects.get(id=plan_id)
+        except SubscriptionPlan.DoesNotExist:
+            return Response({'error': 'Product subscription plan does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        subscription_plan.plan_name = data.get('plan_name', subscription_plan.plan_name)
+        subscription_plan.description = data.get('description', subscription_plan.description)
+        subscription_plan.features = data.get('features', subscription_plan.features)
+        subscription_plan.monthly_price = data.get('monthly_price', subscription_plan.monthly_price)
+        subscription_plan.annual_price = data.get('annual_price', subscription_plan.annual_price)
+        subscription_plan.custom_price = data.get('custom_price', subscription_plan.custom_price)
+        subscription_plan.duration_in_months = data.get('duration_in_months', subscription_plan.duration_in_months)
+        subscription_plan.product = product_instance
+        subscription_plan.plan = plan_instance
+
+        subscription_plan.save()
+
+        serializer = SubscriptionPlanSerializer(subscription_plan)
+        return Response({'message': 'Product subscription plan updated successfully', 'data': serializer.data}, status=status.HTTP_200_OK)
     
     def delete(self, request, plan_id):
         try:
             plan = SubscriptionPlan.objects.get(id=plan_id)
             plan.delete()
-            return Response({'message': 'Subscription plan deleted successfully.'}, status=status.HTTP_200_OK)
+            return Response({'message': 'Product subscription plan deleted successfully.'}, status=status.HTTP_200_OK)
         except SubscriptionPlan.DoesNotExist:
-            return Response({'error': 'Subscription plan not found.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'Product subscription plan not found.'}, status=status.HTTP_404_NOT_FOUND)
         
         
 class UpdateProfileView(APIView):
@@ -239,6 +256,13 @@ class AdminNotificationListView(APIView):
         serializer = AdminNotificationSerializer(notifications, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+    def post(self, request):
+        serializer = AdminNotificationSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class MarkNotificationAsReadView(APIView):
     def put(self, request, notification_id):
         try:
@@ -266,33 +290,35 @@ class CompanySubscriptionListView(APIView):
         except ValueError:
             return Response({"error": "Invalid limit or offset parameter"}, status=status.HTTP_400_BAD_REQUEST)
         
-        subscriptions = CompanySubscription.objects.select_related('subscription_plan', 'company_name').order_by('-created_at')
+        subscriptions = CompanySubscription.objects.select_related('subscription_plan', 'company').order_by('-created_at')
         
         if search_term:
             subscriptions = subscriptions.filter(
-                Q(company_name__company_name__icontains=search_term) |
-                Q(subscription_plan__plan_name__icontains=search_term)
+                Q(company__company_name__icontains=search_term) |
+                Q(subscription_plan__plan_name__icontains=search_term)          
             )
             
         if status_filter:
             subscriptions = subscriptions.filter(status=status_filter)
             
+        total_count = subscriptions.count()
+        
         if limit is not None:
             subscriptions = subscriptions[offset:offset + limit]
         else:
             subscriptions = subscriptions[offset:]
             
         serializer = CompanySubscriptionSerializer(subscriptions, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"company_subscriptions": serializer.data, 'total_count':total_count}, status=status.HTTP_200_OK)
     
     def post(self, request):
         data = request.data
         
-        company_name_id = data.get('company_name')
+        company_id = data.get('company')
         subscription_plan_id = data.get('subscription_plan')
 
         try:
-            company_log = CompanyLog.objects.get(id=company_name_id)
+            company_log = CompanyLog.objects.get(id=company_id)
         except CompanyLog.DoesNotExist:
             return Response({'error': 'Company name does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -302,10 +328,11 @@ class CompanySubscriptionListView(APIView):
             return Response({'error': 'Subscription plan does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
         company_subscription = CompanySubscription.objects.create(
-            company_name=company_log,
+            company=company_log,
             subscription_plan=subscription_plan_obj,
             start_date=data.get('start_date'),
             end_date=data.get('end_date'),
+            period=data.get('period')
         )
 
         serializer = CompanySubscriptionSerializer(company_subscription)
@@ -340,6 +367,25 @@ class CompanySubscriptionUpdateStatusView(APIView):
         subscription.subscription_plan = subscription_plan
         subscription.start_date = data.get('start_date')
         subscription.end_date = data.get('end_date')
+        subscription.period=data.get('period')
+        subscription.save()
+
+        serializer = CompanySubscriptionSerializer(subscription)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class CompanySubscriptionUpdateNotifyView(APIView):
+    def patch(self, request, pk):
+        try:
+            subscription = CompanySubscription.objects.get(pk=pk)
+        except CompanySubscription.DoesNotExist:
+            return Response({'error': 'CompanySubscription does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        if 'notify_before_expire' in request.data:
+            subscription.notify_before_expire = request.data['notify_before_expire']
+
+        if 'notify_on_expire' in request.data:
+            subscription.notify_on_expire = request.data['notify_on_expire']
+
         subscription.save()
 
         serializer = CompanySubscriptionSerializer(subscription)
@@ -377,7 +423,7 @@ class ProductFeaturesView(APIView):
             products = products_query[offset:]
             
         total_count = products_query.count()
-
+        
         serializer = ProductServiceSerializer(products, many=True)
         return Response({'products': serializer.data,'total_count': total_count}, status=status.HTTP_200_OK)
     

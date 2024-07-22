@@ -14,22 +14,30 @@ import { Modal } from "react-responsive-modal";
 import axios from "axios";
 import { CiMenuKebab } from "react-icons/ci";
 import { Link } from "react-router-dom";
-import { FaTimes, FaTrashAlt, FaCheckCircle } from "react-icons/fa";
-import { FiEdit, FiTrash, FiSave } from "react-icons/fi";
+import {
+  FaTimes,
+  FaTrashAlt,
+  FaCheckCircle,
+  FaRegPaperPlane,
+  FaRegFilePdf,
+} from "react-icons/fa";
+import {
+  FiEdit,
+  FiTrash,
+  FiSave,
+  FiBell,
+  FiPlus,
+  FiCheckCircle,
+} from "react-icons/fi";
 
 import config from "../../Functions/config";
 
 const Sample = () => {
-
-
-
   return (
     <>
-      <div className="mt-20">
-       
+      <div className="min-h-screen w-full bg-slate-900 pt-20">
+        <div className="flex justify-center"></div>
       </div>
-
-      
     </>
   );
 };
