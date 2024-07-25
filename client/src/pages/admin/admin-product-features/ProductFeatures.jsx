@@ -681,6 +681,7 @@ const ProductFeatures = () => {
                                   setCategoryDropdown1(!categoryDropdown1);
                                   setCategoryListDropdown(false);
                                 }}
+
                                 className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
                               >
                                 <span className="pr-4 text-sm text-white">
@@ -709,6 +710,7 @@ const ProductFeatures = () => {
                                     </p>
                                   </a>
                                 ))}
+                                
                               </div>
                             </div>
                             <div className="flex gap-2">
