@@ -818,7 +818,7 @@ const Company = () => {
               isSidebarCollapsed ? "md:ml-64 ml-0" : "md:ml-20 ml-0 md:px-16"
             }`}
           >
-            <div className="flex pt-10 mb-12 px-4">
+            <div className="flex pt-10 px-4">
               <ul className="bg-slate-900 border border-gray-700 rounded-full py-2 px-4 -space-x-4 w-max flex items-center mt-4">
                 <li className="bg-gray-800 text-purple-500 hover:underline rounded-full z-40 px-8 py-3 text-base cursor-pointer">
                   <Link to="/admin/dashboard">Dashboard</Link>

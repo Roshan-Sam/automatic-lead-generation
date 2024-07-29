@@ -15,7 +15,9 @@ import "jspdf-autotable";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { Modal } from "react-responsive-modal";
+import AdminPurchaseSalesReport from "../../../components/admin/admin-purchase-sales-report/AdminPurchaseSalesReport";
 import "react-responsive-modal/styles.css";
+import "./purchasesales.css";
 
 const sectors = [
   "tech",
@@ -783,6 +785,7 @@ const PurchaseSales = () => {
                 </div>
               </div>
             </div>
+            <AdminPurchaseSalesReport />
           </div>
         </div>
       </div>

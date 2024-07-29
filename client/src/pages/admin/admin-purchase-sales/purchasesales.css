@@ -1,0 +1,8 @@
+.deleteModal {
+  background: #111827;
+  max-width: fit-content;
+  width: 100% !important;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+}

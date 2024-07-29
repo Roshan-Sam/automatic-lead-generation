@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import axios from "axios";
-import config from "../../Functions/config";
+import config from "../../../Functions/config";
 import { FiChevronDown } from "react-icons/fi";
 import {
   PieChart,
@@ -10,25 +10,17 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import emailjs from "@emailjs/browser";
-import gmailIcon from "../../icons/gmail_icon.png";
-import whatsAppIcon from "../../icons/whatsapp-icon.png";
-import { MdClear } from "react-icons/md";
-import { WhatsappShareButton } from "react-share";
+import { useReactToPrint } from "react-to-print";
+import { FaRegFilePdf } from "react-icons/fa";
 import { useMediaQuery } from "react-responsive";
 
-const Sample = () => {
+const AdminPurchaseSalesMonthlyReport = () => {
+  const chartRef = useRef(null);
   const [productPurchaseSales, setProductPurchaseSales] = useState([]);
   const [dataByMonth, setDataByMonth] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [yearDropdown, setYearDropdown] = useState(false);
-  const [emailDropdownOpen, setEmailDropdownOpen] = useState(false);
-  const [emailAddress, setEmailAddress] = useState("");
-  const [suggestedEmails, setSuggestedEmails] = useState([
-    "roshansamchirathalackal9898@gmail.com",
-    "roshansamchira9898@gmail.com",
-  ]);
 
   const PURPLE_700 = "#6B46C1";
   const WHITE = "#FFFFFF";
@@ -104,6 +96,8 @@ const Sample = () => {
       setDataByMonth(
         monthsWithPercentage.filter((month) => month.percentage > 0)
       );
+    } else {
+      setDataByMonth([]);
     }
   };
 
@@ -152,45 +146,10 @@ const Sample = () => {
     []
   );
 
-  const handleEmailSelect = (email) => {
-    setEmailAddress(email);
-  };
-
-  const handleShare = async () => {
-    if (!emailAddress) {
-      alert("Please enter an email address.");
-      return;
-    }
-
-    const templateParams = {
-      to_email: emailAddress,
-      subject: "Product Purchase Sales Monthly Report",
-      message: `Please check the product purchase sales monthly report at the following link:\n\n${shareUrl}\n\nBest regards,\nAdmin`,
-    };
-
-    emailjs
-      .send(
-        config.service_id,
-        config.template_id,
-        templateParams,
-        config.public_key
-      )
-      .then((response) => {
-        console.log("Email sent successfully!", response.status, response.text);
-        alert("Email sent successfully!");
-      })
-      .catch((error) => {
-        console.error("Error sending email:", error);
-        alert("Error sending email.");
-      });
-
-    setEmailDropdownOpen(false);
-  };
-
-  const shareUrl =
-    "http://localhost:5173/admin/product-purchase-sales-monthly-report";
-
-  const title = `Product Purchase Sales Monthly Report\n`;
+  const handlePrint = useReactToPrint({
+    content: () => chartRef.current,
+    documentTitle: "Product-Purchase-Sales-Monthly-Report",
+  });
 
   const chartHeight = isSmallScreen
     ? 200
@@ -201,10 +160,7 @@ const Sample = () => {
     : 400;
 
   return (
-    <div className="px-4 bg-[rgb(16,23,42)] overflow-auto min-h-screen">
-      <h1 className="text-2xl text-white mb-4">
-        Product Purchase Sales Monthly Report
-      </h1>
+    <div className="px-4 bg-[rgb(16,23,42)] min-h-screen overflow-auto pt-10">
       <div className="flex md:gap-4 gap-2 mb-8 flex-wrap md:justify-start justify-center">
         <div className="relative w-36 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
           <button
@@ -237,99 +193,59 @@ const Sample = () => {
             ))}
           </div>
         </div>
-        <div className="relative w-72 h-fit border border-gray-700 rounded-lg outline-none">
-          <button
-            onClick={() => setEmailDropdownOpen(!emailDropdownOpen)}
-            className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
-          >
-            <span className="pr-4 text-sm text-white flex gap-2 items-center">
-              Share via Email
-              <img src={gmailIcon} alt="Gmail Icon" className="w-5" />
-            </span>
-            <FiChevronDown
-              className="absolute z-10 cursor-pointer right-5 text-white"
-              size={14}
-            />
-          </button>
-          {emailDropdownOpen && (
-            <div className="absolute right-0 z-20 w-full px-4 py-2 bg-white border-t border-gray-200 rounded shadow top-12">
-              <div className="flex items-center gap-1">
-                <input
-                  type="email"
-                  value={emailAddress}
-                  onChange={(e) => setEmailAddress(e.target.value)}
-                  className="w-full p-2 mb-2 border border-gray-300 rounded-md focus:border-purple-600 focus:border-1 focus:ring-purple-600"
-                  placeholder="Type email address"
-                />
-                <MdClear
-                  className="text-gray-900 size-6 mb-2"
-                  onClick={() => {
-                    setEmailAddress("");
-                  }}
-                />
-              </div>
-              <div className="max-h-32 overflow-y-scroll select">
-                {suggestedEmails.map((email, index) => (
-                  <div
-                    key={index}
-                    className="p-2 text-sm leading-none text-gray-600 cursor-pointer hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded"
-                    onClick={() => handleEmailSelect(email)}
-                  >
-                    {email}
-                  </div>
-                ))}
-              </div>
-              <button
-                className="flex gap-2 items-center justify-center w-full p-2 mt-2 text-sm text-white bg-purple-800 rounded"
-                onClick={handleShare}
-              >
-                Share
-                <img src={gmailIcon} alt="Gmail Icon" className="w-5" />
-              </button>
-            </div>
-          )}
-        </div>
-        <WhatsappShareButton url={shareUrl} title={title}>
-          <div className="relative w-72 h-fit border border-gray-700 rounded-lg outline-none cursor-pointer">
-            <div className="relative flex items-center justify-center w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent">
-              <span className="pr-4 text-sm text-white flex gap-2 items-center">
-                Share via WhatsApp
-                <img src={whatsAppIcon} alt="WhatsApp Icon" className="w-5" />
-              </span>
-            </div>
-          </div>
-        </WhatsappShareButton>
+
+        <button
+          onClick={handlePrint}
+          className="py-2 px-4 text-white inline-flex items-center gap-x-1 hover:bg-gray-800 focus:bg-transparent focus:ring-1 focus:ring-purple-600 focus:border-purple-600 text-sm rounded-lg border border-gray-700 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700 dark:text-white dark:hover:bg-neutral-800"
+        >
+          <FaRegFilePdf className="size-4 fill-white" />
+          Export pdf / print
+        </button>
       </div>
-      <div className="flex flex-col items-center">
-        <div className="w-full mb-8" style={{ height: chartHeight }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={dataByMonth}
-                dataKey="total_amount"
-                nameKey="month"
-                cx="50%"
-                cy="50%"
-                label={({ name, percent }) =>
-                  `${name} ${(percent * 100).toFixed(0)}%`
-                }
-              >
-                {dataByMonth.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={PURPLE_700}
-                    stroke={WHITE}
-                  />
-                ))}
-              </Pie>
-              <Tooltip content={customizedTooltip} />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="flex flex-col items-center mt-20">
+        {dataByMonth.length > 0 ? (
+          <div
+            className="w-full mb-8"
+            style={{ height: chartHeight }}
+            ref={chartRef}
+          >
+            <h1 className="text-gray-500 text-3xl mb-10">
+              Product Purchase Sales Monthly Report
+            </h1>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  labelLine={false}
+                  data={dataByMonth}
+                  dataKey="total_amount"
+                  nameKey="month"
+                  cx="50%"
+                  cy="50%"
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
+                >
+                  {dataByMonth.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={PURPLE_700}
+                      stroke={WHITE}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip content={customizedTooltip} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        ) : (
+          <div className="text-white text-sm mt-20 text-center">
+            No product purchase sales available in selected year.
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default Sample;
+export default AdminPurchaseSalesMonthlyReport;

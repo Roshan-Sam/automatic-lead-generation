@@ -14,6 +14,8 @@ from .serializers import SubscriptionPlanSerializer,AdminNotificationSerializer,
 import random
 import string   
 from django.db.models import Q
+import base64
+from django.core.mail import EmailMessage
 
 class CreateCompany(APIView):
     def post(self, request):
@@ -607,3 +609,36 @@ class ProductPurchaseSalesUpdateView(APIView):
         serializer = ProductPurchasesSerializer(purchase)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
+
+class ProductPurchaseSalesMonthlyReport(APIView):
+    def post(self, request, *args, **kwargs):
+        pdf_data = request.data.get('pdfData')
+        email_address = request.data.get('emailAddress')
+        year = request.data.get('year')
+
+        if not pdf_data or not email_address:
+            return Response({'error': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            # Decode the base64 PDF data
+            pdf_data = pdf_data.split(',')[1]
+            pdf_file = base64.b64decode(pdf_data)
+
+            # Create the email
+            email = EmailMultiAlternatives(
+                subject=f'Product Purchase Sales Report for {year}',
+                body='Please find the attached product purchase sales report.',
+                to=[email_address]
+            )
+
+            # Add HTML content (optional)
+            html_content = f'<p>Please find the attached product purchase sales report for the year {year}.</p>'
+            email.attach_alternative(html_content, 'text/html')
+
+            # Attach the PDF file
+            email.attach(f'product-purchase-sales-report-{year}.pdf', pdf_file, 'application/pdf')
+            email.send()
+
+            return Response({'message': 'Email sent successfully'}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -14,6 +14,8 @@ import ProductPreview from "./pages/admin/admin-product-features/ProductPreview"
 import Sample from "./pages/index/sample";
 import PlanPricingPlanView from "./pages/admin/admin-plan-pricing/PlanPricingPlanView";
 import PurchaseSales from "./pages/admin/admin-purchase-sales/PurchaseSales";
+import AdminPurchaseSalesPurchaseReport from "./components/admin/admin-purchase-sales-report/AdminPurchaseSalesPurchaseReport";
+import AdminPurchaseSalesMonthlyReport from "./components/admin/admin-purchase-sales-report/AdminPurchaseSalesMonthlyReport";
 import "flowbite";
 import "./App.css";
 
@@ -44,6 +46,14 @@ function App() {
             element={<ProductPreview />}
           />
         </Route>
+        <Route
+          path="/admin/product-purchase-sales-report"
+          element={<AdminPurchaseSalesPurchaseReport />}
+        />
+        <Route
+          path="/admin/product-purchase-sales-monthly-report"
+          element={<AdminPurchaseSalesMonthlyReport />}
+        />
 
         <Route path="/company-dash" element={<CompanyDashboard />} />
       </Routes>
