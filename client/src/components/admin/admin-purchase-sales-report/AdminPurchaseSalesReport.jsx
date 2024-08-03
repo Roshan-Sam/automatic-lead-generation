@@ -14,12 +14,13 @@ import {
   Brush,
   Cell,
 } from "recharts";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiXCircle } from "react-icons/fi";
 import { MdClear } from "react-icons/md";
 import emailjs from "@emailjs/browser";
 import gmailIcon from "../../../icons/gmail_icon.png";
 import whatsAppIcon from "../../../icons/whatsapp-icon.png";
 import { WhatsappShareButton } from "react-share";
+import { FaCheckCircle } from "react-icons/fa";
 
 const sectorOptions = [
   "tech",
@@ -69,6 +70,9 @@ const AdminPurchaseSalesReport = () => {
     "roshansamchirathalackal9898@gmail.com",
     "roshansamchira9898@gmail.com",
   ]);
+
+  const [barSuccess, setBarSuccess] = useState("");
+  const [barError, setBarError] = useState("");
 
   useEffect(() => {
     fetchProductPurchaseSalesData();
@@ -276,46 +280,49 @@ const AdminPurchaseSalesReport = () => {
 
   const handleBarShare = async () => {
     if (!emailAddress) {
-      alert("Please enter an email address.");
+      setBarError("Please enter an email address.");
+      setTimeout(() => {
+        setBarError("");
+      }, 3000);
       return;
     }
 
     const templateParams = {
       to_email: emailAddress,
-      subject: "Product Purchase Sales Purchase Report",
-      message: `Please check the product purchase sales Purchase report at the following link:\n\n${shareBarUrl}\n\nBest regards,\nAdmin`,
+      subject: "Product Purchase Sales Bar Chart Report",
+      message: `Please check the product purchase sales bar chart report at the following link:\n\n${shareBarUrl}\n\nBest regards,\nAdmin`,
     };
 
-    emailjs
-      .send(
+    try {
+      const response = await emailjs.send(
         config.service_id,
         config.template_id,
         templateParams,
         config.public_key
-      )
-      .then((response) => {
-        console.log("Email sent successfully!", response.status, response.text);
-        alert("Email sent successfully!");
-      })
-      .catch((error) => {
-        console.error("Error sending email:", error);
-        alert("Error sending email.");
-      });
+      );
 
-    setBarEmailDropdownOpen(false);
+      if (response.status === 200) {
+        setBarSuccess("Email sent successfully.");
+        setEmailAddress("");
+        setTimeout(() => {
+          setBarSuccess("");
+          setBarEmailDropdownOpen(false);
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Failed to send email:", error);
+    }
   };
 
   const shareBarUrl =
-    "http://localhost:5173/admin/product-purchase-sales-report";
+    "http://localhost:5173/admin/product-purchase-sales-bar-chart-report";
 
-  const barTitle = `Product Purchase Sales Purchase Report\n`;
-
-  console.log(dataByMonth);
+  const barTitle = `Product Purchase Sales Bar Chart Report\n`;
 
   return (
     <div className="px-4 bg-[rgb(16,23,42)] min-h-screen overflow-auto">
       <h1 className="text-2xl text-white mb-4">
-        Product Purchase Sales Report
+        Product Purchase Sales Bar Chart Report
       </h1>
       <div className="flex md:gap-4 gap-2 mb-4 flex-wrap md:justify-start justify-center">
         <div className="relative w-64 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
@@ -570,6 +577,22 @@ const AdminPurchaseSalesReport = () => {
                 Share
                 <img src={gmailIcon} alt="Gmail Icon" className="w-5" />
               </button>
+              {barError ? (
+                <p className="mt-2 flex items-center gap-2 text-red-500 text-sm justify-center">
+                  <FiXCircle className="size-4" />
+                  {barError}
+                </p>
+              ) : (
+                ""
+              )}
+              {barSuccess ? (
+                <p className="mt-2 flex items-center gap-2 text-green-400 text-sm justify-center">
+                  <FaCheckCircle className="size-3" />
+                  {barSuccess}
+                </p>
+              ) : (
+                ""
+              )}
             </div>
           )}
         </div>
@@ -587,14 +610,14 @@ const AdminPurchaseSalesReport = () => {
       {allProductCountsZero() ? (
         <p className="text-white text-center mt-40">
           No product purchase sales available for the selected company / status
-          / product / year.{" "}
+          / product / year / sector.{" "}
         </p>
       ) : (
         <ResponsiveContainer width="100%" height={800}>
           <BarChart
             data={dataByMonth}
             className="text-white"
-            margin={{ top: 20, right: 75, left: 40, bottom: 140 }}
+            margin={{ top: 20, right: 40, left: 0, bottom: 140 }}
           >
             <XAxis
               dataKey="month"

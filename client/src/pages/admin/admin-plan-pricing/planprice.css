@@ -13,6 +13,12 @@
   }
 }
 
+@media (max-width: 395px) {
+  .planpriceaddmodal {
+    margin: 0 0;
+  }
+}
+
 .planpriceplanaddmodal {
   background: #111827;
   max-width: 500px;
@@ -25,6 +31,12 @@
 @media (max-width: 600px) {
   .planpriceplanaddmodal {
     max-width: 90%;
+  }
+}
+
+@media (max-width: 395px) {
+  .planpriceplanaddmodal {
+    margin: 0 0;
   }
 }
 

@@ -16,6 +16,7 @@ import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { Modal } from "react-responsive-modal";
 import AdminPurchaseSalesReport from "../../../components/admin/admin-purchase-sales-report/AdminPurchaseSalesReport";
+import AdminPurchaseSalesReport1 from "./../../../components/admin/admin-purchase-sales-report/AdminPurchaseSalesReport1";
 import "react-responsive-modal/styles.css";
 import "./purchasesales.css";
 
@@ -56,6 +57,9 @@ const PurchaseSales = () => {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState("");
   const [deletedPurchaseSalesId, setDeletedPurchaseSalesId] = useState(null);
+
+  const [chartType, setChartType] = useState("bar");
+  const [chartDropdownOpen, setChartDropdownOpen] = useState(false);
 
   const sidebarToggle = () => {
     sidebarDispatch({ type: "TOGGLE_SIDEBAR" });
@@ -365,6 +369,11 @@ const PurchaseSales = () => {
     saveAs(blob, "product_purchase_sales_details.xlsx");
   };
 
+  const handleChartTypeChange = (type) => {
+    setChartType(type);
+    setChartDropdownOpen(false);
+  };
+
   return (
     <>
       <div className="bg-[rgb(16,23,42)]">
@@ -391,7 +400,6 @@ const PurchaseSales = () => {
                 </li>
               </ul>
             </div>
-
             <div className="text-white px-4 py-10 sm:px-6 lg:px-8 lg:py-14 mx-auto">
               <div className="flex flex-col">
                 <div className="-m-1.5 overflow-x-auto">
@@ -785,7 +793,45 @@ const PurchaseSales = () => {
                 </div>
               </div>
             </div>
-            <AdminPurchaseSalesReport />
+            <div className="px-4 mb-4 flex justify-end">
+              <div className="relative w-48 h-fit border border-gray-700 rounded-lg outline-none">
+                <button
+                  onClick={() => setChartDropdownOpen(!chartDropdownOpen)}
+                  className="relative flex items-center justify-between w-full px-5 py-2 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 rounded-lg hover:bg-gray-800 focus:bg-transparent"
+                >
+                  <span className="pr-4 text-sm text-white">
+                    {chartType === "bar" ? "Bar Chart" : "Pie Chart"}
+                  </span>
+                  <FiChevronDown
+                    className="absolute z-10 cursor-pointer right-5 text-white"
+                    size={14}
+                  />
+                </button>
+                <div
+                  className={`absolute right-0 z-20 ${
+                    chartDropdownOpen ? "" : "hidden"
+                  } w-full px-1 py-2 bg-white border-t border-gray-200 rounded shadow top-12 max-h-28 overflow-y-scroll select`}
+                >
+                  <button
+                    onClick={() => handleChartTypeChange("bar")}
+                    className="block px-4 py-2 text-sm text-gray-600 hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded w-full text-left"
+                  >
+                    Bar Chart
+                  </button>
+                  <button
+                    onClick={() => handleChartTypeChange("pie")}
+                    className="block px-4 py-2 text-sm text-gray-600 hover:bg-indigo-100 hover:font-medium hover:text-indigo-700 hover:rounded w-full text-left"
+                  >
+                    Pie Chart
+                  </button>
+                </div>
+              </div>
+            </div>
+            {chartType === "bar" ? (
+              <AdminPurchaseSalesReport />
+            ) : (
+              <AdminPurchaseSalesReport1 />
+            )}
           </div>
         </div>
       </div>

@@ -418,7 +418,7 @@ const PlanAndPricing = () => {
             </div>
             <div className="text-white py-10 px-4">
               <div className="px-4 flex flex-col justify-end gap-4">
-                <div className="flex items-center gap-4 justify-end">
+                <div className="flex items-center gap-4 md:justify-end justify-center flex-wrap">
                   <button
                     onClick={() => setPlanModal(true)}
                     className="py-3 px-4 flex justify-center items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-purple-600 text-slate-950 hover:bg-purple-700 disabled:opacity-50 disabled:pointer-events-none"
@@ -434,7 +434,7 @@ const PlanAndPricing = () => {
                     Add New Product Plan
                   </button>
                 </div>
-                <div className="flex justify-end mb-2">
+                <div className="flex md:justify-end justify-center mb-2">
                   <div className="relative rounded-lg w-max">
                     <button
                       type="button"

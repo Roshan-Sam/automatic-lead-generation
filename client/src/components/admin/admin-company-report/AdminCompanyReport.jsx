@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import {
   BarChart,
@@ -36,10 +36,21 @@ const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const { sector, count, companies } = payload[0].payload;
     return (
-      <div className="bg-gray-800 p-2 rounded">
-        <p className="text-white">{`Sector: ${sector}`}</p>
-        <p className="text-white">{`Companies: ${count}`}</p>
-        <p className="text-white">{`Company Names: ${companies.join(", ")}`}</p>
+      <div className="bg-gray-800 p-2 rounded max-w-[200px] text-white">
+        <p className="text-base">
+          <span className="font-semibold">Sector: </span>
+          {sector}
+        </p>
+        <p className="text-sm ml-2 mt-2">
+          <span className="text-teal-400">No of companies: </span>
+          {count}
+        </p>
+        <p className="text-sm ml-2 mt-2">
+          <span>Companies: </span>
+          {companies.length > 0
+            ? companies.join(", ")
+            : "No companies available"}
+        </p>
       </div>
     );
   }
@@ -52,6 +63,7 @@ const AdminCompanyReport = () => {
   const [sectorDropdown, setSectorDropdown] = useState(false);
   const [statusDropdown, setStatusDropdown] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("Select Status");
+  const [brushIndex, setBrushIndex] = useState({ startIndex: 0, endIndex: 0 });
 
   const fetchCompanies = async () => {
     try {
@@ -84,32 +96,47 @@ const AdminCompanyReport = () => {
     setStatusDropdown(false);
   };
 
-  const filteredCompanies = companies.filter((company) => {
-    return (
-      (selectedSector === "Select Sector" ||
-        company.sector.toLowerCase() === selectedSector.toLowerCase()) &&
-      (selectedStatus === "Select Status" ||
-        company.status.toLowerCase() === selectedStatus.toLowerCase())
-    );
-  });
+  const handleBrushChange = (startIndex, endIndex) => {
+    setBrushIndex({ startIndex, endIndex });
+  };
 
-  const aggregatedData = sectors.map((sector) => {
-    const sectorCompanies = filteredCompanies.filter(
-      (company) => company.sector.toLowerCase() === sector
-    );
-    return {
-      sector,
-      count: sectorCompanies.length,
-      companies: sectorCompanies.map((company) => company.company_name),
-    };
-  });
+  const filteredCompanies = useMemo(() => {
+    return companies.filter((company) => {
+      return (
+        (selectedSector === "Select Sector" ||
+          company.sector.toLowerCase() === selectedSector.toLowerCase()) &&
+        (selectedStatus === "Select Status" ||
+          company.status.toLowerCase() === selectedStatus.toLowerCase())
+      );
+    });
+  }, [companies, selectedSector, selectedStatus]);
+
+  const aggregatedData = useMemo(() => {
+    return sectors.map((sector) => {
+      const sectorCompanies = filteredCompanies.filter(
+        (company) => company.sector.toLowerCase() === sector
+      );
+      return {
+        sector,
+        count: sectorCompanies.length,
+        companies: sectorCompanies.map((company) => company.company_name),
+      };
+    });
+  }, [filteredCompanies]);
 
   const isMediumScreenOrBelow = useMediaQuery({ query: "(max-width: 1500px)" });
+
+  useEffect(() => {
+    setBrushIndex((prevState) => ({
+      ...prevState,
+      endIndex: aggregatedData.length - 1,
+    }));
+  }, []);
 
   return (
     <div className="px-4 bg-[rgb(16,23,42)] min-h-screen overflow-auto">
       <h1 className="text-2xl text-white mb-4">Company Report</h1>
-      <div className="flex space-x-4 mb-8">
+      <div className="flex mb-8 md:justify-start justify-center flex-wrap md:gap-4 gap-2">
         <div className="relative w-48 h-fit border border-gray-700 rounded-lg outline-none dropdown-one">
           <button
             onClick={() => {
@@ -187,12 +214,12 @@ const AdminCompanyReport = () => {
                 data={aggregatedData}
                 margin={{
                   top: 20,
-                  right: 75,
-                  left: 40,
+                  right: 40,
+                  left: 0,
                   bottom: 140,
                 }}
                 barGap={10}
-                barSize={80}
+                barSize={50}
               >
                 <XAxis
                   dataKey="sector"
@@ -209,7 +236,12 @@ const AdminCompanyReport = () => {
                 />
                 <Bar dataKey="count" fill={PURPLE_700}>
                   {aggregatedData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PURPLE_700} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={PURPLE_700}
+                      onMouseOver={(e) => (e.target.style.fill = PURPLE_700)}
+                      onMouseOut={(e) => (e.target.style.fill = PURPLE_700)}
+                    />
                   ))}
                 </Bar>
                 <Brush
@@ -219,6 +251,12 @@ const AdminCompanyReport = () => {
                   fill="#1A202C"
                   travellerWidth={15}
                   y={800 - 40}
+                  startIndex={brushIndex.startIndex}
+                  endIndex={brushIndex.endIndex}
+                  onChange={({ startIndex, endIndex }) =>
+                    handleBrushChange(startIndex, endIndex)
+                  }
+                  tickFormatter={(sector) => sector.substring(0, 3)}
                 />
               </BarChart>
             </ResponsiveContainer>

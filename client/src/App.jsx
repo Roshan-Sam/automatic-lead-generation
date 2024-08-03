@@ -14,8 +14,8 @@ import ProductPreview from "./pages/admin/admin-product-features/ProductPreview"
 import Sample from "./pages/index/sample";
 import PlanPricingPlanView from "./pages/admin/admin-plan-pricing/PlanPricingPlanView";
 import PurchaseSales from "./pages/admin/admin-purchase-sales/PurchaseSales";
-import AdminPurchaseSalesPurchaseReport from "./components/admin/admin-purchase-sales-report/AdminPurchaseSalesPurchaseReport";
-import AdminPurchaseSalesMonthlyReport from "./components/admin/admin-purchase-sales-report/AdminPurchaseSalesMonthlyReport";
+import AdminPurchaseSalesBarChartReport from "./components/admin/admin-purchase-sales-report/AdminPurchaseSalesBarChartReport";
+import AdminPurchaseSalesPieChartReport from "./components/admin/admin-purchase-sales-report/AdminPurchaseSalesPieChartReport";
 import "flowbite";
 import "./App.css";
 
@@ -47,12 +47,12 @@ function App() {
           />
         </Route>
         <Route
-          path="/admin/product-purchase-sales-report"
-          element={<AdminPurchaseSalesPurchaseReport />}
+          path="/admin/product-purchase-sales-bar-chart-report"
+          element={<AdminPurchaseSalesBarChartReport />}
         />
         <Route
-          path="/admin/product-purchase-sales-monthly-report"
-          element={<AdminPurchaseSalesMonthlyReport />}
+          path="/admin/product-purchase-sales-pie-chart-report"
+          element={<AdminPurchaseSalesPieChartReport />}
         />
 
         <Route path="/company-dash" element={<CompanyDashboard />} />

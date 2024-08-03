@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import {
   BarChart,
@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Legend,
   Brush,
+  Cell,
 } from "recharts";
 import config from "../../../Functions/config";
 import { FiChevronDown } from "react-icons/fi";
@@ -16,7 +17,6 @@ import { useMediaQuery } from "react-responsive";
 
 const AdminSubscriptionsReport = () => {
   const [companySubscriptions, setCompanySubscriptions] = useState([]);
-  const [dataByMonth, setDataByMonth] = useState([]);
   const [plans, setPlans] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState("Select Company");
   const [selectedStatus, setSelectedStatus] = useState("Select Status");
@@ -26,6 +26,7 @@ const AdminSubscriptionsReport = () => {
   const [statusDropdown, setStatusDropdown] = useState(false);
   const [productDropdown, setProductDropdown] = useState(false);
   const [yearDropdown, setYearDropdown] = useState(false);
+  const [brushIndex, setBrushIndex] = useState({ startIndex: 0, endIndex: 11 });
 
   const [companies, setCompanies] = useState([]);
   const [products, setProducts] = useState([]);
@@ -85,19 +86,27 @@ const AdminSubscriptionsReport = () => {
     fetchCompaniesAndPlans();
   }, []);
 
-  useEffect(() => {
-    filterDataByYear(companySubscriptions, selectedYear);
+  const filteredSubscriptions = useMemo(() => {
+    return companySubscriptions.filter((sub) => {
+      return (
+        sub.year === selectedYear &&
+        (selectedCompany === "Select Company" ||
+          sub.company === selectedCompany) &&
+        (selectedStatus === "Select Status" || sub.status === selectedStatus) &&
+        (selectedProduct === "Select Product" ||
+          sub.product === selectedProduct)
+      );
+    });
   }, [
     companySubscriptions,
-    plans,
+    selectedYear,
     selectedCompany,
     selectedStatus,
     selectedProduct,
-    selectedYear,
   ]);
 
-  const filterDataByYear = (subscriptions, year) => {
-    if (subscriptions.length > 0) {
+  const dataByMonth = useMemo(() => {
+    if (filteredSubscriptions.length > 0) {
       const months = [
         "January",
         "February",
@@ -118,39 +127,28 @@ const AdminSubscriptionsReport = () => {
         details: Object.fromEntries(plans.map((plan) => [plan, []])),
       }));
 
-      subscriptions
-        .filter((sub) => {
-          return (
-            sub.year === year &&
-            (selectedCompany === "Select Company" ||
-              sub.company === selectedCompany) &&
-            (selectedStatus === "Select Status" ||
-              sub.status === selectedStatus) &&
-            (selectedProduct === "Select Product" ||
-              sub.product === selectedProduct)
+      filteredSubscriptions.forEach((sub) => {
+        const startMonth = new Date(sub.start_date).getMonth();
+        const plan = sub.subscription_plan;
+        if (plans.includes(plan)) {
+          const existingIndex = monthData[startMonth].details[plan].findIndex(
+            (item) =>
+              item.company === sub.company && item.product === sub.product
           );
-        })
-        .forEach((sub) => {
-          const startMonth = new Date(sub.start_date).getMonth();
-          const plan = sub.subscription_plan;
-          if (plans.includes(plan)) {
-            const existingIndex = monthData[startMonth].details[plan].findIndex(
-              (item) =>
-                item.company === sub.company && item.product === sub.product
-            );
-            if (existingIndex === -1) {
-              monthData[startMonth][plan] += 1;
-              monthData[startMonth].details[plan].push({
-                company: sub.company,
-                product: sub.product,
-              });
-            }
+          if (existingIndex === -1) {
+            monthData[startMonth][plan] += 1;
+            monthData[startMonth].details[plan].push({
+              company: sub.company,
+              product: sub.product,
+            });
           }
-        });
+        }
+      });
 
-      setDataByMonth(monthData);
+      return monthData;
     }
-  };
+    return [];
+  }, [filteredSubscriptions, plans]);
 
   const handleCompanySelect = (company) => {
     setSelectedCompany(company === "All" ? "Select Company" : company);
@@ -170,6 +168,10 @@ const AdminSubscriptionsReport = () => {
   const handleYearSelect = (year) => {
     setSelectedYear(year);
     setYearDropdown(false);
+  };
+
+  const handleBrushChange = (startIndex, endIndex) => {
+    setBrushIndex({ startIndex, endIndex });
   };
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -379,7 +381,7 @@ const AdminSubscriptionsReport = () => {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={dataByMonth}
-              margin={{ top: 20, right: 75, left: 40, bottom: 140 }}
+              margin={{ top: 20, right: 40, left: 0, bottom: 140 }}
             >
               <Legend
                 wrapperStyle={{
@@ -408,7 +410,20 @@ const AdminSubscriptionsReport = () => {
                 content={<CustomTooltip />}
               />
               {plans.map((plan) => (
-                <Bar key={plan} dataKey={plan} fill={getBarColor(plan)} />
+                <Bar key={plan} dataKey={plan} fill={getBarColor(plan)}>
+                  {dataByMonth.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={getBarColor(plan)}
+                      onMouseOver={(e) =>
+                        (e.target.style.fill = getBarColor(plan))
+                      }
+                      onMouseOut={(e) =>
+                        (e.target.style.fill = getBarColor(plan))
+                      }
+                    />
+                  ))}
+                </Bar>
               ))}
               <Brush
                 dataKey="month"
@@ -417,6 +432,11 @@ const AdminSubscriptionsReport = () => {
                 stroke={PURPLE_700}
                 fill={GRAY_900}
                 travellerWidth={15}
+                startIndex={brushIndex.startIndex}
+                endIndex={brushIndex.endIndex}
+                onChange={({ startIndex, endIndex }) =>
+                  handleBrushChange(startIndex, endIndex)
+                }
                 tickFormatter={(month) => month.substring(0, 3)}
               />
             </BarChart>
